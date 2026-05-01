@@ -1,32 +1,50 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../services/api';
 
-// Mock API login
+// Real API login
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password, role }, { rejectWithValue }) => {
+  async ({ username, password, role }, { rejectWithValue }) => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
 
-      if (password === 'password123') {
-        const user = {
-          id: '1',
-          name: 'Demo User',
-          email,
-          role, // Admin, Principal, RO, Candidate
-        };
-        const token = 'mock-jwt-token';
+      const response = await api.post('/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
 
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_role', role);
-        localStorage.setItem('user_data', JSON.stringify(user));
+      const data = response.data;
 
-        return { user, token };
-      } else {
-        return rejectWithValue('Invalid credentials');
-      }
+      // The API response user object structure: { access_token, user: { role, ... } }
+      localStorage.setItem('auth_token', data.access_token);
+      localStorage.setItem('user_role', data.user.role);
+      localStorage.setItem('user_data', JSON.stringify(data.user));
+
+      return { user: data.user, token: data.access_token };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
+  }
+);
+
+// Fetch current user profile
+export const getMe = createAsyncThunk(
+  'auth/getMe',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/auth/me');
+      const data = response.data;
+
+      localStorage.setItem('user_role', data.role);
+      localStorage.setItem('user_data', JSON.stringify(data));
+
+      return data;
+    } catch (error) {
+      // 401 is handled by axios interceptor (clears localStorage and redirects)
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch user');
     }
   }
 );
@@ -70,6 +88,23 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(getMe.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getMe.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.role = action.payload.role;
+        state.isAuthenticated = true;
+      })
+      .addCase(getMe.rejected, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
+        state.role = null;
       });
   },
 });

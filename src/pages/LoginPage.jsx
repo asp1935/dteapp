@@ -7,7 +7,7 @@ import { LayoutDashboard, ShieldCheck, UserCircle, School, Info } from 'lucide-r
 import { cn } from '../utils/cn';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('password123'); // Default for demo
   const [role, setRole] = useState(ROLES.CANDIDATE);
   
@@ -25,7 +25,7 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password, role }));
+    dispatch(login({ username, password, role }));
   };
 
   const roleCards = [
@@ -92,14 +92,14 @@ const LoginPage = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1.5">Email Address</label>
+                <label className="block text-sm font-medium text-secondary mb-1.5">Username</label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
-                  placeholder="name@institute.edu"
+                  placeholder="admin_amey"
                 />
               </div>
 

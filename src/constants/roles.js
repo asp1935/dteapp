@@ -1,8 +1,8 @@
 export const ROLES = {
-  ADMIN: 'Admin',
-  PRINCIPAL: 'Principal',
+  ADMIN: 'ADMIN',
+  PRINCIPAL: 'PRINCIPAL',
   RO: 'RO',
-  CANDIDATE: 'Candidate',
+  CANDIDATE: 'CANDIDATE',
 };
 
 export const DASHBOARD_ROUTES = {

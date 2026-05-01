@@ -12,7 +12,7 @@ const Topbar = () => {
     <header className="h-16 bg-background border-b border-border px-6 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center space-x-4">
         <h2 className="text-lg font-semibold text-foreground hidden md:block">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h2>
       </div>
 
@@ -32,7 +32,7 @@ const Topbar = () => {
 
         <div className="flex items-center space-x-3 border-l border-border pl-4">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-foreground">{user?.name}</p>
+            <p className="text-sm font-medium text-foreground">{user?.full_name}</p>
             <p className="text-xs text-secondary">{user?.role}</p>
           </div>
           <UserCircle size={32} className="text-secondary" />

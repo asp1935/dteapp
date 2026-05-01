@@ -1,10 +1,14 @@
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { getMe } from './features/auth/authSlice';
 import DashboardLayout from './components/layout/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { ROLES, DASHBOARD_ROUTES } from './constants/roles';
+
+import InstitutionManagement from './features/admin/InstitutionManagement';
 
 // Dashboard Components
 import AdminDashboard from './features/admin/AdminDashboard';
@@ -13,7 +17,14 @@ import RODashboard from './features/ro/RODashboard';
 import CandidateDashboard from './features/candidate/CandidateDashboard';
 
 function App() {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const { isAuthenticated, role, token } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (token) {
+      dispatch(getMe());
+    }
+  }, [dispatch, token]);
 
   return (
     <Routes>
@@ -53,7 +64,16 @@ function App() {
         />
         <Route path="admin/principals" element={<div className="p-8 font-bold">Principals Management UI</div>} />
         <Route path="admin/ros" element={<div className="p-8 font-bold">ROs Management UI</div>} />
-        <Route path="admin/institutes" element={<div className="p-8 font-bold">Institutes Management UI</div>} />
+        <Route
+          path="admin/institutes"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <InstitutionManagement />
+              </div>
+            </ProtectedRoute>
+          }
+        />
         <Route path="admin/ads" element={<div className="p-8 font-bold">Advertisements Management UI</div>} />
 
         {/* Principal Routes */}
