@@ -47,16 +47,6 @@ const PrincipalDashboard = () => {
           <h1 className="text-2xl font-bold text-foreground">Principal Dashboard</h1>
           <p className="text-secondary">Manage your institute, faculty intake, and recruitment process.</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" className="flex items-center space-x-2">
-            <Building2 size={18} />
-            <span>Institute Profile</span>
-          </Button>
-          <Button variant="accent" className="flex items-center space-x-2">
-            <Plus size={18} />
-            <span>Define Intake</span>
-          </Button>
-        </div>
       </div>
 
       {/* Stats Grid */}

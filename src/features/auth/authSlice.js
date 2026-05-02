@@ -67,16 +67,19 @@ export const getMe = createAsyncThunk(
   'auth/getMe',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/auth/me');
+      console.log('auth/getMe: Fetching profile...');
+      const response = await api.get('/auth/me', { timeout: 10000 });
       const data = response.data;
+      console.log('auth/getMe: Profile fetched successfully');
 
       localStorage.setItem('user_role', data.role);
       localStorage.setItem('user_data', JSON.stringify(data));
 
       return data;
     } catch (error) {
+      console.error('auth/getMe error:', error.message);
       // 401 is handled by axios interceptor (clears localStorage and redirects)
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch user');
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch user');
     }
   }
 );
@@ -86,7 +89,7 @@ const initialState = {
   token: localStorage.getItem('auth_token') || null,
   role: localStorage.getItem('user_role') || null,
   isAuthenticated: !!localStorage.getItem('auth_token'),
-  loading: false,
+  loading: !!localStorage.getItem('auth_token'), // Start loading if we have a token to verify
   error: null,
 };
 

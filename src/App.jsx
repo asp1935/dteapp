@@ -15,6 +15,7 @@ import AdminDashboard from './features/admin/AdminDashboard';
 import UserManagement from './features/admin/UserManagement';
 import AddUser from './features/admin/AddUser';
 import PrincipalDashboard from './features/principal/PrincipalDashboard';
+import FacultyManagement from './features/principal/FacultyManagement';
 import RODashboard from './features/ro/RODashboard';
 import CandidateDashboard from './features/candidate/CandidateDashboard';
 
@@ -24,7 +25,10 @@ function App() {
 
   useEffect(() => {
     if (token) {
+      console.log('App: Token found, verifying session...');
       dispatch(getMe());
+    } else {
+      console.log('App: No token found, user is guest');
     }
   }, [dispatch, token]);
 
@@ -48,7 +52,7 @@ function App() {
           index
           element={
             isAuthenticated ? (
-              <Navigate to={DASHBOARD_ROUTES[role]} replace />
+              <Navigate to={DASHBOARD_ROUTES[role?.toUpperCase()]} replace />
             ) : (
               <Navigate to="/login" replace />
             )
@@ -105,7 +109,14 @@ function App() {
         />
         <Route path="principal/institute" element={<div className="p-8 font-bold">Institute Profile UI</div>} />
         <Route path="principal/intake" element={<div className="p-8 font-bold">Intake Management UI</div>} />
-        <Route path="principal/faculty" element={<div className="p-8 font-bold">Faculty Management UI</div>} />
+        <Route
+          path="principal/faculty"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <FacultyManagement />
+            </ProtectedRoute>
+          }
+        />
         <Route path="principal/applications" element={<div className="p-8 font-bold">Applications Review UI</div>} />
         <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
 

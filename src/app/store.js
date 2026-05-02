@@ -3,6 +3,7 @@ import authReducer from '../features/auth/authSlice';
 import uiReducer from '../features/ui/uiSlice';
 import userReducer from '../features/user/userSlice';
 import institutionReducer from '../features/admin/institutionSlice';
+import facultyReducer from '../features/principal/facultySlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     ui: uiReducer,
     user: userReducer,
     institutions: institutionReducer,
+    faculty: facultyReducer,
   },
 });
 

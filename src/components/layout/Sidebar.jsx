@@ -26,17 +26,10 @@ const Sidebar = () => {
     [ROLES.ADMIN]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
       { name: 'User Management', icon: Users, path: '/admin/users' },
-      { name: 'Principals', icon: Users, path: '/admin/principals' },
-      { name: 'ROs', icon: Users, path: '/admin/ros' },
-      { name: 'Institutes', icon: Building2, path: '/admin/institutes' },
-      { name: 'Ads', icon: FileText, path: '/admin/ads' },
     ],
     [ROLES.PRINCIPAL]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
-      { name: 'Institute', icon: Building2, path: '/principal/institute' },
-      { name: 'Intake', icon: GraduationCap, path: '/principal/intake' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
-      { name: 'Applications', icon: FileText, path: '/principal/applications' },
       { name: 'Interviews', icon: Calendar, path: '/principal/interviews' },
     ],
     [ROLES.RO]: [

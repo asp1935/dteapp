@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, User, Mail, Phone, Shield, Lock, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ChevronLeft, User, Mail, Phone, Shield, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Building2 } from 'lucide-react';
 import { register } from '../auth/authSlice';
 import { addUser } from '../user/userSlice';
+import api from '../../services/api';
 
 const AddUser = () => {
   const dispatch = useDispatch();
@@ -12,18 +13,41 @@ const AddUser = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [institutions, setInstitutions] = useState([]);
   
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     mobile: '',
     role: 'RO',
+    institutionId: '',
     password: '',
     confirmPassword: '',
   });
 
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const response = await api.get('/requirements/institutions?limit=100');
+        setInstitutions(response.data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch institutions:', err);
+      }
+    };
+    fetchInstitutions();
+  }, []);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      // If role changed from PRINCIPAL, reset institutionId
+      if (name === 'role' && value !== 'PRINCIPAL') {
+        next.institutionId = '';
+      }
+      return next;
+    });
+    
     // Clear messages when user types
     if (successMessage) setSuccessMessage('');
     if (errorMessage) setErrorMessage('');
@@ -34,6 +58,12 @@ const AddUser = () => {
     setErrorMessage('');
     setSuccessMessage('');
 
+    // Validation for PRINCIPAL
+    if (formData.role === 'PRINCIPAL' && !formData.institutionId) {
+      setErrorMessage('Please select an institute for the Principal');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage('Passwords do not match');
       return;
@@ -41,18 +71,29 @@ const AddUser = () => {
     
     setIsSubmitting(true);
     try {
-      const resultAction = await dispatch(register(formData));
+      // Prepare payload exactly as requested
+      const payload = {
+        fullName: formData.fullName,
+        email: formData.email,
+        mobile: formData.mobile,
+        role: formData.role,
+        password: formData.password,
+        institutionId: formData.role === 'PRINCIPAL' ? parseInt(formData.institutionId) : null
+      };
+
+      const resultAction = await dispatch(register(payload));
       
       if (register.fulfilled.match(resultAction)) {
         setSuccessMessage('User created successfully!');
         
-        // Update local list for UI consistency with correct field names and a temporary ID
+        // Update local list for UI consistency
         dispatch(addUser({
-          id: Date.now(), // Temporary unique ID for React key
+          id: Date.now(),
           full_name: formData.fullName,
           email: formData.email,
           phone_number: formData.mobile,
           role: formData.role,
+          institution_id: payload.institutionId
         }));
 
         // Reset form
@@ -61,6 +102,7 @@ const AddUser = () => {
           email: '',
           mobile: '',
           role: 'RO',
+          institutionId: '',
           password: '',
           confirmPassword: '',
         });
@@ -163,12 +205,36 @@ const AddUser = () => {
                 className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all appearance-none"
               >
                 <option value="RO">RO</option>
-                <option value="PRINCIPAL">Principal</option>
-                <option value="TREASURY">Treasurer</option>
-                <option value="FACULTY">Lecturer</option>
+                <option value="PRINCIPAL">PRINCIPAL</option>
+                <option value="TREASURY">TREASURY</option>
+                <option value="FACULTY">FACULTY</option>
               </select>
             </div>
           </div>
+
+          {/* Conditional Institute Field for Principal */}
+          {formData.role === 'PRINCIPAL' && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="text-xs font-bold text-secondary uppercase tracking-wider ml-1">SELECT INSTITUTE</label>
+              <div className="relative group">
+                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-accent transition-colors" size={20} />
+                <select
+                  name="institutionId"
+                  required
+                  value={formData.institutionId}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all appearance-none"
+                >
+                  <option value="">Select an Institute</option>
+                  {institutions.map(inst => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Password */}
