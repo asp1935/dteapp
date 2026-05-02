@@ -12,6 +12,8 @@ import InstitutionManagement from './features/admin/InstitutionManagement';
 
 // Dashboard Components
 import AdminDashboard from './features/admin/AdminDashboard';
+import UserManagement from './features/admin/UserManagement';
+import AddUser from './features/admin/AddUser';
 import PrincipalDashboard from './features/principal/PrincipalDashboard';
 import RODashboard from './features/ro/RODashboard';
 import CandidateDashboard from './features/candidate/CandidateDashboard';
@@ -59,6 +61,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/users"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/users/add"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AddUser />
             </ProtectedRoute>
           }
         />

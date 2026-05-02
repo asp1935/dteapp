@@ -30,6 +30,38 @@ export const login = createAsyncThunk(
   }
 );
 
+// Register new user
+export const register = createAsyncThunk(
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/auth/register', {
+        email: userData.email,
+        password: userData.password,
+        role: userData.role || null,
+        full_name: userData.fullName,
+        phone_number: userData.mobile,
+        institution_id: userData.institutionId || null,
+      });
+      return response.data;
+    } catch (error) {
+      // Extract detailed error messages from FastAPI 422 errors
+      const detail = error.response?.data?.detail;
+      let errorMessage = 'Registration failed';
+      
+      if (Array.isArray(detail)) {
+        errorMessage = detail.map(d => `${d.loc.join('.')}: ${d.msg}`).join(', ');
+      } else if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else {
+        errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+      }
+      
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Fetch current user profile
 export const getMe = createAsyncThunk(
   'auth/getMe',

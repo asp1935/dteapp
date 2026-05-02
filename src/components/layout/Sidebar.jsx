@@ -25,6 +25,7 @@ const Sidebar = () => {
   const menuItems = {
     [ROLES.ADMIN]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+      { name: 'User Management', icon: Users, path: '/admin/users' },
       { name: 'Principals', icon: Users, path: '/admin/principals' },
       { name: 'ROs', icon: Users, path: '/admin/ros' },
       { name: 'Institutes', icon: Building2, path: '/admin/institutes' },
