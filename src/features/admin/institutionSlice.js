@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { institutionService, createIntake as createIntakeApi } from '../../services/institutionService';
+import { institutionService, createIntake as createIntakeApi, addCourse as addCourseApi } from '../../services/institutionService';
 
 export const fetchInstitutions = createAsyncThunk(
   'institutions/fetchAll',
@@ -46,6 +46,19 @@ export const deleteInstitution = createAsyncThunk(
       return id;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete institution');
+    }
+  }
+);
+
+export const addCourse = createAsyncThunk(
+  'institutions/addCourse',
+  async ({ institutionId, courseData }, { rejectWithValue, dispatch }) => {
+    try {
+      const data = await addCourseApi(institutionId, courseData);
+      dispatch(fetchInstitutions({ page: 1, limit: 10 })); // Refresh to get updated course list
+      return { institutionId, course: data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to add course');
     }
   }
 );
@@ -112,6 +125,24 @@ const institutionSlice = createSlice({
       // Delete Institution
       .addCase(deleteInstitution.fulfilled, (state, action) => {
         state.institutions = state.institutions.filter(i => i.id !== action.payload);
+      })
+      // Add Course
+      .addCase(addCourse.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.institutions.findIndex(i => i.id === action.payload.institutionId);
+        if (index !== -1) {
+          if (!state.institutions[index].courses) {
+            state.institutions[index].courses = [];
+          }
+          state.institutions[index].courses.push(action.payload.course);
+        }
+      })
+      .addCase(addCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       // Create Intake
       .addCase(createIntake.pending, (state) => {

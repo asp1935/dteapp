@@ -9,6 +9,8 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { ROLES, DASHBOARD_ROUTES } from './constants/roles';
 
 import InstitutionManagement from './features/admin/InstitutionManagement';
+import CourseManagement from './features/admin/CourseManagement';
+import NormsIntakeManagement from './features/admin/NormsIntakeManagement';
 
 // Dashboard Components
 import AdminDashboard from './features/admin/AdminDashboard';
@@ -18,6 +20,10 @@ import PrincipalDashboard from './features/principal/PrincipalDashboard';
 import FacultyManagement from './features/principal/FacultyManagement';
 import RODashboard from './features/ro/RODashboard';
 import CandidateDashboard from './features/candidate/CandidateDashboard';
+import AIQueryAssistant from './features/admin/AIQueryAssistant';
+import VacancyManagement from './features/admin/VacancyManagement';
+import AdGenerationDashboard from './features/admin/AdGenerationDashboard';
+import PublicAdView from './pages/PublicAdView';
 
 function App() {
   const dispatch = useDispatch();
@@ -37,6 +43,7 @@ function App() {
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      <Route path="/ads/public/:token" element={<PublicAdView />} />
 
       {/* Protected Routes */}
       <Route
@@ -85,7 +92,55 @@ function App() {
           }
         />
         <Route path="admin/principals" element={<div className="p-8 font-bold">Principals Management UI</div>} />
-        <Route path="admin/ros" element={<div className="p-8 font-bold">ROs Management UI</div>} />
+        <Route 
+          path="admin/courses" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <CourseManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="admin/ads" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <AdGenerationDashboard />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="admin/ai-assistant" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <AIQueryAssistant />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="admin/ro" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-8 font-bold">Region Office Management UI</div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="admin/vacancies" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <VacancyManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+
         <Route
           path="admin/institutes"
           element={
@@ -96,7 +151,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="admin/ads" element={<div className="p-8 font-bold">Advertisements Management UI</div>} />
 
         {/* Principal Routes */}
         <Route
@@ -109,16 +163,29 @@ function App() {
         />
         <Route path="principal/institute" element={<div className="p-8 font-bold">Institute Profile UI</div>} />
         <Route path="principal/intake" element={<div className="p-8 font-bold">Intake Management UI</div>} />
-        <Route
-          path="principal/faculty"
+        <Route 
+          path="principal/faculty" 
           element={
             <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
-              <FacultyManagement />
+              <div className="p-6">
+                <FacultyManagement />
+              </div>
             </ProtectedRoute>
-          }
+          } 
         />
+
         <Route path="principal/applications" element={<div className="p-8 font-bold">Applications Review UI</div>} />
         <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
+        <Route 
+          path="principal/ai-assistant" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <AIQueryAssistant />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
 
         {/* RO Routes */}
         <Route

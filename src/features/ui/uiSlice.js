@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   theme: localStorage.getItem('theme') || 'light',
-  isSidebarOpen: true,
+  isSidebarOpen: false,
 };
 
 const uiSlice = createSlice({

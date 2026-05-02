@@ -1,26 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Users, Building2, FileText, Search } from 'lucide-react';
+import { Users, Building2, FileText, Search, GraduationCap, Briefcase } from 'lucide-react';
 import { Table } from '../../components/common/Table';
 import { Button, Input } from '../../components/common/UIComponents';
 import InstitutionManagement from './InstitutionManagement';
+import CourseManagement from './CourseManagement';
+import { fetchCourses } from './courseSlice';
+import NormsIntakeManagement from './NormsIntakeManagement';
+import AIValidationDashboard from './AIValidationDashboard';
 
 const AdminDashboard = () => {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('institutes');
-  const { institutions } = useSelector((state) => state.institutions);
+  const { institutions = [] } = useSelector((state) => state.institutions || {});
+  const { courses = [] } = useSelector((state) => state.courses || {});
+
+  useEffect(() => {
+    dispatch(fetchCourses());
+  }, [dispatch]);
 
   const stats = [
-    { label: 'Total Principals', value: '124', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Active ROs', value: '8', icon: Users, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { label: 'Institutes', value: institutions.length || '0', icon: Building2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Live Ads', value: '12', icon: FileText, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Institutes', value: institutions.length || '0', icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Advertisements', value: '12', icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Total Courses', value: courses.length || '0', icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Registered Users', value: '1,284', icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10' },
   ];
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Admin Overview</h1>
-        <p className="text-secondary">Manage regional officers, principals, and institute recruitment advertisements.</p>
+        <p className="text-secondary">Manage institutions, courses, recruitment norms, and advertisements.</p>
       </div>
 
       {/* Stats Grid */}
@@ -40,7 +50,7 @@ const AdminDashboard = () => {
 
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
-        {['institutes', 'principals', 'ros', 'advertisements'].map((tab) => (
+        {['institutes', 'courses', 'requirements', 'advertisements', 'ai_validation'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -48,7 +58,9 @@ const AdminDashboard = () => {
               activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
             }`}
           >
-            {tab}
+            {tab === 'requirements' ? 'Requirements' : 
+             tab === 'ai_validation' ? 'AI Validation' : 
+             tab.replace('_', ' & ')}
           </button>
         ))}
       </div>
@@ -56,8 +68,11 @@ const AdminDashboard = () => {
       {/* Content Section */}
       <div>
         {activeTab === 'institutes' && <InstitutionManagement />}
+        {activeTab === 'courses' && <CourseManagement />}
+        {activeTab === 'requirements' && <NormsIntakeManagement />}
+        {activeTab === 'ai_validation' && <AIValidationDashboard />}
         
-        {activeTab !== 'institutes' && activeTab !== 'advertisements' && (
+        {activeTab !== 'institutes' && activeTab !== 'courses' && activeTab !== 'requirements' && activeTab !== 'advertisements' && (
           <div className="bg-background border border-border rounded-xl p-20 text-center text-secondary italic">
             Management UI for {activeTab} is coming soon.
           </div>

@@ -8,11 +8,11 @@ const DashboardLayout = () => {
   const { isSidebarOpen } = useSelector((state) => state.ui);
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-white">
       <Sidebar />
       <div 
         className={cn(
-          "transition-all duration-300 min-h-screen flex flex-col",
+          "transition-all duration-500 ease-in-out min-h-screen flex flex-col",
           isSidebarOpen ? "ml-64" : "ml-20"
         )}
       >
@@ -22,7 +22,7 @@ const DashboardLayout = () => {
             <Outlet />
           </div>
         </main>
-        <footer className="p-4 text-center text-xs text-secondary border-t border-border bg-background">
+        <footer className="h-12 flex items-center justify-center text-[10px] text-secondary border-t border-border bg-background">
           &copy; {new Date().getFullYear()} Department of Technical Education. All rights reserved.
         </footer>
       </div>

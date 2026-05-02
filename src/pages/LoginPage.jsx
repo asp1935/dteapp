@@ -9,7 +9,6 @@ import { cn } from '../utils/cn';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('password123'); // Default for demo
-  const [role, setRole] = useState(ROLES.CANDIDATE);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -25,18 +24,12 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ username, password, role }));
+    dispatch(login({ username, password }));
   };
 
-  const roleCards = [
-    { id: ROLES.ADMIN, label: 'Admin', icon: ShieldCheck, color: 'text-red-500' },
-    { id: ROLES.PRINCIPAL, label: 'Principal', icon: School, color: 'text-blue-500' },
-    { id: ROLES.RO, label: 'RO', icon: Info, color: 'text-amber-500' },
-    { id: ROLES.CANDIDATE, label: 'Candidate', icon: UserCircle, color: 'text-emerald-500' },
-  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-4xl grid md:grid-cols-2 bg-background rounded-2xl shadow-xl overflow-hidden border border-border">
         {/* Left Side - Branding */}
         <div className="bg-primary p-12 text-white flex flex-col justify-center">
@@ -66,31 +59,12 @@ const LoginPage = () => {
         <div className="p-8 md:p-12">
           <div className="mb-8">
             <h3 className="text-2xl font-bold text-foreground">Sign In</h3>
-            <p className="text-secondary mt-2">Choose your role and enter credentials</p>
+            <p className="text-secondary mt-2">Enter your credentials to access your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Role Selection */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {roleCards.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setRole(r.id)}
-                  className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all",
-                    role === r.id 
-                      ? "border-accent bg-accent/5 ring-4 ring-accent/10" 
-                      : "border-border hover:border-accent/50 hover:bg-muted/50"
-                  )}
-                >
-                  <r.icon className={cn("mb-2", r.color)} size={20} />
-                  <span className="text-xs font-semibold">{r.label}</span>
-                </button>
-              ))}
-            </div>
-
             <div className="space-y-4">
+
               <div>
                 <label className="block text-sm font-medium text-secondary mb-1.5">Username</label>
                 <input

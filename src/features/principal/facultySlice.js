@@ -49,7 +49,7 @@ export const deleteFaculty = createAsyncThunk(
   'faculty/deleteFaculty',
   async (id, { rejectWithValue }) => {
     try {
-      await api.delete(`/vacancies/faculty/${id}`);
+      await api.delete(`/vacancies/faculty/${id}?reason=REMOVED_BY_PRINCIPAL`);
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to delete faculty');

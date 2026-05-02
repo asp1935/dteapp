@@ -3,7 +3,13 @@ import authReducer from '../features/auth/authSlice';
 import uiReducer from '../features/ui/uiSlice';
 import userReducer from '../features/user/userSlice';
 import institutionReducer from '../features/admin/institutionSlice';
+import courseReducer from '../features/admin/courseSlice';
+import normReducer from '../features/admin/normSlice';
+import intakeReducer from '../features/admin/intakeSlice';
+import requirementReducer from '../features/admin/requirementSlice';
 import facultyReducer from '../features/principal/facultySlice';
+import vacancyReducer from '../features/admin/vacancySlice';
+import adReducer from '../features/admin/advertisementSlice';
 
 export const store = configureStore({
   reducer: {
@@ -11,8 +17,15 @@ export const store = configureStore({
     ui: uiReducer,
     user: userReducer,
     institutions: institutionReducer,
+    courses: courseReducer,
+    norms: normReducer,
+    intakes: intakeReducer,
+    requirements: requirementReducer,
     faculty: facultyReducer,
+    vacancy: vacancyReducer,
+    ads: adReducer,
   },
 });
+
 
 export default store;

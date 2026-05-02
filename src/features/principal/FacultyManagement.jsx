@@ -252,6 +252,7 @@ const FacultyManagement = () => {
         specialization: formData.specialization || null,
         status: formData.status || 'ACTIVE',
         date_of_birth: formData.date_of_birth || null,
+        date_of_joining: formData.date_of_joining || null,
         academic_year: formData.academic_year || '2026-27',
         qualifications: formData.qualifications.length > 0 
           ? formData.qualifications.map(q => ({
@@ -347,7 +348,34 @@ const FacultyManagement = () => {
         </div>
       )}
 
+      {/* Stats Mini Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-blue-500/5 border border-blue-500/10 p-4 rounded-xl">
+          <p className="text-xs font-bold text-blue-500 uppercase tracking-wider">Total Faculty</p>
+          <p className="text-2xl font-black text-blue-600 mt-1">{totalResults || faculties.length}</p>
+        </div>
+        <div className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-xl">
+          <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Effective Strength</p>
+          <p className="text-2xl font-black text-emerald-600 mt-1">
+            {faculties.filter(f => f.status === 'ACTIVE').length}
+          </p>
+        </div>
+        <div className="bg-purple-500/5 border border-purple-500/10 p-4 rounded-xl">
+          <p className="text-xs font-bold text-purple-500 uppercase tracking-wider">Permanent</p>
+          <p className="text-2xl font-black text-purple-600 mt-1">
+            {faculties.filter(f => f.employment_type === 'PERMANENT').length}
+          </p>
+        </div>
+        <div className="bg-amber-500/5 border border-amber-500/10 p-4 rounded-xl">
+          <p className="text-xs font-bold text-amber-500 uppercase tracking-wider">Contract/Ad-hoc</p>
+          <p className="text-2xl font-black text-amber-600 mt-1">
+            {faculties.filter(f => f.employment_type !== 'PERMANENT').length}
+          </p>
+        </div>
+      </div>
+
       {/* Faculty Table */}
+
       <div className="bg-background rounded-2xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

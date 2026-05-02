@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import { Button } from './UIComponents';
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
   if (!isOpen) return null;
 
   return (
@@ -13,7 +13,13 @@ const Modal = ({ isOpen, onClose, title, children }) => {
       />
       
       {/* Modal Content */}
-      <div className="relative bg-background border border-border w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className={`relative bg-background border border-border w-full rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 ${
+        size === 'sm' ? 'max-w-md' :
+        size === 'lg' ? 'max-w-3xl' :
+        size === 'xl' ? 'max-w-5xl' :
+        size === 'full' ? 'max-w-[90vw]' :
+        'max-w-2xl'
+      }`}>
         <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
           <h3 className="text-lg font-bold text-foreground">{title}</h3>
           <Button variant="ghost" onClick={onClose} className="p-2 h-auto hover:bg-muted rounded-full">
