@@ -10,6 +10,7 @@ import requirementReducer from '../features/admin/requirementSlice';
 import facultyReducer from '../features/principal/facultySlice';
 import vacancyReducer from '../features/admin/vacancySlice';
 import adReducer from '../features/admin/advertisementSlice';
+import candidateReducer from '../features/candidate/candidateSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     faculty: facultyReducer,
     vacancy: vacancyReducer,
     ads: adReducer,
+    candidate: candidateReducer,
   },
 });
 

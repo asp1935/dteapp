@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin } from 'lucide-react';
+import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle } from 'lucide-react';
 import { Table } from '../../components/common/Table';
 import { Button, Input } from '../../components/common/UIComponents';
+import CandidateProfile from './CandidateProfile';
+import { cn } from '../../utils/cn';
 
 const CandidateDashboard = () => {
+  const [activeView, setActiveView] = useState('dashboard');
   const [showApplyForm, setShowApplyForm] = useState(false);
 
   const ads = [
@@ -25,12 +28,34 @@ const CandidateDashboard = () => {
           <p className="text-secondary">Explore teaching opportunities and track your application status.</p>
         </div>
         <div className="flex bg-background border border-border rounded-lg p-1">
-          <button className="px-4 py-2 text-sm font-medium bg-muted rounded-md shadow-sm">My Dashboard</button>
-          <button className="px-4 py-2 text-sm font-medium text-secondary">Browse All Ads</button>
+          <button 
+            onClick={() => setActiveView('dashboard')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium rounded-md transition-all",
+              activeView === 'dashboard' ? "bg-muted shadow-sm" : "text-secondary hover:text-foreground"
+            )}
+          >
+            My Dashboard
+          </button>
+          <button 
+            onClick={() => setActiveView('profile')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium rounded-md transition-all",
+              activeView === 'profile' ? "bg-muted shadow-sm" : "text-secondary hover:text-foreground"
+            )}
+          >
+            Manage Profile
+          </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      {activeView === 'profile' ? (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <CandidateProfile />
+        </div>
+      ) : (
+        
+        <div className="grid lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="lg:col-span-2 space-y-8">
           {/* Active Ads */}
           <div className="space-y-4">
@@ -121,7 +146,8 @@ const CandidateDashboard = () => {
             </ul>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Mock Application Form (Overlay) */}
       {showApplyForm && (
@@ -156,10 +182,5 @@ const CandidateDashboard = () => {
   );
 };
 
-const UserCircle = ({ size, className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-);
 
 export default CandidateDashboard;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { login } from '../features/auth/authSlice';
 import { ROLES, DASHBOARD_ROUTES } from '../constants/roles';
 import { LayoutDashboard, ShieldCheck, UserCircle, School, Info } from 'lucide-react';
@@ -114,9 +114,15 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-3">
             <p className="text-sm text-secondary">
-              Don't have an account? <a href="#" className="text-accent font-semibold hover:underline">Contact Admin</a>
+              Don't have an account? <Link to="/register" className="text-accent font-semibold hover:underline">Register as Candidate</Link>
+            </p>
+            <p className="text-[10px] text-secondary/50 uppercase tracking-widest font-bold">
+              OR
+            </p>
+            <p className="text-sm text-secondary">
+              Institutional user? <a href="#" className="text-slate-900 font-semibold hover:underline">Contact Admin</a>
             </p>
           </div>
         </div>

@@ -30,6 +30,23 @@ export const login = createAsyncThunk(
   }
 );
 
+export const registerCandidate = createAsyncThunk(
+  'auth/registerCandidate',
+  async (candidateData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/auth/candidate/register', {
+        full_name: candidateData.full_name,
+        email: candidateData.email,
+        password: candidateData.password,
+        phone_number: candidateData.phone_number
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Candidate registration failed');
+    }
+  }
+);
+
 // Register new user
 export const register = createAsyncThunk(
   'auth/register',
