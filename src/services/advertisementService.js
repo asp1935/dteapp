@@ -64,6 +64,11 @@ const advertisementService = {
   deleteAdvertisement: async (id) => {
     const response = await api.delete(`/advertisements/${id}`);
     return response.data;
+  },
+
+  getRecruitmentContext: async (institutionId, courseId, academicYear = '2026-27') => {
+    const response = await api.get(`/advertisements/recruitment-context?institution_id=${institutionId}&course_id=${courseId}&academic_year=${academicYear}`);
+    return response.data;
   }
 };
 

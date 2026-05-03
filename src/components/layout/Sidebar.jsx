@@ -32,17 +32,16 @@ const Sidebar = () => {
       { name: 'User Management', icon: Users, path: '/admin/users' },
       { name: 'Courses', icon: GraduationCap, path: '/admin/courses' },
       { name: 'Institutes', icon: Building2, path: '/admin/institutes' },
-      { name: 'Vacancies', icon: UserCheck, path: '/admin/vacancies' },
-      { name: 'Ads', icon: FileText, path: '/admin/ads' },
+      { name: 'Advertisements', icon: FileText, path: '/admin/ads' },
       { name: 'Faculty Calculator', icon: Calculator, path: '/admin/ai-assistant' },
 
     ],
     [ROLES.PRINCIPAL]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
+      { name: 'Vacancy Assessment', icon: UserCheck, path: '/principal/vacancies' },
       { name: 'Faculty Calculator', icon: Calculator, path: '/principal/ai-assistant' },
       { name: 'Applications', icon: FileText, path: '/principal/applications' },
-
       { name: 'Interviews', icon: Calendar, path: '/principal/interviews' },
     ],
     [ROLES.RO]: [

@@ -23,6 +23,17 @@ export const generateAdAI = createAsyncThunk(
   }
 );
 
+export const fetchRecruitmentContext = createAsyncThunk(
+  'ads/fetchRecruitmentContext',
+  async ({ institution_id, course_id, academic_year }, { rejectWithValue }) => {
+    try {
+      return await advertisementService.getRecruitmentContext(institution_id, course_id, academic_year);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch recruitment context');
+    }
+  }
+);
+
 export const fetchAdMeta = createAsyncThunk(
   'ads/fetchMeta',
   async (_, { rejectWithValue }) => {
@@ -131,6 +142,8 @@ const advertisementSlice = createSlice({
     meta: null,
     currentAd: null,
     preview: null,
+    recruitmentContext: null,
+    contextLoading: false,
     loading: false,
     aiLoading: false,
     error: null,
@@ -141,6 +154,9 @@ const advertisementSlice = createSlice({
       state.success = false;
       state.error = null;
       state.preview = null;
+    },
+    clearRecruitmentContext: (state) => {
+      state.recruitmentContext = null;
     }
   },
   extraReducers: (builder) => {
@@ -207,9 +223,22 @@ const advertisementSlice = createSlice({
       .addCase(deleteAd.fulfilled, (state, action) => {
         state.list = state.list.filter(ad => ad.id !== action.payload);
         state.success = true;
+      })
+      // Recruitment Context
+      .addCase(fetchRecruitmentContext.pending, (state) => {
+        state.contextLoading = true;
+        state.recruitmentContext = null;
+      })
+      .addCase(fetchRecruitmentContext.fulfilled, (state, action) => {
+        state.contextLoading = false;
+        state.recruitmentContext = action.payload.data || action.payload;
+      })
+      .addCase(fetchRecruitmentContext.rejected, (state, action) => {
+        state.contextLoading = false;
+        state.error = action.payload;
       });
   }
 });
 
-export const { clearAdStatus } = advertisementSlice.actions;
+export const { clearAdStatus, clearRecruitmentContext } = advertisementSlice.actions;
 export default advertisementSlice.reducer;

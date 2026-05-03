@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { ROLES, DASHBOARD_ROUTES } from './constants/roles';
+import { Toaster } from 'react-hot-toast';
 
 import InstitutionManagement from './features/admin/InstitutionManagement';
 import CourseManagement from './features/admin/CourseManagement';
@@ -22,7 +23,7 @@ import FacultyManagement from './features/principal/FacultyManagement';
 import RODashboard from './features/ro/RODashboard';
 import CandidateDashboard from './features/candidate/CandidateDashboard';
 import AIQueryAssistant from './features/admin/AIQueryAssistant';
-import VacancyManagement from './features/admin/VacancyManagement';
+import VacancyManagement from './features/principal/VacancyManagement';
 import AdGenerationDashboard from './features/admin/AdGenerationDashboard';
 import PublicAdView from './pages/PublicAdView';
 
@@ -40,7 +41,9 @@ function App() {
   }, [dispatch, token]);
 
   return (
-    <Routes>
+    <>
+      <Toaster position="top-right" />
+      <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -132,16 +135,7 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="admin/vacancies" 
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <div className="p-6">
-                <VacancyManagement />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
+
 
         <Route
           path="admin/institutes"
@@ -171,6 +165,16 @@ function App() {
             <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
               <div className="p-6">
                 <FacultyManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="principal/vacancies" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <VacancyManagement />
               </div>
             </ProtectedRoute>
           } 
@@ -214,7 +218,8 @@ function App() {
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

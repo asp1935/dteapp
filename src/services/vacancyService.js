@@ -20,11 +20,41 @@ export const deleteFaculty = async (id, reason) => {
   return response.data;
 };
 
+export const suggestVacancy = async (params) => {
+  const response = await api.post('/vacancies/suggest', params);
+  return response.data;
+};
+
+export const aiAnalysis = async (params) => {
+  const response = await api.post('/vacancies/ai-analysis', params);
+  return response.data;
+};
+
+export const getAssessment = async (institutionId, courseId, academicYear) => {
+  const response = await api.get(`/vacancies/assessment?institution_id=${institutionId}&course_id=${courseId}&academic_year=${academicYear}`);
+  return response.data;
+};
+
+export const confirmVacancy = async (institutionId, courseId, academicYear, data) => {
+  const response = await api.post(`/vacancies/confirm?institution_id=${institutionId}&course_id=${courseId}&academic_year=${academicYear}`, data);
+  return response.data;
+};
+
+export const acknowledgeAnomaly = async (anomalyId, remarks) => {
+  const response = await api.post(`/vacancies/anomalies/${anomalyId}/acknowledge`, { remarks });
+  return response.data;
+};
+
 export const vacancyService = {
   getFacultyList,
   createFaculty,
   updateFaculty,
   deleteFaculty,
+  suggestVacancy,
+  aiAnalysis,
+  getAssessment,
+  confirmVacancy,
+  acknowledgeAnomaly,
 };
 
 export default vacancyService;
