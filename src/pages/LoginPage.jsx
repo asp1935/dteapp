@@ -17,7 +17,8 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated && userRole) {
-      const from = location.state?.from?.pathname || DASHBOARD_ROUTES[userRole];
+      const dashboardPath = DASHBOARD_ROUTES[userRole.toUpperCase()] || '/';
+      const from = location.state?.from?.pathname || dashboardPath;
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, userRole, navigate, location]);

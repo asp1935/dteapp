@@ -36,6 +36,10 @@ const InstitutionManagement = () => {
   const { intakes = [], loading: intakeLoading } = useSelector((state) => state.intakes || {});
   const { norms = [], loading: normLoading } = useSelector((state) => state.norms || {});
   const [selectedInstitutionForCourses, setSelectedInstitutionForCourses] = useState(null);
+  const activeInstitution = selectedInstitutionForCourses 
+    ? (institutions.find(i => i.id === selectedInstitutionForCourses.id) || selectedInstitutionForCourses)
+    : null;
+
 
   useEffect(() => {
     dispatch(fetchInstitutions({ page: 1, limit: 10 }));
@@ -305,7 +309,7 @@ const InstitutionManagement = () => {
           setSelectedCourse(null);
           setActiveConfigTab('intake');
         }}
-        title={selectedCourse ? `Config: ${selectedCourse.name}` : `Courses: ${selectedInstitutionForCourses?.name}`}
+        title={selectedCourse ? `Config: ${selectedCourse.name}` : `Courses: ${activeInstitution?.name}`}
         size="xl"
       >
         {!selectedCourse ? (
@@ -326,10 +330,10 @@ const InstitutionManagement = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {selectedInstitutionForCourses?.courses?.map((course) => {
+              {activeInstitution?.courses?.map((course) => {
                 const currentIntake = intakes.find(i => 
                   i.course_id === course.id && 
-                  i.institution_id === selectedInstitutionForCourses.id &&
+                  i.institution_id === activeInstitution.id &&
                   i.academic_year === academicYear
                 );
                 const approvedSeats = currentIntake?.approved_seats || 0;
@@ -424,7 +428,7 @@ const InstitutionManagement = () => {
                 );
               })}
             </div>
-            {(!selectedInstitutionForCourses?.courses || selectedInstitutionForCourses.courses.length === 0) && (
+            {(!activeInstitution?.courses || activeInstitution.courses.length === 0) && (
               <div className="py-10 text-center text-secondary italic">No courses registered for this institution.</div>
             )}
 
@@ -478,15 +482,9 @@ const InstitutionManagement = () => {
                         if (!inlineNewCourse.name.trim()) return;
                         try {
                           await dispatch(addCourse({ 
-                            institutionId: selectedInstitutionForCourses.id, 
+                            institutionId: activeInstitution.id, 
                             courseData: inlineNewCourse 
                           })).unwrap();
-                          
-                          // Refresh the local state for the modal
-                          const updatedInst = institutions.find(i => i.id === selectedInstitutionForCourses.id);
-                          if (updatedInst) {
-                             setSelectedInstitutionForCourses(updatedInst);
-                          }
                           
                           setInlineNewCourse({ name: '', level: 'DIPLOMA' });
                           setShowAddCourseForm(false);
@@ -562,7 +560,7 @@ const InstitutionManagement = () => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
                   const intakeData = {
-                    institution_id: selectedInstitutionForCourses.id,
+                    institution_id: activeInstitution.id,
                     course_id: selectedCourse.id,
                     academic_year: academicYear,
                     approved_seats: parseInt(formData.get('approved_seats')),
@@ -571,7 +569,7 @@ const InstitutionManagement = () => {
 
                   const currentIntake = intakes.find(i => 
                     i.course_id === selectedCourse.id && 
-                    i.institution_id === selectedInstitutionForCourses.id && 
+                    i.institution_id === activeInstitution.id && 
                     i.academic_year === academicYear
                   );
 
@@ -582,12 +580,12 @@ const InstitutionManagement = () => {
                     await dispatch(createIntake(intakeData));
                     alert('Intake configuration saved!');
                   }
-                  dispatch(fetchIntakes({ institutionId: selectedInstitutionForCourses.id, academicYear }));
+                  dispatch(fetchIntakes({ institutionId: activeInstitution.id, academicYear }));
                 }} className="space-y-6">
                   {(() => {
                     const currentIntake = intakes.find(i => 
                       i.course_id === selectedCourse.id && 
-                      i.institution_id === selectedInstitutionForCourses.id && 
+                      i.institution_id === activeInstitution.id && 
                       i.academic_year === academicYear
                     );
                     return (
@@ -617,7 +615,7 @@ const InstitutionManagement = () => {
                               onClick={async () => {
                                 if (window.confirm('Are you sure you want to delete this intake record?')) {
                                   await dispatch(deleteIntake(currentIntake.id));
-                                  dispatch(fetchIntakes({ institutionId: selectedInstitutionForCourses.id, academicYear }));
+                                  dispatch(fetchIntakes({ institutionId: activeInstitution.id, academicYear }));
                                 }
                               }}
                             >
@@ -638,7 +636,7 @@ const InstitutionManagement = () => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
                   const normData = {
-                    institution_id: selectedInstitutionForCourses.id,
+                    institution_id: activeInstitution.id,
                     course_id: selectedCourse.id,
                     academic_year: academicYear,
                     norm_type: 'COURSE_WISE',
@@ -662,7 +660,7 @@ const InstitutionManagement = () => {
                     await dispatch(createNorm(normData));
                     alert('Course-specific recruitment norms applied!');
                   }
-                  dispatch(fetchNorms({ academicYear, institutionId: selectedInstitutionForCourses.id }));
+                  dispatch(fetchNorms({ academicYear, institutionId: activeInstitution.id }));
                 }} className="space-y-6">
                   {(() => {
                     const courseSpecificNorm = norms.find(n => 
@@ -692,12 +690,12 @@ const InstitutionManagement = () => {
                             onClick={async () => {
                               if (window.confirm('This will seed the 5 standard DTE course-wise norms for this institution and year. Existing norms for these categories might be updated. Continue?')) {
                                 await dispatch(seedDTEDefaults({
-                                  institution_id: selectedInstitutionForCourses.id,
+                                  institution_id: activeInstitution.id,
                                   academic_year: academicYear,
                                   faculty_student_ratio: 20.0
                                 }));
                                 alert('DTE default norms seeded successfully!');
-                                dispatch(fetchNorms({ academicYear, institutionId: selectedInstitutionForCourses.id }));
+                                dispatch(fetchNorms({ academicYear, institutionId: activeInstitution.id }));
                               }
                             }}
                           >

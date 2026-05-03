@@ -211,12 +211,29 @@ const FacultyManagement = () => {
 
   const handleQualificationChange = (index, e) => {
     const { name, value, type, checked } = e.target;
-    const newQuals = [...formData.qualifications];
-    newQuals[index] = { 
-      ...newQuals[index], 
-      [name]: type === 'checkbox' ? checked : value
-    };
-    setFormData(prev => ({ ...prev, qualifications: newQuals }));
+    let newQuals = [...formData.qualifications];
+    
+    if (name === 'is_highest' && checked) {
+      // Enforce single selection for highest qualification
+      newQuals = newQuals.map((q, i) => ({
+        ...q,
+        is_highest: i === index
+      }));
+    } else {
+      newQuals[index] = { 
+        ...newQuals[index], 
+        [name]: type === 'checkbox' ? checked : value
+      };
+    }
+    
+    // Auto-sync summary fields from the highest qualification
+    const highest = newQuals.find(q => q.is_highest);
+    setFormData(prev => ({ 
+      ...prev, 
+      qualifications: newQuals,
+      qualification: highest ? highest.degree : prev.qualification,
+      specialization: highest ? highest.specialization : prev.specialization
+    }));
   };
 
   const addQualification = () => {
@@ -604,39 +621,6 @@ const FacultyManagement = () => {
                 </div>
               </div>
 
-              {/* Qualification Summary Section */}
-              <div className="space-y-6 pt-4">
-                <div className="flex items-center gap-2 text-primary">
-                  <Shield size={18} />
-                  <h3 className="font-bold text-sm uppercase tracking-wider">Qualification Summary</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-secondary uppercase tracking-wider ml-1">HIGHEST QUALIFICATION</label>
-                    <input
-                      type="text"
-                      name="qualification"
-                      required
-                      value={formData.qualification}
-                      onChange={handleChange}
-                      placeholder="M.Tech"
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-secondary uppercase tracking-wider ml-1">SPECIALIZATION</label>
-                    <input
-                      type="text"
-                      name="specialization"
-                      required
-                      value={formData.specialization}
-                      onChange={handleChange}
-                      placeholder="Computer Engineering"
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
 
               {/* Work Details Section */}
               <div className="space-y-6 pt-4">

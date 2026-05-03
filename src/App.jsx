@@ -64,7 +64,7 @@ function App() {
           index
           element={
             isAuthenticated ? (
-              <Navigate to={DASHBOARD_ROUTES[role?.toUpperCase()]} replace />
+              <Navigate to={DASHBOARD_ROUTES[role?.toUpperCase()] || "/"} replace />
             ) : (
               <Navigate to="/login" replace />
             )
@@ -182,16 +182,6 @@ function App() {
 
         <Route path="principal/applications" element={<div className="p-8 font-bold">Applications Review UI</div>} />
         <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
-        <Route 
-          path="principal/ai-assistant" 
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
-              <div className="p-6">
-                <AIQueryAssistant />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
 
         {/* RO Routes */}
         <Route

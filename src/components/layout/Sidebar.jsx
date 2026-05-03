@@ -40,7 +40,6 @@ const Sidebar = () => {
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
       { name: 'Vacancy Assessment', icon: UserCheck, path: '/principal/vacancies' },
-      { name: 'Faculty Calculator', icon: Calculator, path: '/principal/ai-assistant' },
       { name: 'Applications', icon: FileText, path: '/principal/applications' },
       { name: 'Interviews', icon: Calendar, path: '/principal/interviews' },
     ],

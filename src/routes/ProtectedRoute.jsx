@@ -13,6 +13,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+  
+  // If authenticated but role is missing, we're likely in a transition state (fetching profile)
+  if (!role) {
+    return <LoadingScreen message="Loading user profile..." />;
+  }
 
   if (allowedRoles && !allowedRoles.some(r => r.toUpperCase() === role?.toUpperCase())) {
     return <Navigate to="/unauthorized" replace />;
