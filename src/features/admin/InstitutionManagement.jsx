@@ -248,39 +248,41 @@ const InstitutionManagement = () => {
               )}
             </div>
 
-            {/* Add Course Sub-form */}
-            <div className="bg-muted/20 p-4 rounded-2xl border border-border space-y-4 shadow-inner">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <input 
-                    type="text"
-                    placeholder="e.g. Computer Engineering" 
-                    value={newCourse.name}
-                    onChange={(e) => setNewCourse(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full h-10 px-4 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-sm"
-                  />
+            {/* Add Course Sub-form - Only visible when creating a new institution */}
+            {!isEditing && (
+              <div className="bg-muted/20 p-4 rounded-2xl border border-border space-y-4 shadow-inner">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2">
+                    <input 
+                      type="text"
+                      placeholder="e.g. Computer Engineering" 
+                      value={newCourse.name}
+                      onChange={(e) => setNewCourse(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full h-10 px-4 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-sm"
+                    />
+                  </div>
+                  <div>
+                    <select 
+                      value={newCourse.level}
+                      onChange={(e) => setNewCourse(prev => ({ ...prev, level: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-xs font-bold uppercase"
+                    >
+                      <option value="DIPLOMA">Diploma</option>
+                      <option value="UG">Under Graduate</option>
+                      <option value="PG">Post Graduate</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <select 
-                    value={newCourse.level}
-                    onChange={(e) => setNewCourse(prev => ({ ...prev, level: e.target.value }))}
-                    className="w-full h-10 px-3 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-xs font-bold uppercase"
-                  >
-                    <option value="DIPLOMA">Diploma</option>
-                    <option value="UG">Under Graduate</option>
-                    <option value="PG">Post Graduate</option>
-                  </select>
-                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleAddCourse}
+                  className="w-full py-2.5 h-auto text-xs font-bold uppercase tracking-wider bg-background hover:bg-accent hover:text-white transition-all border-dashed"
+                >
+                  <Plus size={14} className="mr-2" /> Add Course to List
+                </Button>
               </div>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleAddCourse}
-                className="w-full py-2.5 h-auto text-xs font-bold uppercase tracking-wider bg-background hover:bg-accent hover:text-white transition-all border-dashed"
-              >
-                <Plus size={14} className="mr-2" /> Add Course to List
-              </Button>
-            </div>
+            )}
           </div>
           
           <div className="flex justify-end space-x-3 pt-6 border-t border-border mt-6">
