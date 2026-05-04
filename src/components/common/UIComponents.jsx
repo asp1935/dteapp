@@ -39,3 +39,25 @@ export const Input = ({ label, error, className, ...props }) => {
     </div>
   );
 };
+
+export const Select = ({ label, options, error, className, ...props }) => {
+  return (
+    <div className={cn('w-full', className)}>
+      {label && <label className="block text-sm font-medium text-secondary mb-1.5">{label}</label>}
+      <select
+        className={cn(
+          'w-full px-4 py-2 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all appearance-none',
+          error && 'border-red-500 focus:ring-red-500'
+        )}
+        {...props}
+      >
+        {options?.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};

@@ -23,19 +23,24 @@ import {
   XCircle as CloseCircle,
   MessageSquare,
   History,
-  Info
+  Info,
+  RefreshCw,
+  Wallet,
+  ListOrdered
 } from 'lucide-react';
 import { Button, Input } from '../../components/common/UIComponents';
 import { Table } from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import { 
   fetchBills, 
+  fetchBillingSummary,
   generateBill, 
   bulkGenerateBills,
   submitBill, 
   approveBill,
   fetchBillDetails,
   fetchBillApprovals,
+  regenerateBill,
   resetBillingStatus, 
   setPage 
 } from '../admin/billingSlice';
@@ -48,6 +53,7 @@ const PrincipalBillingDashboard = () => {
   const { 
     bills, 
     totalBills, 
+    summary,
     selectedBill, 
     selectedBillApprovals, 
     page, 
@@ -85,13 +91,16 @@ const PrincipalBillingDashboard = () => {
     remarks: ''
   });
 
-  // Fetch bills and faculty on load
+  // Fetch data on load
   useEffect(() => {
     if (user?.institution_id) {
       dispatch(fetchBills({ 
         institution_id: user.institution_id,
         page,
         limit
+      }));
+      dispatch(fetchBillingSummary({
+        institution_id: user.institution_id
       }));
       dispatch(getFaculties({ 
         institution_id: user.institution_id, 
@@ -105,6 +114,7 @@ const PrincipalBillingDashboard = () => {
     if (success) {
       toast.success('Billing action successful!');
       dispatch(fetchBills({ institution_id: user.institution_id, page: 1, limit }));
+      dispatch(fetchBillingSummary({ institution_id: user.institution_id }));
       closeModals();
       dispatch(resetBillingStatus());
     }
@@ -154,6 +164,10 @@ const PrincipalBillingDashboard = () => {
 
   const handleSubmitBill = (billId) => {
     dispatch(submitBill(billId));
+  };
+
+  const handleRegenerateBill = (billId) => {
+    dispatch(regenerateBill(billId));
   };
 
   const handleOpenApproveModal = (billId) => {
@@ -224,6 +238,31 @@ const PrincipalBillingDashboard = () => {
     }
   ];
 
+  const itemColumns = [
+    { 
+      key: 'lecture_date', 
+      label: 'Date',
+      render: (val) => <span className="text-xs font-bold text-slate-900">{new Date(val).toLocaleDateString()}</span>
+    },
+    { key: 'subject_name', label: 'Subject' },
+    { key: 'lecture_type', label: 'Type' },
+    { 
+      key: 'duration_hours', 
+      label: 'Hours',
+      render: (val) => <span className="font-black text-slate-600">{val}h</span>
+    },
+    { 
+      key: 'rate_applied', 
+      label: 'Rate',
+      render: (val) => <span className="text-xs font-bold text-slate-400">₹{val}/hr</span>
+    },
+    { 
+      key: 'amount', 
+      label: 'Total',
+      render: (val) => <span className="font-black text-indigo-600">₹{val}</span>
+    }
+  ];
+
   const approvalColumns = [
     { 
       key: 'level', 
@@ -286,19 +325,31 @@ const PrincipalBillingDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pending Submission</p>
-          <p className="text-4xl font-black text-slate-900">{bills.filter(b => b.bill_status === 'DRAFT').length}</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-black text-slate-900">{summary?.pending_submission_count || 0}</p>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Drafts</span>
+          </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-          <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">In Process</p>
-          <p className="text-4xl font-black text-blue-600">{bills.filter(b => b.bill_status === 'SUBMITTED').length}</p>
+          <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">In Approval Flow</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-black text-blue-600">{summary?.in_approval_count || 0}</p>
+            <span className="text-[10px] font-bold text-blue-400 uppercase">Submitted</span>
+          </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-emerald-500">
-          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Approved</p>
-          <p className="text-4xl font-black text-emerald-600">{bills.filter(b => b.bill_status?.includes('APPROVED')).length}</p>
+          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Total Approved</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-black text-emerald-600">{summary?.approved_count || 0}</p>
+            <span className="text-[10px] font-bold text-emerald-400 uppercase">Bills</span>
+          </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-indigo-500">
-          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2">Treasury Processed</p>
-          <p className="text-4xl font-black text-indigo-600">0</p>
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-indigo-500 bg-indigo-50/20">
+          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2">Total Amount (Approved)</p>
+          <div className="flex items-center text-indigo-600">
+            <Wallet size={20} className="mr-2" />
+            <p className="text-3xl font-black italic tracking-tighter">₹{summary?.total_approved_amount?.toLocaleString() || 0}</p>
+          </div>
         </div>
       </div>
 
@@ -340,12 +391,32 @@ const PrincipalBillingDashboard = () => {
               actions={(row) => (
                 <div className="flex justify-end space-x-2">
                   {row.bill_status === 'DRAFT' && (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        className="p-2 h-auto text-indigo-500 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-black uppercase tracking-tighter"
+                        onClick={() => handleRegenerateBill(row.id)}
+                        title="Regenerate Bill"
+                      >
+                        <RefreshCw size={14} className="mr-1" /> Re-gen
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="p-2 h-auto text-emerald-600 hover:bg-emerald-50 rounded-xl flex items-center text-[10px] font-black uppercase tracking-tighter"
+                        onClick={() => handleSubmitBill(row.id)}
+                      >
+                        <Send size={14} className="mr-1" /> Submit
+                      </Button>
+                    </>
+                  )}
+                  {row.bill_status === 'REJECTED' && (
                     <Button 
                       variant="ghost" 
-                      className="p-2 h-auto text-emerald-600 hover:bg-emerald-50 rounded-xl flex items-center text-[10px] font-black uppercase tracking-tighter"
-                      onClick={() => handleSubmitBill(row.id)}
+                      className="p-2 h-auto text-indigo-500 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-black uppercase tracking-tighter"
+                      onClick={() => handleRegenerateBill(row.id)}
+                      title="Regenerate Bill"
                     >
-                      <Send size={14} className="mr-1" /> Submit
+                      <RefreshCw size={14} className="mr-1" /> Re-gen
                     </Button>
                   )}
                   {row.bill_status === 'SUBMITTED' && (
@@ -448,6 +519,27 @@ const PrincipalBillingDashboard = () => {
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 border-l-4 border-l-indigo-500">
                 <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-1">Total Amount</p>
                 <p className="text-xl font-black text-indigo-600">₹{selectedBill.total_amount}</p>
+              </div>
+            </div>
+
+            {/* Items Breakdown */}
+            <div className="space-y-4">
+              <div className="flex items-center px-1">
+                <ListOrdered size={16} className="text-slate-400 mr-2" />
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Lecture Breakdown</h4>
+              </div>
+              <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm max-h-[300px] overflow-y-auto custom-scrollbar">
+                <Table 
+                  columns={itemColumns} 
+                  data={selectedBill.items || []} 
+                  className="border-none shadow-none"
+                />
+                {(selectedBill.items || []).length === 0 && (
+                  <div className="py-12 text-center flex flex-col items-center">
+                    <ReceiptText size={32} className="text-slate-200 mb-3" />
+                    <p className="text-xs font-bold text-slate-400">No lecture items found in this bill</p>
+                  </div>
+                )}
               </div>
             </div>
 

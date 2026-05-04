@@ -113,6 +113,70 @@ export const fetchBillApprovals = createAsyncThunk(
   }
 );
 
+export const regenerateBill = createAsyncThunk(
+  'billing/regenerate',
+  async (billId, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/billing/bills/${billId}/regenerate`, {});
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
+export const fetchAIReadiness = createAsyncThunk(
+  'billing/fetchReadiness',
+  async (billId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/billing/bills/${billId}/ai-readiness`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
+export const aiValidateBill = createAsyncThunk(
+  'billing/aiValidate',
+  async (billId, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/billing/bills/${billId}/ai-validate`, {});
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
+export const createAISnapshot = createAsyncThunk(
+  'billing/createSnapshot',
+  async (billId, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/billing/bills/${billId}/ai-snapshot`, {});
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
+export const fetchBillingSummary = createAsyncThunk(
+  'billing/fetchSummary',
+  async (params, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.institution_id) queryParams.append('institution_id', params.institution_id);
+      if (params?.academic_year) queryParams.append('academic_year', params.academic_year);
+      
+      const response = await api.get(`/billing/bills/summary?${queryParams.toString()}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
 export const submitBill = createAsyncThunk(
   'billing/submit',
   async (billId, { rejectWithValue }) => {
@@ -173,6 +237,9 @@ const billingSlice = createSlice({
     bills: [],
     selectedBill: null,
     selectedBillApprovals: [],
+    selectedBillReadiness: null,
+    summary: null,
+    aiMonitorData: null,
     totalBills: 0,
     
     // State
@@ -230,11 +297,35 @@ const billingSlice = createSlice({
         state.loading = false;
         state.selectedBillApprovals = action.payload.data || action.payload || [];
       })
+      .addCase(fetchAIReadiness.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedBillReadiness = action.payload.data || action.payload || null;
+      })
+      .addCase(fetchBillingSummary.fulfilled, (state, action) => {
+        state.loading = false;
+        state.summary = action.payload.data || action.payload || null;
+      })
+      .addCase(fetchAIMonitor.fulfilled, (state, action) => {
+        state.loading = false;
+        state.aiMonitorData = action.payload.data || action.payload || null;
+      })
       .addCase(generateBill.fulfilled, (state) => {
         state.loading = false;
         state.success = true;
       })
       .addCase(submitBill.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      .addCase(regenerateBill.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      .addCase(aiValidateBill.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      .addCase(createAISnapshot.fulfilled, (state) => {
         state.loading = false;
         state.success = true;
       })

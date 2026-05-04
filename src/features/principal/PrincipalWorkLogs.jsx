@@ -15,7 +15,6 @@ import {
   fetchAnomalies 
 } from '../faculty/attendanceSlice';
 import { Button, Input, Select } from '../../components/common/UIComponents';
-import { format } from 'date-fns';
 
 const PrincipalWorkLogs = () => {
   const dispatch = useDispatch();
@@ -138,7 +137,7 @@ const PrincipalWorkLogs = () => {
                   <React.Fragment key={log.id}>
                     <tr className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                        {format(new Date(log.lecture_date), 'dd MMM yyyy')}
+                        {new Date(log.lecture_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         <div className="text-xs text-gray-500 mt-1 font-normal">
                           {log.start_time.slice(0,5)} - {log.end_time.slice(0,5)}
                         </div>
