@@ -1,6 +1,8 @@
 import { cn } from '../../utils/cn';
+import { ChevronDown } from 'lucide-react';
 
-export const Button = ({ children, variant = 'primary', className, ...props }) => {
+
+export const Button = ({ children, variant = 'primary', size = 'md', className, ...props }) => {
   const variants = {
     primary: 'bg-primary text-white hover:bg-primary/90',
     secondary: 'bg-muted text-foreground hover:bg-muted/80',
@@ -10,11 +12,18 @@ export const Button = ({ children, variant = 'primary', className, ...props }) =
     danger: 'bg-red-500 text-white hover:bg-red-600',
   };
 
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg',
+  };
+
   return (
     <button
       className={cn(
-        'flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none',
+        'flex items-center justify-center rounded-lg font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none',
         variants[variant],
+        sizes[size],
         className
       )}
       {...props}
@@ -23,6 +32,7 @@ export const Button = ({ children, variant = 'primary', className, ...props }) =
     </button>
   );
 };
+
 
 export const Input = ({ label, error, className, ...props }) => {
   return (
@@ -35,28 +45,6 @@ export const Input = ({ label, error, className, ...props }) => {
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-    </div>
-  );
-};
-
-export const Select = ({ label, options, error, className, ...props }) => {
-  return (
-    <div className={cn('w-full', className)}>
-      {label && <label className="block text-sm font-medium text-secondary mb-1.5">{label}</label>}
-      <select
-        className={cn(
-          'w-full px-4 py-2 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all appearance-none',
-          error && 'border-red-500 focus:ring-red-500'
-        )}
-        {...props}
-      >
-        {options?.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );

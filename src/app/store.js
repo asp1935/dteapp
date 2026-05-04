@@ -14,6 +14,7 @@ import candidateReducer from '../features/candidate/candidateSlice';
 import selectionReducer from '../features/principal/selectionSlice';
 import attendanceReducer from '../features/faculty/attendanceSlice';
 import billingReducer from '../features/admin/billingSlice';
+import applicationReducer from '../features/candidate/applicationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     selection: selectionReducer,
     attendance: attendanceReducer,
     billing: billingReducer,
+    application: applicationReducer,
   },
 });
 
