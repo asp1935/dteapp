@@ -52,6 +52,20 @@ export const submitLog = createAsyncThunk(
   }
 );
 
+export const bulkSubmit = createAsyncThunk(
+  'attendance/bulkSubmit',
+  async (logIds, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.bulkSubmit(logIds);
+      toast.success(`Successfully submitted ${response.success_count} logs`);
+      return response;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Bulk submission failed');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 export const fetchMonthlySummary = createAsyncThunk(
   'attendance/fetchMonthlySummary',
   async ({ facultyCredentialId, academicYear, month }, { rejectWithValue }) => {
