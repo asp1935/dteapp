@@ -14,7 +14,8 @@ import {
   ClipboardList,
   School,
   Calculator,
-  UserCheck
+  UserCheck,
+  Award
 } from 'lucide-react';
 import { setSidebar } from '../../features/ui/uiSlice';
 import { logout } from '../../features/auth/authSlice';
@@ -33,15 +34,18 @@ const Sidebar = () => {
       { name: 'Courses', icon: GraduationCap, path: '/admin/courses' },
       { name: 'Institutes', icon: Building2, path: '/admin/institutes' },
       { name: 'Advertisements', icon: FileText, path: '/admin/ads' },
+      { name: 'Billing', icon: Briefcase, path: '/admin/billing' },
       { name: 'Faculty Calculator', icon: Calculator, path: '/admin/ai-assistant' },
-
     ],
     [ROLES.PRINCIPAL]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
       { name: 'Vacancy Assessment', icon: UserCheck, path: '/principal/vacancies' },
+      { name: 'Candidate Selection', icon: Award, path: '/principal/selection' },
       { name: 'Applications', icon: FileText, path: '/principal/applications' },
       { name: 'Interviews', icon: Calendar, path: '/principal/interviews' },
+      { name: 'Work Logs', icon: ClipboardList, path: '/principal/work-logs' },
+      { name: 'Billing', icon: Briefcase, path: '/principal/billing' },
     ],
     [ROLES.RO]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/ro/dashboard' },
@@ -50,6 +54,11 @@ const Sidebar = () => {
       { name: 'Dashboard', icon: LayoutDashboard, path: '/candidate/dashboard' },
       { name: 'Job Ads', icon: Briefcase, path: '/candidate/ads' },
       { name: 'Applications', icon: FileText, path: '/candidate/applications' },
+    ],
+    [ROLES.FACULTY]: [
+      { name: 'Dashboard', icon: LayoutDashboard, path: '/faculty/dashboard' },
+      { name: 'Timetable', icon: Calendar, path: '/faculty/timetable' },
+      { name: 'Work Logs', icon: ClipboardList, path: '/faculty/dashboard' },
     ],
   };
 
