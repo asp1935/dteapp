@@ -66,6 +66,70 @@ export const bulkSubmit = createAsyncThunk(
   }
 );
 
+export const verifyLog = createAsyncThunk(
+  'attendance/verifyLog',
+  async ({ logId, action, remarks }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.verifyLog(logId, action, remarks);
+      toast.success(`Log ${action.toLowerCase()} successfully`);
+      return { logId, ...response };
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Verification failed');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const upsertCalendar = createAsyncThunk(
+  'attendance/upsertCalendar',
+  async ({ institutionId, academicYear, entries }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.upsertCalendar(institutionId, academicYear, entries);
+      toast.success('Calendar updated successfully');
+      return response;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update calendar');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const fetchCalendar = createAsyncThunk(
+  'attendance/fetchCalendar',
+  async ({ institutionId, academicYear, month }, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getCalendar(institutionId, academicYear, month);
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const fetchAnomalies = createAsyncThunk(
+  'attendance/fetchAnomalies',
+  async (params, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getAnomalies(params);
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const acknowledgeAnomaly = createAsyncThunk(
+  'attendance/acknowledgeAnomaly',
+  async ({ anomalyId, remarks }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.acknowledgeAnomaly(anomalyId, remarks);
+      toast.success('Anomaly acknowledged');
+      return { anomalyId, ...response };
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Acknowledgement failed');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 export const fetchMonthlySummary = createAsyncThunk(
   'attendance/fetchMonthlySummary',
   async ({ facultyCredentialId, academicYear, month }, { rejectWithValue }) => {
@@ -82,6 +146,8 @@ const attendanceSlice = createSlice({
   initialState: {
     timetable: [],
     logs: [],
+    calendar: [],
+    anomalies: [],
     summary: null,
     loading: false,
     submitting: false,
@@ -91,6 +157,8 @@ const attendanceSlice = createSlice({
     clearAttendanceState: (state) => {
       state.timetable = [];
       state.logs = [];
+      state.calendar = [];
+      state.anomalies = [];
       state.summary = null;
       state.error = null;
     }
@@ -107,6 +175,12 @@ const attendanceSlice = createSlice({
       .addCase(fetchTimetable.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchCalendar.fulfilled, (state, action) => {
+        state.calendar = action.payload.data || action.payload;
+      })
+      .addCase(fetchAnomalies.fulfilled, (state, action) => {
+        state.anomalies = action.payload.data || action.payload;
       })
       .addCase(fetchLogs.fulfilled, (state, action) => {
         state.logs = action.payload.data || action.payload;

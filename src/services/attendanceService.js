@@ -44,11 +44,62 @@ const attendanceService = {
   },
 
   /**
+   * Verify or reject a log (Principal only)
+   */
+  verifyLog: async (logId, action, remarks) => {
+    const response = await api.post(`/attendance/logs/${logId}/verify`, {
+      action,
+      remarks
+    });
+    return response.data;
+  },
+
+  /**
    * Bulk submit logs for verification
    */
   bulkSubmit: async (logIds) => {
     const response = await api.post('/attendance/logs/bulk-submit', {
       log_ids: logIds
+    });
+    return response.data;
+  },
+
+  /**
+   * Upsert calendar entries (Admin/Principal)
+   */
+  upsertCalendar: async (institutionId, academicYear, entries) => {
+    const response = await api.post('/attendance/calendar', {
+      institution_id: institutionId,
+      academic_year: academicYear,
+      entries: entries // Array of { calendar_date, day_type, description }
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetch calendar entries
+   */
+  getCalendar: async (institutionId, academicYear, month) => {
+    const response = await api.get('/attendance/calendar', {
+      params: { institution_id: institutionId, academic_year: academicYear, month }
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetch attendance anomalies (Admin/Principal)
+   */
+  getAnomalies: async (params) => {
+    const response = await api.get('/attendance/anomalies', { params });
+    return response.data;
+  },
+
+  /**
+   * Acknowledge an attendance anomaly (Principal only)
+   */
+  acknowledgeAnomaly: async (anomalyId, remarks) => {
+    const response = await api.post(`/attendance/anomalies/${anomalyId}/acknowledge`, {
+      remarks
     });
     return response.data;
   },

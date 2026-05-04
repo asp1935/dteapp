@@ -30,6 +30,7 @@ import PublicAdView from './pages/PublicAdView';
 import LecturerDashboard from './features/faculty/LecturerDashboard';
 import AdminBillingDashboard from './features/admin/AdminBillingDashboard';
 import PrincipalBillingDashboard from './features/principal/PrincipalBillingDashboard';
+import PrincipalWorkLogs from './features/principal/PrincipalWorkLogs';
 
 function App() {
   const dispatch = useDispatch();
@@ -169,6 +170,16 @@ function App() {
             <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
               <div className="p-6">
                 <FacultyManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="principal/work-logs" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <PrincipalWorkLogs />
               </div>
             </ProtectedRoute>
           } 

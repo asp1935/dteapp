@@ -44,6 +44,7 @@ const Sidebar = () => {
       { name: 'Candidate Selection', icon: Award, path: '/principal/selection' },
       { name: 'Applications', icon: FileText, path: '/principal/applications' },
       { name: 'Interviews', icon: Calendar, path: '/principal/interviews' },
+      { name: 'Work Logs', icon: ClipboardList, path: '/principal/work-logs' },
       { name: 'Billing', icon: Briefcase, path: '/principal/billing' },
     ],
     [ROLES.RO]: [
