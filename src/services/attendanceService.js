@@ -44,6 +44,17 @@ const attendanceService = {
   },
 
   /**
+   * Verify or reject a log (Principal only)
+   */
+  verifyLog: async (logId, action, remarks) => {
+    const response = await api.post(`/attendance/logs/${logId}/verify`, {
+      action,
+      remarks
+    });
+    return response.data;
+  },
+
+  /**
    * Bulk submit logs for verification
    */
   bulkSubmit: async (logIds) => {

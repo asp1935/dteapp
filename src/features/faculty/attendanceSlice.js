@@ -66,6 +66,20 @@ export const bulkSubmit = createAsyncThunk(
   }
 );
 
+export const verifyLog = createAsyncThunk(
+  'attendance/verifyLog',
+  async ({ logId, action, remarks }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.verifyLog(logId, action, remarks);
+      toast.success(`Log ${action.toLowerCase()} successfully`);
+      return { logId, ...response };
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Verification failed');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 export const upsertCalendar = createAsyncThunk(
   'attendance/upsertCalendar',
   async ({ institutionId, academicYear, entries }, { rejectWithValue }) => {
