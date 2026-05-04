@@ -18,7 +18,7 @@ import {
   Loader2,
   X
 } from 'lucide-react';
-import { fetchLogs, fetchMonthlySummary, createLog, fetchTimetable } from './attendanceSlice';
+import { fetchLogs, fetchMonthlySummary, createLog, fetchTimetable, bulkSubmit } from './attendanceSlice';
 import { Button } from '../../components/common/UIComponents';
 import { cn } from '../../utils/cn';
 
@@ -56,6 +56,18 @@ const LecturerDashboard = () => {
       setIsModalOpen(false);
       dispatch(fetchLogs({ faculty_credential_id: user.id, month: currentMonth }));
       dispatch(fetchMonthlySummary({ facultyCredentialId: user.id, academicYear, month: currentMonth }));
+    }
+  };
+
+  const handleBulkSubmit = async () => {
+    const draftIds = logs.filter(log => log.status === 'DRAFT').map(log => log.id);
+    if (draftIds.length === 0) return;
+    
+    if (window.confirm(`Submit all ${draftIds.length} draft entries for verification?`)) {
+      const result = await dispatch(bulkSubmit(draftIds));
+      if (bulkSubmit.fulfilled.match(result)) {
+        dispatch(fetchLogs({ faculty_credential_id: user.id, month: currentMonth }));
+      }
     }
   };
 
@@ -153,6 +165,16 @@ const LecturerDashboard = () => {
             <div className="flex items-center space-x-3">
               <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
               <h3 className="text-xl font-black text-slate-900 tracking-tight">Recent Activity</h3>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleBulkSubmit}
+                disabled={!logs.some(l => l.status === 'DRAFT')}
+                className="text-[10px] font-black uppercase tracking-widest h-10 border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all"
+              >
+                Submit All Drafts
+              </Button>
             </div>
           </div>
           

@@ -44,14 +44,11 @@ const attendanceService = {
   },
 
   /**
-   * Bulk submit logs for a month
+   * Bulk submit logs for verification
    */
-  bulkSubmit: async (applicationId, month, year, academicYear) => {
+  bulkSubmit: async (logIds) => {
     const response = await api.post('/attendance/logs/bulk-submit', {
-      application_id: applicationId,
-      month,
-      year,
-      academic_year: academicYear
+      log_ids: logIds
     });
     return response.data;
   },
