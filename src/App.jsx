@@ -27,6 +27,7 @@ import VacancyManagement from './features/principal/VacancyManagement';
 import AdGenerationDashboard from './features/admin/AdGenerationDashboard';
 import SelectionManagement from './features/principal/SelectionManagement';
 import PublicAdView from './pages/PublicAdView';
+import LecturerDashboard from './features/faculty/LecturerDashboard';
 
 function App() {
   const dispatch = useDispatch();
@@ -213,6 +214,16 @@ function App() {
         />
         <Route path="candidate/ads" element={<div className="p-8 font-bold">Browse Job Advertisements</div>} />
         <Route path="candidate/applications" element={<div className="p-8 font-bold">My Applications History</div>} />
+        
+        {/* Faculty / Lecturer Routes */}
+        <Route
+          path="faculty/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
+              <LecturerDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Fallback */}

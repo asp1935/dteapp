@@ -51,6 +51,11 @@ const Sidebar = () => {
       { name: 'Job Ads', icon: Briefcase, path: '/candidate/ads' },
       { name: 'Applications', icon: FileText, path: '/candidate/applications' },
     ],
+    [ROLES.FACULTY]: [
+      { name: 'Dashboard', icon: LayoutDashboard, path: '/faculty/dashboard' },
+      { name: 'Timetable', icon: Calendar, path: '/faculty/timetable' },
+      { name: 'Work Logs', icon: ClipboardList, path: '/faculty/dashboard' },
+    ],
   };
 
   const currentMenuItems = menuItems[role] || [];
