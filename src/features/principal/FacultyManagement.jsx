@@ -83,7 +83,13 @@ const FacultyManagement = () => {
       setLocalLoading(true);
       try {
         const response = await api.get('/requirements/institutions?limit=100');
-        const insts = response.data.data || [];
+        let insts = response.data.data || [];
+        
+        // Restricted view for Principal
+        if (user?.role === 'PRINCIPAL' && user?.institution_id) {
+          insts = insts.filter(inst => inst.id === user.institution_id);
+        }
+        
         setInstitutions(insts);
         
         // Auto-select for Principal
@@ -659,7 +665,8 @@ const FacultyManagement = () => {
                       required
                       value={formData.institution_id}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all disabled:opacity-75 disabled:bg-muted"
+                      disabled={user?.role === 'PRINCIPAL' && !!user?.institution_id}
                     >
                       <option value="">Select Institution</option>
                       {institutions.map(inst => (

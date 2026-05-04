@@ -25,7 +25,9 @@ import CandidateDashboard from './features/candidate/CandidateDashboard';
 import AIQueryAssistant from './features/admin/AIQueryAssistant';
 import VacancyManagement from './features/principal/VacancyManagement';
 import AdGenerationDashboard from './features/admin/AdGenerationDashboard';
+import SelectionManagement from './features/principal/SelectionManagement';
 import PublicAdView from './pages/PublicAdView';
+import LecturerDashboard from './features/faculty/LecturerDashboard';
 import AdminBillingDashboard from './features/admin/AdminBillingDashboard';
 import PrincipalBillingDashboard from './features/principal/PrincipalBillingDashboard';
 
@@ -182,6 +184,16 @@ function App() {
           } 
         />
 
+        <Route 
+          path="principal/selection" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <SelectionManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
         <Route path="principal/applications" element={<div className="p-8 font-bold">Applications Review UI</div>} />
         <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
         <Route 
@@ -216,6 +228,16 @@ function App() {
         />
         <Route path="candidate/ads" element={<div className="p-8 font-bold">Browse Job Advertisements</div>} />
         <Route path="candidate/applications" element={<div className="p-8 font-bold">My Applications History</div>} />
+        
+        {/* Faculty / Lecturer Routes */}
+        <Route
+          path="faculty/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
+              <LecturerDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Fallback */}
