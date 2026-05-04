@@ -54,6 +54,28 @@ const attendanceService = {
   },
 
   /**
+   * Upsert calendar entries (Admin/Principal)
+   */
+  upsertCalendar: async (institutionId, academicYear, entries) => {
+    const response = await api.post('/attendance/calendar', {
+      institution_id: institutionId,
+      academic_year: academicYear,
+      entries: entries // Array of { calendar_date, day_type, description }
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetch calendar entries
+   */
+  getCalendar: async (institutionId, academicYear, month) => {
+    const response = await api.get('/attendance/calendar', {
+      params: { institution_id: institutionId, academic_year: academicYear, month }
+    });
+    return response.data;
+  },
+
+  /**
    * Get monthly summary for dashboard
    */
   getMonthlySummary: async (facultyCredentialId, academicYear, month) => {
