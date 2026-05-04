@@ -91,6 +91,31 @@ export const fetchCalendar = createAsyncThunk(
   }
 );
 
+export const fetchAnomalies = createAsyncThunk(
+  'attendance/fetchAnomalies',
+  async (params, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getAnomalies(params);
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const acknowledgeAnomaly = createAsyncThunk(
+  'attendance/acknowledgeAnomaly',
+  async ({ anomalyId, remarks }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.acknowledgeAnomaly(anomalyId, remarks);
+      toast.success('Anomaly acknowledged');
+      return { anomalyId, ...response };
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Acknowledgement failed');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 export const fetchMonthlySummary = createAsyncThunk(
   'attendance/fetchMonthlySummary',
   async ({ facultyCredentialId, academicYear, month }, { rejectWithValue }) => {
@@ -108,6 +133,7 @@ const attendanceSlice = createSlice({
     timetable: [],
     logs: [],
     calendar: [],
+    anomalies: [],
     summary: null,
     loading: false,
     submitting: false,
@@ -118,6 +144,7 @@ const attendanceSlice = createSlice({
       state.timetable = [];
       state.logs = [];
       state.calendar = [];
+      state.anomalies = [];
       state.summary = null;
       state.error = null;
     }
@@ -137,6 +164,9 @@ const attendanceSlice = createSlice({
       })
       .addCase(fetchCalendar.fulfilled, (state, action) => {
         state.calendar = action.payload.data || action.payload;
+      })
+      .addCase(fetchAnomalies.fulfilled, (state, action) => {
+        state.anomalies = action.payload.data || action.payload;
       })
       .addCase(fetchLogs.fulfilled, (state, action) => {
         state.logs = action.payload.data || action.payload;
