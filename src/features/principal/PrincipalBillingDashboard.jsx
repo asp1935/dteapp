@@ -16,7 +16,14 @@ import {
   Building2,
   FileText,
   ShieldCheck,
-  Send
+  Send,
+  Users,
+  Layers,
+  CheckCircle,
+  XCircle as CloseCircle,
+  MessageSquare,
+  History,
+  Info
 } from 'lucide-react';
 import { Button, Input } from '../../components/common/UIComponents';
 import { Table } from '../../components/common/Table';
@@ -24,18 +31,41 @@ import Modal from '../../components/common/Modal';
 import { 
   fetchBills, 
   generateBill, 
+  bulkGenerateBills,
   submitBill, 
+  approveBill,
+  fetchBillDetails,
+  fetchBillApprovals,
   resetBillingStatus, 
   setPage 
 } from '../admin/billingSlice';
+import { getFaculties } from './facultySlice';
 import toast from 'react-hot-toast';
 
 const PrincipalBillingDashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { bills, totalBills, page, limit, loading, fetching, success, error } = useSelector((state) => state.billing);
+  const { 
+    bills, 
+    totalBills, 
+    selectedBill, 
+    selectedBillApprovals, 
+    page, 
+    limit, 
+    loading, 
+    fetching, 
+    success, 
+    error 
+  } = useSelector((state) => state.billing);
+  const { facultyList, loading: facultyLoading } = useSelector((state) => state.faculty);
 
   const [isGenModalOpen, setIsGenModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  
+  const [selectedBillId, setSelectedBillId] = useState(null);
+  
   const [genData, setGenData] = useState({
     faculty_credential_id: '',
     period_start: '',
@@ -43,7 +73,19 @@ const PrincipalBillingDashboard = () => {
     academic_year: '2026-2027'
   });
 
-  // Fetch bills on load and when page changes
+  const [bulkData, setBulkData] = useState({
+    institution_id: '',
+    period_start: '',
+    period_end: '',
+    academic_year: '2026-2027'
+  });
+
+  const [approveData, setApproveData] = useState({
+    action: 'APPROVE', // or 'REJECT'
+    remarks: ''
+  });
+
+  // Fetch bills and faculty on load
   useEffect(() => {
     if (user?.institution_id) {
       dispatch(fetchBills({ 
@@ -51,14 +93,19 @@ const PrincipalBillingDashboard = () => {
         page,
         limit
       }));
+      dispatch(getFaculties({ 
+        institution_id: user.institution_id, 
+        limit: 1000 
+      }));
+      setBulkData(prev => ({ ...prev, institution_id: user.institution_id }));
     }
   }, [dispatch, user, page, limit]);
 
   useEffect(() => {
     if (success) {
-      toast.success('Action completed successfully!');
+      toast.success('Billing action successful!');
       dispatch(fetchBills({ institution_id: user.institution_id, page: 1, limit }));
-      setIsGenModalOpen(false);
+      closeModals();
       dispatch(resetBillingStatus());
     }
     if (error) {
@@ -67,13 +114,68 @@ const PrincipalBillingDashboard = () => {
     }
   }, [success, error, dispatch, user, limit]);
 
+  const closeModals = () => {
+    setIsGenModalOpen(false);
+    setIsBulkModalOpen(false);
+    setIsApproveModalOpen(false);
+    setIsDetailsModalOpen(false);
+    setSelectedBillId(null);
+    setGenData({
+      faculty_credential_id: '',
+      period_start: '',
+      period_end: '',
+      academic_year: '2026-2027'
+    });
+    setBulkData({
+      institution_id: user?.institution_id || '',
+      period_start: '',
+      period_end: '',
+      academic_year: '2026-2027'
+    });
+    setApproveData({
+      action: 'APPROVE',
+      remarks: ''
+    });
+  };
+
   const handleGenerate = (e) => {
     e.preventDefault();
+    if (!genData.faculty_credential_id) {
+      toast.error('Please select a faculty member');
+      return;
+    }
     dispatch(generateBill(genData));
+  };
+
+  const handleBulkGenerate = (e) => {
+    e.preventDefault();
+    dispatch(bulkGenerateBills(bulkData));
   };
 
   const handleSubmitBill = (billId) => {
     dispatch(submitBill(billId));
+  };
+
+  const handleOpenApproveModal = (billId) => {
+    setSelectedBillId(billId);
+    setIsApproveModalOpen(true);
+  };
+
+  const handleViewDetails = (billId) => {
+    setSelectedBillId(billId);
+    dispatch(fetchBillDetails(billId));
+    dispatch(fetchBillApprovals(billId));
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleApprove = (e) => {
+    e.preventDefault();
+    if (!selectedBillId) return;
+    dispatch(approveBill({ 
+      billId: selectedBillId, 
+      action: approveData.action, 
+      remarks: approveData.remarks 
+    }));
   };
 
   const getStatusColor = (status) => {
@@ -122,10 +224,34 @@ const PrincipalBillingDashboard = () => {
     }
   ];
 
+  const approvalColumns = [
+    { 
+      key: 'level', 
+      label: 'Level',
+      render: (val) => <span className="font-black text-[10px] uppercase tracking-tighter">{val.replace('_', ' ')}</span>
+    },
+    { 
+      key: 'action', 
+      label: 'Action',
+      render: (val) => (
+        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter ${val === 'APPROVE' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+          {val}
+        </span>
+      )
+    },
+    { key: 'approver_name', label: 'Approver' },
+    { key: 'remarks', label: 'Remarks' },
+    { 
+      key: 'created_at', 
+      label: 'Date',
+      render: (val) => <span className="text-[10px] text-slate-400 font-medium">{new Date(val).toLocaleDateString()}</span>
+    }
+  ];
+
   const totalPages = Math.ceil(totalBills / limit);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -137,13 +263,23 @@ const PrincipalBillingDashboard = () => {
           </p>
         </div>
         
-        <Button 
-          onClick={() => setIsGenModalOpen(true)}
-          className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 flex items-center transition-all active:scale-95"
-        >
-          <Plus size={20} className="mr-2" />
-          GENERATE BILL
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            onClick={() => setIsBulkModalOpen(true)}
+            variant="outline"
+            className="border-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-black flex items-center transition-all active:scale-95 hover:bg-slate-50"
+          >
+            <Layers size={18} className="mr-2" />
+            BULK GENERATE
+          </Button>
+          <Button 
+            onClick={() => setIsGenModalOpen(true)}
+            className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 flex items-center transition-all active:scale-95"
+          >
+            <Plus size={20} className="mr-2" />
+            GENERATE BILL
+          </Button>
+        </div>
       </div>
 
       {/* Analytics Cards */}
@@ -194,7 +330,7 @@ const PrincipalBillingDashboard = () => {
           {fetching ? (
             <div className="h-64 flex flex-col items-center justify-center space-y-4">
               <Loader2 size={40} className="animate-spin text-indigo-500" />
-              <p className="text-sm font-bold text-slate-400 animate-pulse">Fetching billing records...</p>
+              <p className="text-sm font-bold text-slate-400 animate-pulse text-center">Syncing institutional billing records...<br/><span className="text-[10px] font-black uppercase tracking-widest tracking-tighter">Please Wait</span></p>
             </div>
           ) : bills.length > 0 ? (
             <Table 
@@ -212,10 +348,20 @@ const PrincipalBillingDashboard = () => {
                       <Send size={14} className="mr-1" /> Submit
                     </Button>
                   )}
+                  {row.bill_status === 'SUBMITTED' && (
+                    <Button 
+                      variant="ghost" 
+                      className="p-2 h-auto text-indigo-600 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-black uppercase tracking-tighter"
+                      onClick={() => handleOpenApproveModal(row.id)}
+                    >
+                      <CheckCircle size={14} className="mr-1" /> Review
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     className="p-2 h-auto text-slate-400 hover:bg-slate-50 rounded-xl"
                     title="View Details"
+                    onClick={() => handleViewDetails(row.id)}
                   >
                     <ChevronRight size={18} />
                   </Button>
@@ -276,28 +422,102 @@ const PrincipalBillingDashboard = () => {
         )}
       </div>
 
-      {/* Generation Modal */}
+      {/* Details Modal */}
+      <Modal
+        isOpen={isDetailsModalOpen}
+        onClose={closeModals}
+        title="Bill Details & Audit Trail"
+        size="lg"
+      >
+        {loading && !selectedBill ? (
+          <div className="h-64 flex items-center justify-center">
+            <Loader2 size={40} className="animate-spin text-indigo-500" />
+          </div>
+        ) : selectedBill && (
+          <div className="space-y-8 p-1">
+            {/* Bill Info Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Faculty Member</p>
+                <p className="text-sm font-black text-slate-900">{selectedBill.faculty_name}</p>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Claim Period</p>
+                <p className="text-sm font-black text-slate-900">{selectedBill.period_start} - {selectedBill.period_end}</p>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 border-l-4 border-l-indigo-500">
+                <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-1">Total Amount</p>
+                <p className="text-xl font-black text-indigo-600">₹{selectedBill.total_amount}</p>
+              </div>
+            </div>
+
+            {/* Approval Timeline */}
+            <div className="space-y-4">
+              <div className="flex items-center px-1">
+                <History size={16} className="text-slate-400 mr-2" />
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Approval History</h4>
+              </div>
+              
+              <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm">
+                <Table 
+                  columns={approvalColumns} 
+                  data={selectedBillApprovals} 
+                  className="border-none shadow-none"
+                />
+                {selectedBillApprovals.length === 0 && (
+                  <div className="py-12 text-center flex flex-col items-center">
+                    <Info size={32} className="text-slate-200 mb-3" />
+                    <p className="text-xs font-bold text-slate-400">No approval records yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button 
+                onClick={closeModals}
+                className="bg-slate-900 hover:bg-black text-white px-8 py-3 rounded-xl font-black transition-all"
+              >
+                CLOSE
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Individual Generation Modal */}
       <Modal
         isOpen={isGenModalOpen}
-        onClose={() => setIsGenModalOpen(false)}
+        onClose={closeModals}
         title="Generate Faculty Bill"
         size="md"
       >
         <form onSubmit={handleGenerate} className="space-y-6 p-1">
           <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Faculty Member (UUID)</label>
-            <Input 
-              placeholder="Enter Faculty UUID" 
-              value={genData.faculty_credential_id}
-              onChange={(e) => setGenData({...genData, faculty_credential_id: e.target.value})}
-              required
-              className="bg-slate-50 border-slate-200 rounded-xl py-3 font-bold"
-            />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
+              <Users size={14} className="mr-2 text-indigo-500" /> Target Faculty
+            </label>
+            <div className="relative">
+              <select 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
+                value={genData.faculty_credential_id}
+                onChange={(e) => setGenData({...genData, faculty_credential_id: e.target.value})}
+                required
+              >
+                <option value="">Select a Faculty Member...</option>
+                {facultyList.map(f => (
+                  <option key={f.id} value={f.id}>{f.name} ({f.designation})</option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <ChevronLeft className="-rotate-90" size={14} />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Start Date</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Period Start</label>
               <Input 
                 type="date"
                 value={genData.period_start}
@@ -307,7 +527,7 @@ const PrincipalBillingDashboard = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">End Date</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Period End</label>
               <Input 
                 type="date"
                 value={genData.period_end}
@@ -319,9 +539,9 @@ const PrincipalBillingDashboard = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Academic Year</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Academic Session</label>
             <select 
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
               value={genData.academic_year}
               onChange={(e) => setGenData({...genData, academic_year: e.target.value})}
             >
@@ -334,16 +554,144 @@ const PrincipalBillingDashboard = () => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => setIsGenModalOpen(false)}
-              className="flex-1 rounded-xl font-black text-slate-500"
+              onClick={closeModals}
+              className="flex-1 rounded-xl font-black text-slate-500 border-slate-200 hover:bg-slate-50"
             >
               CANCEL
             </Button>
             <Button 
               disabled={loading}
-              className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black shadow-lg shadow-indigo-100"
+              className="flex-[2] bg-slate-900 hover:bg-black text-white rounded-xl font-black shadow-lg transition-all active:scale-95"
             >
-              {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'GENERATE NOW'}
+              {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'GENERATE BILL'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Bulk Generation Modal */}
+      <Modal
+        isOpen={isBulkModalOpen}
+        onClose={closeModals}
+        title="Bulk Generation"
+        size="md"
+      >
+        <form onSubmit={handleBulkGenerate} className="space-y-6 p-1">
+          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-start">
+            <Info size={20} className="text-indigo-600 mr-3 mt-0.5" />
+            <p className="text-xs font-bold text-indigo-900 leading-relaxed">
+              This will generate honorarium bills for <span className="font-black underline">ALL active faculty members</span> in your institution for the selected period.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Period Start</label>
+              <Input 
+                type="date"
+                value={bulkData.period_start}
+                onChange={(e) => setBulkData({...bulkData, period_start: e.target.value})}
+                required
+                className="bg-slate-50 border-slate-200 rounded-xl font-bold"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Period End</label>
+              <Input 
+                type="date"
+                value={bulkData.period_end}
+                onChange={(e) => setBulkData({...bulkData, period_end: e.target.value})}
+                required
+                className="bg-slate-50 border-slate-200 rounded-xl font-bold"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Academic Session</label>
+            <select 
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
+              value={bulkData.academic_year}
+              onChange={(e) => setBulkData({...bulkData, academic_year: e.target.value})}
+            >
+              <option value="2026-2027">2026-2027</option>
+              <option value="2025-2026">2025-2026</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={closeModals}
+              className="flex-1 rounded-xl font-black text-slate-500 border-slate-200 hover:bg-slate-50"
+            >
+              CANCEL
+            </Button>
+            <Button 
+              disabled={loading}
+              className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black shadow-lg shadow-indigo-100 transition-all active:scale-95"
+            >
+              {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'RUN BULK GENERATION'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Approval Modal */}
+      <Modal
+        isOpen={isApproveModalOpen}
+        onClose={closeModals}
+        title="Review & Approve Bill"
+        size="md"
+      >
+        <form onSubmit={handleApprove} className="space-y-6 p-1">
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Action</label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setApproveData({...approveData, action: 'APPROVE'})}
+                className={`flex items-center justify-center p-4 rounded-2xl border-2 transition-all ${approveData.action === 'APPROVE' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-black' : 'border-slate-100 bg-white text-slate-400 font-bold'}`}
+              >
+                <CheckCircle size={20} className="mr-2" /> APPROVE
+              </button>
+              <button
+                type="button"
+                onClick={() => setApproveData({...approveData, action: 'REJECT'})}
+                className={`flex items-center justify-center p-4 rounded-2xl border-2 transition-all ${approveData.action === 'REJECT' ? 'border-red-500 bg-red-50 text-red-700 font-black' : 'border-slate-100 bg-white text-slate-400 font-bold'}`}
+              >
+                <CloseCircle size={20} className="mr-2" /> REJECT
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
+              <MessageSquare size={14} className="mr-2 text-indigo-500" /> Remarks (Optional)
+            </label>
+            <textarea
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold outline-none focus:border-indigo-500 min-h-[120px] transition-all"
+              placeholder="Add your comments here..."
+              value={approveData.remarks}
+              onChange={(e) => setApproveData({...approveData, remarks: e.target.value})}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={closeModals}
+              className="flex-1 rounded-xl font-black text-slate-500 border-slate-200 hover:bg-slate-50"
+            >
+              CANCEL
+            </Button>
+            <Button 
+              disabled={loading}
+              className={`flex-[2] text-white rounded-xl font-black shadow-lg transition-all active:scale-95 ${approveData.action === 'APPROVE' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100' : 'bg-red-600 hover:bg-red-700 shadow-red-100'}`}
+            >
+              {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : `CONFIRM ${approveData.action}`}
             </Button>
           </div>
         </form>

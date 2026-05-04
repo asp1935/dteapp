@@ -3,11 +3,13 @@ import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCirc
 import { Table } from '../../components/common/Table';
 import { Button, Input } from '../../components/common/UIComponents';
 import CandidateProfile from './CandidateProfile';
+import JobApplicationFlow from './JobApplicationFlow';
 import { cn } from '../../utils/cn';
 
 const CandidateDashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
-  const [showApplyForm, setShowApplyForm] = useState(false);
+  const [showApplyFlow, setShowApplyFlow] = useState(false);
+  const [selectedAd, setSelectedAd] = useState(null);
 
   const ads = [
     { id: 'AD/2026/01', title: 'Lecturer in Computer Engineering', institute: 'G.P. Pune', date: '2026-05-15', status: 'Live' },
@@ -77,7 +79,10 @@ const CandidateDashboard = () => {
                       <span className="flex items-center"><Clock size={12} className="mr-1" /> Closes: {ad.date}</span>
                     </div>
                   </div>
-                  <Button variant="accent" size="sm" onClick={() => setShowApplyForm(true)}>Apply Now</Button>
+                  <Button variant="accent" size="sm" onClick={() => {
+                    setSelectedAd(ad);
+                    setShowApplyFlow(true);
+                  }}>Apply Now</Button>
                 </div>
               ))}
             </div>
@@ -149,33 +154,17 @@ const CandidateDashboard = () => {
         </div>
       )}
 
-      {/* Mock Application Form (Overlay) */}
-      {showApplyForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-background w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-border animate-in fade-in zoom-in duration-200">
-            <div className="p-6 border-b border-border flex items-center justify-between">
-              <h3 className="text-xl font-bold">Job Application Form</h3>
-              <button onClick={() => setShowApplyForm(false)} className="text-secondary hover:text-foreground">✕</button>
-            </div>
-            <div className="p-8 space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <Input label="Full Name" placeholder="John Doe" />
-                <Input label="Mobile Number" placeholder="+91 9876543210" />
-              </div>
-              <Input label="Highest Qualification" placeholder="M.Tech in CS" />
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-secondary">Upload Resume (PDF)</label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors">
-                  <FileText className="mx-auto text-secondary mb-2" size={32} />
-                  <p className="text-sm text-secondary">Click to upload or drag and drop</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 bg-muted/30 border-t border-border flex justify-end space-x-3">
-              <Button variant="ghost" onClick={() => setShowApplyForm(false)}>Cancel</Button>
-              <Button variant="primary" onClick={() => setShowApplyForm(false)}>Submit Application</Button>
-            </div>
-          </div>
+      {/* Job Application Flow Overlay */}
+      {showApplyFlow && selectedAd && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+          <JobApplicationFlow 
+            advertisementId={selectedAd.id} 
+            advertisementTitle={selectedAd.title}
+            onClose={() => {
+              setShowApplyFlow(false);
+              setSelectedAd(null);
+            }} 
+          />
         </div>
       )}
     </div>

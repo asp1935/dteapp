@@ -101,11 +101,23 @@ export const fetchBillDetails = createAsyncThunk(
   }
 );
 
+export const fetchBillApprovals = createAsyncThunk(
+  'billing/fetchApprovals',
+  async (billId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/billing/bills/${billId}/approvals`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
 export const submitBill = createAsyncThunk(
   'billing/submit',
   async (billId, { rejectWithValue }) => {
     try {
-      const response = await api.post(`/billing/bills/${billId}/submit`);
+      const response = await api.post(`/billing/bills/${billId}/submit`, {});
       return response.data;
     } catch (error) {
       return rejectWithValue(extractErrorMessage(error));
@@ -160,6 +172,7 @@ const billingSlice = createSlice({
     // Bills
     bills: [],
     selectedBill: null,
+    selectedBillApprovals: [],
     totalBills: 0,
     
     // State
@@ -212,6 +225,10 @@ const billingSlice = createSlice({
       .addCase(fetchBillDetails.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedBill = action.payload;
+      })
+      .addCase(fetchBillApprovals.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedBillApprovals = action.payload.data || action.payload || [];
       })
       .addCase(generateBill.fulfilled, (state) => {
         state.loading = false;

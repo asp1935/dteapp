@@ -34,6 +34,17 @@ export const updateProfile = createAsyncThunk(
   }
 );
 
+export const getProfile = createAsyncThunk(
+  'candidate/getProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await candidateService.getProfile();
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch profile');
+    }
+  }
+);
+
 const candidateSlice = createSlice({
   name: 'candidate',
   initialState: {
@@ -61,6 +72,18 @@ const candidateSlice = createSlice({
         state.success = true;
       })
       .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get Profile
+      .addCase(getProfile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload.data;
+      })
+      .addCase(getProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
