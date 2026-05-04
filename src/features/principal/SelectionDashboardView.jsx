@@ -125,21 +125,31 @@ const SelectionDashboardView = ({ advertisementId, onStartSelection }) => {
               </div>
               
               <div className="space-y-4">
-                 <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <div className="w-2 h-2 mt-1.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 flex-shrink-0" />
-                    <div>
-                       <p className="text-[11px] font-bold text-slate-200 mb-0.5">Shortlisting Neutrality Check</p>
-                       <p className="text-[10px] text-slate-400 leading-relaxed font-medium">Shortlisted candidates match 100% of defined qualification criteria.</p>
-                    </div>
-                 </div>
+                 {(dashboard.insights || []).map((insight, i) => (
+                   <div key={`insight-${i}`} className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-indigo-500 shadow-lg shadow-indigo-500/50 flex-shrink-0" />
+                      <div>
+                         <p className="text-[11px] font-bold text-slate-200 mb-0.5">AI Selection Insight</p>
+                         <p className="text-[10px] text-slate-400 leading-relaxed font-medium">{insight}</p>
+                      </div>
+                   </div>
+                 ))}
 
-                 <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <div className="w-2 h-2 mt-1.5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50 flex-shrink-0" />
-                    <div>
-                       <p className="text-[11px] font-bold text-slate-200 mb-0.5">Scoring Anomaly Detection</p>
-                       <p className="text-[10px] text-slate-400 leading-relaxed font-medium">Pending marks for 2 shortlisted candidates. Completion required for ranking.</p>
-                    </div>
-                 </div>
+                 {(dashboard.bias_flags || []).map((flag, i) => (
+                   <div key={`bias-${i}`} className="flex gap-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50 flex-shrink-0" />
+                      <div>
+                         <p className="text-[11px] font-bold text-amber-200 mb-0.5">Diversity Flag</p>
+                         <p className="text-[10px] text-amber-400/80 leading-relaxed font-medium">{flag}</p>
+                      </div>
+                   </div>
+                 ))}
+
+                 {(!dashboard.insights?.length && !dashboard.bias_flags?.length) && (
+                   <div className="p-8 text-center text-slate-500 text-[10px] font-medium border border-dashed border-white/10 rounded-2xl">
+                     Awaiting ranking generation to run deep analysis.
+                   </div>
+                 )}
               </div>
 
               <button className="w-full mt-8 py-4 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:bg-white/5 transition-all">

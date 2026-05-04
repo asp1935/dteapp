@@ -31,7 +31,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
     try {
       const data = await applicationService.getApplications({ 
         advertisement_id: advertisementId, 
-        status: 'SUBMITTED' 
+        status: 'SUBMITTED,UNDER_REVIEW' 
       });
       setCandidates(data.items || []);
     } catch (err) {
@@ -46,7 +46,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
     setShortlisting(true);
     try {
       await dispatch(shortlistCandidates({
-        advertisement_id: advertisementId,
+        advertisementId,
         applicationIds: selectedIds,
         remarks: 'Shortlisted for interviews'
       })).unwrap();
@@ -127,8 +127,12 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
                 <td colSpan="5" className="py-24 text-center">
                    <div className="flex flex-col items-center text-slate-400">
                       <Search size={48} className="mb-4 opacity-20" />
-                      <p className="font-medium italic text-lg">No pending applications found.</p>
-                      <p className="text-sm mt-1">All candidates for this ad have already been processed.</p>
+                      <p className="font-medium italic text-lg text-slate-500">All applications processed.</p>
+                      <p className="text-sm mt-1 mb-6">Your shortlist is ready. Proceed to interview scoring.</p>
+                      <Button variant="primary" onClick={onSkip} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+                        Proceed to Interview Marks
+                        <ArrowRight size={16} className="ml-2" />
+                      </Button>
                    </div>
                 </td>
               </tr>
@@ -162,9 +166,9 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
                           <div className={cn(
                             "h-full transition-all duration-1000",
                             cand.ai_confidence_score > 70 ? "bg-emerald-500" : "bg-amber-500"
-                          )} style={{ width: '85%' }} />
+                          )} style={{ width: `${cand.ai_confidence_score || 0}%` }} />
                         </div>
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">85% Fit</span>
+                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{cand.ai_confidence_score || 0}% Fit</span>
                      </div>
                   </td>
                   <td className="py-5 px-6 text-right">

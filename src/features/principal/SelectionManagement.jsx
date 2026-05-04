@@ -25,7 +25,8 @@ import { BarChart3 } from 'lucide-react';
 const SelectionManagement = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { list: ads = [] } = useSelector((state) => state.ads);
+  const { list: adsRaw = [] } = useSelector((state) => state.ads);
+  const ads = Array.isArray(adsRaw) ? adsRaw : [];
   const { shortlisted, rankedList, loading, marking, ranking } = useSelector((state) => state.selection);
 
   const [selectedAdId, setSelectedAdId] = useState('');
@@ -82,7 +83,7 @@ const SelectionManagement = () => {
 
   const handleConfirm = async (remarks) => {
     await dispatch(confirmSelection({
-      advertisement_id: selectedAdId,
+      advertisementId: selectedAdId,
       remarks: remarks || 'Selection confirmed'
     }));
   };

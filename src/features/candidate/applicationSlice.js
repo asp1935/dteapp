@@ -34,10 +34,23 @@ export const submitApplication = createAsyncThunk(
   }
 );
 
+export const getMyApplications = createAsyncThunk(
+  'application/fetchMy',
+  async (params, { rejectWithValue }) => {
+    try {
+      return await applicationService.getMyApplications(params);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch your applications');
+    }
+  }
+);
+
 const applicationSlice = createSlice({
   name: 'application',
   initialState: {
     currentApplication: null,
+    myApplications: [],
+    pagination: null,
     loading: false,
     error: null,
     success: false,
@@ -78,7 +91,6 @@ const applicationSlice = createSlice({
       })
       .addCase(uploadDocuments.fulfilled, (state) => {
         state.loading = false;
-        state.step = 3;
       })
       .addCase(uploadDocuments.rejected, (state, action) => {
         state.loading = false;
@@ -94,6 +106,23 @@ const applicationSlice = createSlice({
         state.success = true;
       })
       .addCase(submitApplication.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get My Applications
+      .addCase(getMyApplications.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getMyApplications.fulfilled, (state, action) => {
+        state.loading = false;
+        state.myApplications = action.payload.data;
+        state.pagination = {
+          total: action.payload.total,
+          page: action.payload.page,
+          total_pages: action.payload.total_pages
+        };
+      })
+      .addCase(getMyApplications.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

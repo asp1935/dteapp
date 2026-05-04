@@ -7,7 +7,10 @@ import {
 } from 'lucide-react';
 import { fetchInstitutions } from './institutionSlice';
 import { fetchCourses } from './courseSlice';
-import { generateAdAI, clearAdStatus, fetchAds, fetchRecruitmentContext, clearRecruitmentContext } from './advertisementSlice';
+import { 
+  generateAdAI, clearAdStatus, fetchAds, fetchRecruitmentContext, 
+  clearRecruitmentContext, saveAd, submitAd, approveAd, publishAd 
+} from './advertisementSlice';
 import { cn } from '../../utils/cn';
 
 const StatusBadge = ({ status }) => {
@@ -16,6 +19,10 @@ const StatusBadge = ({ status }) => {
     CONFIRMED: { bg: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2, label: 'Confirmed' },
     AI_SUGGESTED: { bg: 'bg-indigo-100 text-indigo-700', icon: Sparkles, label: 'Suggested' },
     DRAFT: { bg: 'bg-slate-100 text-slate-600', icon: FileText, label: 'Draft' },
+    REVIEW: { bg: 'bg-blue-100 text-blue-700', icon: Search, label: 'In Review' },
+    APPROVED: { bg: 'bg-indigo-100 text-indigo-700', icon: CheckCircle2, label: 'Approved' },
+    PUBLISHED: { bg: 'bg-emerald-100 text-emerald-700', icon: TrendingUp, label: 'Published' },
+    REJECTED: { bg: 'bg-rose-100 text-rose-700', icon: XCircle, label: 'Rejected' },
     pending: { bg: 'bg-amber-100 text-amber-700', icon: AlertCircle, label: 'Pending' },
   };
   const s = map[status] || map.pending;
@@ -73,6 +80,33 @@ const AdGenerationDashboard = () => {
       application_mode: applicationMode,
       academic_year: academicYear
     }));
+  };
+
+  const handleFinalize = () => {
+    if (!preview) return;
+    const aiData = preview.data?.ai_generated_ad || preview;
+    dispatch(saveAd({
+      assessment_id: ctx.step2_vacancy.assessment_id,
+      application_start_date: new Date().toISOString().split('T')[0],
+      application_end_date: deadline,
+      qualification_requirements: ctx.norms?.min_qualification,
+      content_en: aiData.english,
+      content_mr: aiData.marathi
+    })).then(() => {
+      dispatch(fetchAds());
+    });
+  };
+
+  const handleSubmit = (id) => {
+    dispatch(submitAd(id)).then(() => dispatch(fetchAds()));
+  };
+
+  const handleApprove = (id) => {
+    dispatch(approveAd({ id, action: 'APPROVE', remarks: 'Approved by Admin' })).then(() => dispatch(fetchAds()));
+  };
+
+  const handlePublish = (id) => {
+    dispatch(publishAd(id)).then(() => dispatch(fetchAds()));
   };
 
   const filteredCourses = courses.filter(c => c.institution_id === parseInt(selectedInst));
@@ -291,7 +325,14 @@ const AdGenerationDashboard = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors"><Download size={18} /></button>
-                        <button className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-all"><Save size={18} />Finalize</button>
+                        <button 
+                          onClick={handleFinalize}
+                          disabled={loading}
+                          className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-all disabled:opacity-50"
+                        >
+                          {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                          Finalize & Save
+                        </button>
                       </div>
                     </div>
                     <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50">
@@ -342,12 +383,26 @@ const AdGenerationDashboard = () => {
               <div key={ad.id} className="bg-white rounded-3xl border border-slate-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all group">
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all"><FileText size={20} /></div>
-                  <div className={cn("px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase",
-                    ad.status === 'PUBLISHED' ? "bg-green-100 text-green-700" : ad.status === 'APPROVED' ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
-                  )}>{ad.status}</div>
+                  <StatusBadge status={ad.status} />
                 </div>
                 <h3 className="font-bold text-slate-800 truncate">{ad.course_name}</h3>
                 <p className="text-xs text-slate-500 mt-1">{ad.institution_name}</p>
+                
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {ad.status === 'DRAFT' && (
+                    <button onClick={() => handleSubmit(ad.id)} className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-lg hover:bg-indigo-700 transition-colors uppercase">Submit</button>
+                  )}
+                  {ad.status === 'REVIEW' && (
+                    <button onClick={() => handleApprove(ad.id)} className="px-3 py-1 bg-emerald-600 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-700 transition-colors uppercase">Approve</button>
+                  )}
+                  {ad.status === 'APPROVED' && (
+                    <button onClick={() => handlePublish(ad.id)} className="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-lg hover:bg-slate-800 transition-colors uppercase">Publish</button>
+                  )}
+                  {ad.status === 'PUBLISHED' && (
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1"><CheckCircle2 size={12} /> Live</span>
+                  )}
+                </div>
+
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50">
                   <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase"><Calendar size={12} />{new Date(ad.created_at).toLocaleDateString()}</span>
                   <button className="text-indigo-600 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 group/btn">View<ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" /></button>

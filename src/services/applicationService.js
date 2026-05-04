@@ -19,6 +19,31 @@ export const submitApplication = async (applicationId, submissionData) => {
   return response.data;
 };
 
+export const withdrawApplication = async (applicationId) => {
+  const response = await api.delete(`/applications/${applicationId}/withdraw`);
+  return response.data;
+};
+
+export const processAction = async (applicationId, actionData) => {
+  const response = await api.post(`/applications/${applicationId}/action`, actionData);
+  return response.data;
+};
+
+export const listDocuments = async (applicationId) => {
+  const response = await api.get(`/applications/${applicationId}/documents`);
+  return response.data;
+};
+
+export const getAISummary = async (applicationId) => {
+  const response = await api.get(`/applications/${applicationId}/ai-summary`);
+  return response.data;
+};
+
+export const getMyApplications = async (params) => {
+  const response = await api.get('/applications/my', { params });
+  return response.data;
+};
+
 export const getApplications = async (params) => {
   const response = await api.get('/applications', { params });
   return response.data;
@@ -28,7 +53,12 @@ export const applicationService = {
   createApplication,
   uploadDocuments,
   submitApplication,
+  withdrawApplication,
+  processAction,
+  getMyApplications,
   getApplications,
+  listDocuments,
+  getAISummary,
 };
 
 export default applicationService;
