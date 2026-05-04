@@ -8,6 +8,7 @@ import CourseManagement from './CourseManagement';
 import { fetchCourses } from './courseSlice';
 import NormsIntakeManagement from './NormsIntakeManagement';
 import AIValidationDashboard from './AIValidationDashboard';
+import { fetchBillingRates } from './billingSlice';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const AdminDashboard = () => {
 
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
-        {['institutes', 'courses', 'requirements', 'advertisements', 'ai_validation'].map((tab) => (
+        {['institutes', 'courses', 'requirements', 'advertisements', 'ai_validation', 'rates'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -60,6 +61,7 @@ const AdminDashboard = () => {
           >
             {tab === 'requirements' ? 'Requirements' : 
              tab === 'ai_validation' ? 'AI Validation' : 
+             tab === 'rates' ? 'Honorarium Rates' :
              tab.replace('_', ' & ')}
           </button>
         ))}
@@ -71,6 +73,7 @@ const AdminDashboard = () => {
         {activeTab === 'courses' && <CourseManagement />}
         {activeTab === 'requirements' && <NormsIntakeManagement />}
         {activeTab === 'ai_validation' && <AIValidationDashboard />}
+        {activeTab === 'rates' && <HonorariumRatesView />}
         
         {activeTab !== 'institutes' && activeTab !== 'courses' && activeTab !== 'requirements' && activeTab !== 'advertisements' && (
           <div className="bg-background border border-border rounded-xl p-20 text-center text-secondary italic">
@@ -109,6 +112,50 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+const HonorariumRatesView = () => {
+  const dispatch = useDispatch();
+  const { rates, loading } = useSelector((state) => state.billing);
+  const { institutions } = useSelector((state) => state.institutions);
+  const [instId, setInstId] = useState('1');
+  const [year] = useState('2026-2027');
+
+  useEffect(() => {
+    if (instId) {
+      dispatch(fetchBillingRates({ institution_id: parseInt(instId), academic_year: year }));
+    }
+  }, [dispatch, instId, year]);
+
+  const columns = [
+    { key: 'designation', label: 'Designation' },
+    { key: 'lecture_type', label: 'Type' },
+    { key: 'rate_per_lecture', label: 'Rate', render: (val) => <span className="font-bold">₹{val}</span> },
+    { key: 'effective_from', label: 'Effective From' },
+    { key: 'is_active', label: 'Status', render: (val) => <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${val ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{val ? 'Active' : 'Inactive'}</span> }
+  ];
+
+  return (
+    <div className="bg-background rounded-xl border border-border shadow-sm p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">Institutional Honorarium Rates</h3>
+        <select 
+          className="bg-muted border border-border rounded-lg px-4 py-2 text-sm font-semibold outline-none"
+          value={instId}
+          onChange={(e) => setInstId(e.target.value)}
+        >
+          {institutions.map(inst => (
+            <option key={inst.id} value={inst.id}>{inst.name}</option>
+          ))}
+        </select>
+      </div>
+      <Table 
+        columns={columns}
+        data={rates}
+        loading={loading}
+      />
     </div>
   );
 };

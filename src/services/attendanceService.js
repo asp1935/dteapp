@@ -10,6 +10,22 @@ const attendanceService = {
     });
     return response.data;
   },
+  
+  /**
+   * Create or update timetable in bulk
+   */
+  createTimetable: async (timetableData) => {
+    const response = await api.post('/attendance/timetable', timetableData);
+    return response.data;
+  },
+
+  /**
+   * Update a specific timetable slot
+   */
+  updateTimetableSlot: async (slotId, slotData) => {
+    const response = await api.put(`/attendance/timetable/${slotId}`, slotData);
+    return response.data;
+  },
 
   /**
    * Fetch attendance logs
@@ -111,6 +127,38 @@ const attendanceService = {
     const response = await api.get('/attendance/logs/summary', {
       params: { faculty_credential_id: facultyCredentialId, academic_year: academicYear, month }
     });
+    return response.data;
+  },
+
+  /**
+   * Run AI check on a specific log
+   */
+  aiCheckLog: async (logId) => {
+    const response = await api.post(`/attendance/logs/${logId}/ai-check`, {});
+    return response.data;
+  },
+
+  /**
+   * Get AI snapshot for a faculty
+   */
+  getFacultyAISnapshot: async (facultyCredentialId) => {
+    const response = await api.get(`/attendance/faculty/${facultyCredentialId}/ai-snapshot`);
+    return response.data;
+  },
+
+  /**
+   * Get AI analysis for a faculty
+   */
+  getFacultyAIAnalysis: async (facultyCredentialId) => {
+    const response = await api.get(`/attendance/faculty/${facultyCredentialId}/ai-analysis`);
+    return response.data;
+  },
+
+  /**
+   * Global AI monitoring for attendance
+   */
+  getAttendanceAIMonitor: async () => {
+    const response = await api.get('/attendance/ai-monitor');
     return response.data;
   }
 };

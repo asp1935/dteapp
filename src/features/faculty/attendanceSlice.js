@@ -13,6 +13,34 @@ export const fetchTimetable = createAsyncThunk(
   }
 );
 
+export const createTimetable = createAsyncThunk(
+  'attendance/createTimetable',
+  async (timetableData, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.createTimetable(timetableData);
+      toast.success('Timetable updated successfully');
+      return response;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update timetable');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const updateTimetableSlot = createAsyncThunk(
+  'attendance/updateSlot',
+  async ({ slotId, slotData }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.updateTimetableSlot(slotId, slotData);
+      toast.success('Slot updated successfully');
+      return response;
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update slot');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 export const fetchLogs = createAsyncThunk(
   'attendance/fetchLogs',
   async (params, { rejectWithValue }) => {
@@ -141,6 +169,53 @@ export const fetchMonthlySummary = createAsyncThunk(
   }
 );
 
+export const aiCheckLog = createAsyncThunk(
+  'attendance/aiCheck',
+  async (logId, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.aiCheckLog(logId);
+      toast.success('AI check completed successfully');
+      return { logId, ...response };
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'AI check failed');
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const fetchAISnapshot = createAsyncThunk(
+  'attendance/fetchAISnapshot',
+  async (facultyCredentialId, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getFacultyAISnapshot(facultyCredentialId);
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const fetchAIAnalysis = createAsyncThunk(
+  'attendance/fetchAIAnalysis',
+  async (facultyCredentialId, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getFacultyAIAnalysis(facultyCredentialId);
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const fetchAttendanceMonitor = createAsyncThunk(
+  'attendance/fetchMonitor',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getAttendanceAIMonitor();
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 const attendanceSlice = createSlice({
   name: 'attendance',
   initialState: {
@@ -148,6 +223,9 @@ const attendanceSlice = createSlice({
     logs: [],
     calendar: [],
     anomalies: [],
+    aiSnapshot: null,
+    aiAnalysis: null,
+    aiMonitor: null,
     summary: null,
     loading: false,
     submitting: false,
@@ -188,6 +266,27 @@ const attendanceSlice = createSlice({
       .addCase(fetchMonthlySummary.fulfilled, (state, action) => {
         state.summary = action.payload.data || action.payload;
       })
+      .addCase(createTimetable.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateTimetableSlot.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(aiCheckLog.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchAISnapshot.fulfilled, (state, action) => {
+        state.loading = false;
+        state.aiSnapshot = action.payload.data || action.payload;
+      })
+      .addCase(fetchAIAnalysis.fulfilled, (state, action) => {
+        state.loading = false;
+        state.aiAnalysis = action.payload.data || action.payload;
+      })
+      .addCase(fetchAttendanceMonitor.fulfilled, (state, action) => {
+        state.loading = false;
+        state.aiMonitor = action.payload.data || action.payload;
+      })
       .addCase(createLog.pending, (state) => {
         state.submitting = true;
       })
@@ -196,7 +295,23 @@ const attendanceSlice = createSlice({
       })
       .addCase(createLog.rejected, (state) => {
         state.submitting = false;
-      });
+      })
+
+      // --- Global Matchers ---
+      .addMatcher(
+        (action) => action.type.endsWith('/pending'),
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith('/rejected'),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
   }
 });
 
