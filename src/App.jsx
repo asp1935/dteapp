@@ -31,6 +31,8 @@ import LecturerDashboard from './features/faculty/LecturerDashboard';
 import AdminBillingDashboard from './features/admin/AdminBillingDashboard';
 import PrincipalBillingDashboard from './features/principal/PrincipalBillingDashboard';
 import PrincipalWorkLogs from './features/principal/PrincipalWorkLogs';
+import ApplicationManagement from './features/admin/ApplicationManagement';
+import MyApplications from './features/candidate/MyApplications';
 import AttendanceAIMonitor from './features/principal/AttendanceAIMonitor';
 import MISReportsDashboard from './features/admin/MISReportsDashboard';
 import ROBillingDashboard from './features/ro/ROBillingDashboard';
@@ -198,6 +200,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="admin/applications"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <ApplicationManagement />
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Principal Routes */}
         <Route
@@ -281,7 +293,16 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route path="principal/applications" element={<div className="p-8 font-bold">Applications Review UI</div>} />
+        <Route 
+          path="principal/applications" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <ApplicationManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
         <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
         <Route 
           path="principal/billing" 
@@ -314,7 +335,16 @@ function App() {
           }
         />
         <Route path="candidate/ads" element={<div className="p-8 font-bold">Browse Job Advertisements</div>} />
-        <Route path="candidate/applications" element={<div className="p-8 font-bold">My Applications History</div>} />
+        <Route 
+          path="candidate/applications" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.CANDIDATE]}>
+              <div className="p-6">
+                <MyApplications />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Faculty / Lecturer Routes */}
         <Route

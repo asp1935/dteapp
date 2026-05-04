@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Briefcase, 
-  Building2, 
-  Calendar, 
-  AlertTriangle, 
-  Search, 
-  ArrowRight, 
-  CheckCircle2, 
-  TrendingUp, 
+import {
+  Briefcase,
+  Building2,
+  Calendar,
+  AlertTriangle,
+  Search,
+  ArrowRight,
+  CheckCircle2,
+  TrendingUp,
   Users,
   Info,
   Shield,
@@ -34,6 +34,10 @@ const VacancyManagement = () => {
   const [academicYear, setAcademicYear] = useState('2026-27');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+  const unacknowledgedHighAnomalies = assessment?.anomalies?.filter(
+    a => a.severity === 'HIGH' && !a.is_acknowledged
+  ) || [];
+
   // Principal's institution is auto-locked
   const institutionId = user?.institution_id;
   const currentInstitution = institutions.find(i => i.id === institutionId);
@@ -53,17 +57,19 @@ const VacancyManagement = () => {
 
   const handleLoadAssessment = async () => {
     if (!institutionId || !selectedCourse) return;
-    
+
     const result = await dispatch(fetchVacancyAssessment({
       institution_id: institutionId,
       course_id: selectedCourse,
       academic_year: academicYear
     }));
 
-    const isNotFound = fetchVacancyAssessment.rejected.match(result) || 
-                       (fetchVacancyAssessment.fulfilled.match(result) && (!result.payload?.data && !result.payload?.id));
+    const fetchedAssessment = result?.payload?.data || result?.payload;
+    const isDraft = fetchVacancyAssessment.fulfilled.match(result) && fetchedAssessment?.status === 'DRAFT';
+    const isNotFound = fetchVacancyAssessment.rejected.match(result) ||
+      (fetchVacancyAssessment.fulfilled.match(result) && !fetchedAssessment);
 
-    if (isNotFound) {
+    if (isNotFound || isDraft) {
       dispatch(suggestVacancy({
         institution_id: parseInt(institutionId),
         course_id: parseInt(selectedCourse),
@@ -83,7 +89,7 @@ const VacancyManagement = () => {
 
   const handleConfirm = async () => {
     if (!assessment) return;
-    
+
     const instId = assessment.institution_id || parseInt(institutionId);
     const courseId = assessment.course_id || parseInt(selectedCourse);
     const ay = assessment.academic_year || academicYear;
@@ -106,7 +112,7 @@ const VacancyManagement = () => {
   const handleAcknowledge = async (anomalyId) => {
     const remarks = window.prompt('Enter remarks for acknowledgement:');
     if (remarks === null) return;
-    
+
     const result = await dispatch(acknowledgeAnomaly({
       anomaly_id: anomalyId,
       remarks: remarks || 'Acknowledged'
@@ -157,7 +163,7 @@ const VacancyManagement = () => {
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
             <Briefcase size={12} className="mr-1.5" /> Select Course
           </label>
-          <select 
+          <select
             className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer disabled:opacity-50"
             value={selectedCourse}
             onChange={(e) => {
@@ -177,7 +183,7 @@ const VacancyManagement = () => {
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
             <Calendar size={12} className="mr-1.5" /> Academic Year
           </label>
-          <select 
+          <select
             className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
             value={academicYear}
             onChange={(e) => {
@@ -190,8 +196,8 @@ const VacancyManagement = () => {
           </select>
         </div>
 
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={handleLoadAssessment}
           disabled={!institutionId || !selectedCourse || loading || suggesting}
           className="h-[52px] px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 border-none transition-all"
@@ -216,7 +222,7 @@ const VacancyManagement = () => {
                 <h3 className="text-lg font-black text-slate-900">Deterministic Gap Analysis</h3>
                 <span className="text-[10px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">Live Audit</span>
               </div>
-              
+
               <div className="p-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
@@ -247,7 +253,8 @@ const VacancyManagement = () => {
                       {assessment.suggested_vacancy > 0 ? <AlertTriangle size={24} /> : <CheckCircle2 size={24} />}
                     </div>
                     <p className="text-[10px] mt-2 font-bold opacity-60">
-                      {assessment.status === 'CONFIRMED' ? 'Confirmed for Recruitment' : 'Pending Confirmation'}
+                      {assessment.status === 'CONFIRMED' ? 'Confirmed for Recruitment' : 
+                       unacknowledgedHighAnomalies.length > 0 ? 'Action Required: Anomalies' : 'Pending Confirmation'}
                     </p>
                   </div>
                 </div>
@@ -288,7 +295,8 @@ const VacancyManagement = () => {
                         <div className="flex items-center gap-2">
                           <span className={cn(
                             "text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-tighter",
-                            anomaly.severity === 'CRITICAL' ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+                            anomaly.severity === 'HIGH' ? "bg-red-500 text-white shadow-sm shadow-red-200" : 
+                            anomaly.severity === 'MEDIUM' ? "bg-amber-500 text-white" : "bg-slate-400 text-white"
                           )}>
                             {anomaly.severity}
                           </span>
@@ -296,10 +304,10 @@ const VacancyManagement = () => {
                         </div>
                         <p className="text-xs font-medium text-slate-500 leading-relaxed">{anomaly.description}</p>
                       </div>
-                      
+
                       {!anomaly.is_acknowledged ? (
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           size="sm"
                           onClick={() => handleAcknowledge(anomaly.id)}
                           className="rounded-xl h-9 px-4 text-[10px] font-black border-slate-200 hover:bg-white"
@@ -331,8 +339,8 @@ const VacancyManagement = () => {
                     </div>
                     <h3 className="text-xl font-black text-white tracking-tight">AI Vacancy Insights</h3>
                   </div>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     onClick={handleAIAnalysis}
                     disabled={suggesting}
                     className="text-[10px] font-black text-indigo-400 hover:text-white border border-indigo-500/30 hover:border-indigo-400 rounded-full px-4 h-8 uppercase tracking-widest transition-all"
@@ -378,18 +386,26 @@ const VacancyManagement = () => {
                   <span className={cn(
                     "text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest",
                     assessment.status === 'CONFIRMED' ? "bg-emerald-100 text-emerald-700" :
-                    assessment.status === 'AI_SUGGESTED' ? "bg-indigo-100 text-indigo-700" :
-                    "bg-slate-100 text-slate-600"
+                      assessment.status === 'AI_SUGGESTED' ? "bg-indigo-100 text-indigo-700" :
+                        "bg-slate-100 text-slate-600"
                   )}>{assessment.status}</span>
                 </div>
               </div>
 
               <div className="mt-10 space-y-4">
-                <Button 
-                  variant="primary" 
+                {unacknowledgedHighAnomalies.length > 0 && assessment.status !== 'CONFIRMED' && (
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 animate-pulse">
+                    <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={14} />
+                    <p className="text-[10px] font-bold text-red-700 leading-tight">
+                      Attention: {unacknowledgedHighAnomalies.length} High Severity anomalies must be acknowledged before you can confirm and forward this assessment.
+                    </p>
+                  </div>
+                )}
+                <Button
+                  variant="primary"
                   onClick={() => setShowConfirmModal(true)}
-                  disabled={confirming || assessment.status === 'CONFIRMED'}
-                  className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-black text-white flex items-center justify-center font-black tracking-tight disabled:opacity-50"
+                  disabled={confirming || assessment.status === 'CONFIRMED' || unacknowledgedHighAnomalies.length > 0}
+                  className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-black text-white flex items-center justify-center font-black tracking-tight disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   {confirming ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -450,17 +466,17 @@ const VacancyManagement = () => {
               <p className="text-slate-500 font-medium leading-relaxed mb-10">
                 You are about to finalize the vacancy count of <span className="text-indigo-600 font-black">{assessment?.suggested_vacancy}</span> for this course. This will lock the assessment and allow the Admin to generate the recruitment advertisement.
               </p>
-              
+
               <div className="flex gap-4">
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={() => setShowConfirmModal(false)}
                   className="flex-1 h-14 rounded-2xl border-slate-200 font-black text-slate-600"
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   onClick={() => {
                     handleConfirm();
                     setShowConfirmModal(false);

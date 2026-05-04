@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileText, CheckCircle, Upload, AlertCircle, ArrowRight, X } from 'lucide-react';
 import { Button, Input } from '../../components/common/UIComponents';
-import { createApplication, uploadDocuments, submitApplication, resetApplicationState } from './applicationSlice';
+import { createApplication, uploadDocuments, submitApplication, resetApplicationState, setStep } from './applicationSlice';
 import { cn } from '../../utils/cn';
 
 const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) => {
@@ -10,7 +10,14 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
   const { currentApplication, loading, error, success, step } = useSelector((state) => state.application);
   
   const [coverLetter, setCoverLetter] = useState('');
-  const [documents, setDocuments] = useState([]);
+  const [documentFiles, setDocumentFiles] = useState({
+    PHOTO: null,
+    SIGNATURE: null,
+    AADHAR: null,
+    DEGREE_CERTIFICATE: null,
+    MARKSHEET: null,
+    OTHER: []
+  });
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
 
   useEffect(() => {
@@ -21,16 +28,38 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
 
   const handleInitialApply = (e) => {
     e.preventDefault();
-    dispatch(createApplication({ advertisement_id: advertisementId, cover_letter: coverLetter }));
+    dispatch(createApplication({ 
+      advertisement_id: advertisementId, 
+      cover_letter: coverLetter,
+      applied_designation: advertisementTitle
+    }));
   };
 
-  const handleDocumentUpload = (e) => {
+  const handleDocumentUpload = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    documents.forEach((file) => {
-      formData.append('documents', file);
-    });
-    dispatch(uploadDocuments({ applicationId: currentApplication.id, formData }));
+    
+    // Upload required single files
+    const requiredTypes = ['PHOTO', 'SIGNATURE', 'AADHAR', 'DEGREE_CERTIFICATE', 'MARKSHEET'];
+    for (const type of requiredTypes) {
+      if (documentFiles[type]) {
+        const formData = new FormData();
+        formData.append('documents', documentFiles[type]);
+        formData.append('document_type', type);
+        await dispatch(uploadDocuments({ applicationId: currentApplication.id, formData }));
+      }
+    }
+
+    // Upload additional files
+    if (documentFiles.OTHER.length > 0) {
+      for (const file of documentFiles.OTHER) {
+        const formData = new FormData();
+        formData.append('documents', file);
+        formData.append('document_type', 'OTHER');
+        await dispatch(uploadDocuments({ applicationId: currentApplication.id, formData }));
+      }
+    }
+
+    dispatch(setStep(3));
   };
 
   const handleFinalSubmit = (e) => {
@@ -130,36 +159,92 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
         )}
 
         {step === 2 && (
-          <form onSubmit={handleDocumentUpload} className="space-y-6 animate-in fade-in slide-in-from-right-4">
-            <div className="p-8 border-2 border-dashed border-border rounded-2xl text-center bg-muted/5 group hover:border-accent transition-all cursor-pointer relative">
-              <input 
-                type="file" 
-                multiple 
-                className="absolute inset-0 opacity-0 cursor-pointer" 
-                onChange={handleFileChange}
-              />
-              <Upload className="mx-auto text-secondary mb-4 group-hover:text-accent transition-colors" size={48} />
-              <h4 className="font-bold text-foreground">Click to upload required documents</h4>
-              <p className="text-xs text-secondary mt-2">PDF, PNG or JPG (Max 5MB each)</p>
-              
-              {documents.length > 0 && (
-                <div className="mt-6 space-y-2 text-left">
-                  <p className="text-xs font-bold text-secondary uppercase tracking-widest px-2">Selected Files ({documents.length})</p>
-                  {documents.map((file, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-background rounded-lg border border-border">
-                      <div className="flex items-center space-x-3">
-                        <FileText size={16} className="text-accent" />
-                        <span className="text-sm font-medium truncate max-w-[200px]">{file.name}</span>
+          <form onSubmit={handleDocumentUpload} className="space-y-8 animate-in fade-in slide-in-from-right-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { id: 'PHOTO', label: 'Recent Photograph', type: 'image/*' },
+                { id: 'SIGNATURE', label: 'Signature Specimen', type: 'image/*' },
+                { id: 'AADHAR', label: 'Aadhar Card (PDF/Image)', type: 'application/pdf,image/*' },
+                { id: 'DEGREE_CERTIFICATE', label: 'Degree Certificate', type: 'application/pdf,image/*' },
+                { id: 'MARKSHEET', label: 'Last Qualifying Marksheet', type: 'application/pdf,image/*' },
+              ].map((doc) => (
+                <div key={doc.id} className={cn(
+                  "relative p-4 border-2 border-dashed rounded-xl transition-all group",
+                  documentFiles[doc.id] ? "border-emerald-500 bg-emerald-50/10" : "border-border hover:border-accent bg-muted/5"
+                )}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">{doc.label}</span>
+                    {documentFiles[doc.id] && <CheckCircle size={14} className="text-emerald-500" />}
+                  </div>
+                  
+                  {!documentFiles[doc.id] ? (
+                    <div className="relative">
+                      <input 
+                        type="file" 
+                        accept={doc.type}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                        onChange={(e) => setDocumentFiles(prev => ({ ...prev, [doc.id]: e.target.files[0] }))}
+                      />
+                      <div className="flex items-center space-x-2 text-secondary py-2">
+                        <Upload size={14} />
+                        <span className="text-xs">Click to upload</span>
                       </div>
-                      <span className="text-[10px] font-bold text-secondary">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-xs font-medium truncate max-w-[120px]">{documentFiles[doc.id].name}</span>
+                      <button 
+                        type="button"
+                        onClick={() => setDocumentFiles(prev => ({ ...prev, [doc.id]: null }))}
+                        className="p-1 hover:bg-red-100 text-red-500 rounded-full transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Other Documents Slot */}
+              <div className="md:col-span-2 p-4 border-2 border-dashed border-border rounded-xl bg-muted/5">
+                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-3">Other Supporting Documents</span>
+                <div className="space-y-3">
+                  <div className="relative border border-border bg-background p-3 rounded-lg flex items-center justify-center hover:border-accent transition-all cursor-pointer group">
+                    <input 
+                      type="file" 
+                      multiple
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={(e) => setDocumentFiles(prev => ({ ...prev, OTHER: [...prev.OTHER, ...Array.from(e.target.files)] }))}
+                    />
+                    <div className="flex items-center space-x-2 text-secondary">
+                      <Upload size={16} />
+                      <span className="text-sm">Add more files...</span>
+                    </div>
+                  </div>
+                  
+                  {documentFiles.OTHER.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 bg-background rounded border border-border">
+                      <span className="text-xs truncate max-w-[200px]">{file.name}</span>
+                      <button 
+                        type="button"
+                        onClick={() => setDocumentFiles(prev => ({ ...prev, OTHER: prev.OTHER.filter((_, i) => i !== idx) }))}
+                        className="text-red-500 hover:bg-red-50 p-1 rounded"
+                      >
+                        <X size={12} />
+                      </button>
                     </div>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
+
             <div className="flex justify-between items-center pt-4">
               <Button type="button" variant="outline" onClick={() => dispatch(setStep(1))}>Back</Button>
-              <Button variant="accent" className="px-8 py-3 group" disabled={loading || documents.length === 0}>
+              <Button 
+                variant="accent" 
+                className="px-8 py-3 group" 
+                disabled={loading || !['PHOTO', 'SIGNATURE', 'AADHAR', 'DEGREE_CERTIFICATE', 'MARKSHEET'].every(k => !!documentFiles[k])}
+              >
                 {loading ? 'Uploading...' : (
                   <>
                     Next: Final Review <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -199,7 +284,9 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-secondary">Documents Uploaded</span>
-                  <span className="font-bold">{documents.length} Files</span>
+                  <span className="font-bold">
+                    {Object.values(documentFiles).filter(v => v && !Array.isArray(v)).length + documentFiles.OTHER.length} Files
+                  </span>
                 </div>
               </div>
             </div>

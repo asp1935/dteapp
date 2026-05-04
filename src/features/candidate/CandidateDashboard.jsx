@@ -1,26 +1,28 @@
-import { useState } from 'react';
-import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle, Loader2 } from 'lucide-react';
 import { Table } from '../../components/common/Table';
 import { Button, Input } from '../../components/common/UIComponents';
 import CandidateProfile from './CandidateProfile';
 import JobApplicationFlow from './JobApplicationFlow';
+import { fetchPublishedAds } from '../admin/advertisementSlice';
+import { getMyApplications } from './applicationSlice';
 import { cn } from '../../utils/cn';
 
 const CandidateDashboard = () => {
+  const dispatch = useDispatch();
+  const { publishedList = [], loading: adsLoading } = useSelector(state => state.ads);
+  const { myApplications = [], loading: appsLoading } = useSelector(state => state.application);
   const [activeView, setActiveView] = useState('dashboard');
   const [showApplyFlow, setShowApplyFlow] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
 
-  const ads = [
-    { id: 'AD/2026/01', title: 'Lecturer in Computer Engineering', institute: 'G.P. Pune', date: '2026-05-15', status: 'Live' },
-    { id: 'AD/2026/04', title: 'Lecturer in Information Technology', institute: 'G.P. Mumbai', date: '2026-05-20', status: 'Live' },
-    { id: 'AD/2026/07', title: 'Lecturer in Civil Engineering', institute: 'G.P. Nagpur', date: '2026-05-25', status: 'Live' },
-  ];
+  useEffect(() => {
+    dispatch(fetchPublishedAds({}));
+    dispatch(getMyApplications({ skip: 0, limit: 10 }));
+  }, [dispatch]);
 
-  const applications = [
-    { id: 'APP-9982', title: 'Lecturer in Computer', institute: 'G.P. Pune', date: '2026-04-20', status: 'Under Review' },
-    { id: 'APP-8821', title: 'Lecturer in Mechanical', institute: 'G.P. Nashik', date: '2026-03-12', status: 'Interview Scheduled' },
-  ];
+  const loading = adsLoading || appsLoading;
 
   return (
     <div className="space-y-8">
@@ -70,13 +72,30 @@ const CandidateDashboard = () => {
             </div>
             
             <div className="grid gap-4">
-              {ads.map((ad) => (
+              {loading && (
+                <div className="flex flex-col items-center justify-center py-12 bg-background border border-border border-dashed rounded-xl">
+                  <Loader2 className="animate-spin text-accent mb-2" />
+                  <p className="text-xs text-secondary font-medium">Fetching latest opportunities...</p>
+                </div>
+              )}
+              
+              {!loading && publishedList.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 bg-background border border-border border-dashed rounded-xl">
+                  <Briefcase className="text-muted mb-2" size={32} />
+                  <p className="text-xs text-secondary font-medium">No active advertisements at the moment.</p>
+                </div>
+              )}
+
+              {!loading && publishedList.map((ad) => (
                 <div key={ad.id} className="p-5 bg-background border border-border rounded-xl hover:border-accent transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <h4 className="font-bold text-foreground group-hover:text-accent transition-colors">{ad.title}</h4>
+                    <h4 className="font-bold text-foreground group-hover:text-accent transition-colors">
+                      Lecturer in {ad.course_name}
+                    </h4>
                     <div className="flex items-center space-x-4 text-xs text-secondary">
-                      <span className="flex items-center"><MapPin size={12} className="mr-1" /> {ad.institute}</span>
-                      <span className="flex items-center"><Clock size={12} className="mr-1" /> Closes: {ad.date}</span>
+                      <span className="flex items-center font-medium"><MapPin size={12} className="mr-1" /> {ad.institution_name}</span>
+                      <span className="flex items-center"><Clock size={12} className="mr-1" /> Closes: {new Date(ad.application_end_date).toLocaleDateString()}</span>
+                      <span className="flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase tracking-wider">{ad.vacancy_count} Openings</span>
                     </div>
                   </div>
                   <Button variant="accent" size="sm" onClick={() => {
@@ -101,16 +120,23 @@ const CandidateDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {applications.map((app) => (
-                    <tr key={app.id}>
+                  {myApplications.length === 0 && (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-12 text-center text-secondary text-xs italic">
+                        No applications submitted yet.
+                      </td>
+                    </tr>
+                  )}
+                  {myApplications.map((app) => (
+                    <tr key={app.application_id}>
                       <td className="px-6 py-4">
-                        <p className="font-medium">{app.title}</p>
-                        <p className="text-xs text-secondary">{app.institute}</p>
+                        <p className="font-medium">{app.advertisement_name}</p>
+                        <p className="text-xs text-secondary">{app.institution_name}</p>
                       </td>
                       <td className="px-6 py-4">
                         <span className={cn(
                           "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                          app.status.includes('Interview') ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
+                          app.status === 'SUBMITTED' ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
                         )}>
                           {app.status}
                         </span>

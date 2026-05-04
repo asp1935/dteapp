@@ -41,6 +41,7 @@ const Sidebar = () => {
       { name: 'Courses', icon: GraduationCap, path: '/admin/courses' },
       { name: 'Institutes', icon: Building2, path: '/admin/institutes' },
       { name: 'Advertisements', icon: FileText, path: '/admin/ads' },
+      { name: 'Applications', icon: ClipboardList, path: '/admin/applications' },
       { name: 'Academic Calendar', icon: Calendar, path: '/admin/calendar' },
       { name: 'Billing', icon: Briefcase, path: '/admin/billing' },
       { name: 'MIS Reports', icon: BarChart3, path: '/admin/reports' },

@@ -164,7 +164,9 @@ const advertisementSlice = createSlice({
       .addCase(fetchAds.pending, (state) => { state.loading = true; })
       .addCase(fetchAds.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        const payload = action.payload;
+        const ads = Array.isArray(payload) ? payload : payload?.data;
+        state.list = Array.isArray(ads) ? ads : [];
       })
       .addCase(fetchAds.rejected, (state, action) => {
         state.loading = false;
