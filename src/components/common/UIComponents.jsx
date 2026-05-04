@@ -49,28 +49,3 @@ export const Input = ({ label, error, className, ...props }) => {
     </div>
   );
 };
-
-export const Select = ({ label, error, children, className, ...props }) => {
-  return (
-    <div className={cn('w-full', className)}>
-      {label && <label className="block text-sm font-medium text-secondary mb-1.5">{label}</label>}
-      <div className="relative">
-        <select
-          className={cn(
-            'w-full px-4 py-2 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all appearance-none cursor-pointer pr-10',
-            error && 'border-red-500 focus:ring-red-500'
-          )}
-          {...props}
-        >
-          {children}
-        </select>
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-          <ChevronDown size={18} />
-        </div>
-      </div>
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-    </div>
-  );
-};
-
-
