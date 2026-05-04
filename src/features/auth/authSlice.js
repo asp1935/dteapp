@@ -4,8 +4,9 @@ import api from '../../services/api';
 // Real API login
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ username, password, role }, { rejectWithValue }) => {
+  async ({ username, password }, { rejectWithValue }) => {
     try {
+      // Reverting to URLSearchParams (Form Data) as 422 suggests JSON is not accepted
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
@@ -25,7 +26,9 @@ export const login = createAsyncThunk(
 
       return { user: data.user, token: data.access_token };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      // 401 means credentials wrong, 422 means format wrong
+      // If we are here with 401, it's a success in terms of format, but failure in credentials.
+      return rejectWithValue(error.response?.data?.message || error.response?.data?.detail || 'Login failed');
     }
   }
 );
