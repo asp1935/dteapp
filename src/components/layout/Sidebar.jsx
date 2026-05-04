@@ -14,7 +14,8 @@ import {
   ClipboardList,
   School,
   Calculator,
-  UserCheck
+  UserCheck,
+  Award
 } from 'lucide-react';
 import { setSidebar } from '../../features/ui/uiSlice';
 import { logout } from '../../features/auth/authSlice';
@@ -40,8 +41,7 @@ const Sidebar = () => {
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
       { name: 'Vacancy Assessment', icon: UserCheck, path: '/principal/vacancies' },
-      { name: 'Applications', icon: FileText, path: '/principal/applications' },
-      { name: 'Interviews', icon: Calendar, path: '/principal/interviews' },
+      { name: 'Candidate Selection', icon: Award, path: '/principal/selection' },
     ],
     [ROLES.RO]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/ro/dashboard' },

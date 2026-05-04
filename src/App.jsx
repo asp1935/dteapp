@@ -25,6 +25,7 @@ import CandidateDashboard from './features/candidate/CandidateDashboard';
 import AIQueryAssistant from './features/admin/AIQueryAssistant';
 import VacancyManagement from './features/principal/VacancyManagement';
 import AdGenerationDashboard from './features/admin/AdGenerationDashboard';
+import SelectionManagement from './features/principal/SelectionManagement';
 import PublicAdView from './pages/PublicAdView';
 
 function App() {
@@ -180,8 +181,16 @@ function App() {
           } 
         />
 
-        <Route path="principal/applications" element={<div className="p-8 font-bold">Applications Review UI</div>} />
-        <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
+        <Route 
+          path="principal/selection" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <SelectionManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
 
         {/* RO Routes */}
         <Route
