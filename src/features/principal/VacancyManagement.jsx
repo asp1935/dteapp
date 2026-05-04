@@ -60,10 +60,12 @@ const VacancyManagement = () => {
       academic_year: academicYear
     }));
 
+    const fetchedAssessment = result?.payload?.data || result?.payload;
+    const isDraft = fetchVacancyAssessment.fulfilled.match(result) && fetchedAssessment?.status === 'DRAFT';
     const isNotFound = fetchVacancyAssessment.rejected.match(result) || 
-                       (fetchVacancyAssessment.fulfilled.match(result) && (!result.payload?.data && !result.payload?.id));
+                       (fetchVacancyAssessment.fulfilled.match(result) && !fetchedAssessment);
 
-    if (isNotFound) {
+    if (isNotFound || isDraft) {
       dispatch(suggestVacancy({
         institution_id: parseInt(institutionId),
         course_id: parseInt(selectedCourse),
