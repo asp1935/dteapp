@@ -18,7 +18,7 @@ import {
   Loader2,
   X
 } from 'lucide-react';
-import { fetchLogs, fetchMonthlySummary, createLog, fetchTimetable, bulkSubmit } from './attendanceSlice';
+import { fetchLogs, fetchMonthlySummary, createLog, fetchTimetable, bulkSubmit, submitLog } from './attendanceSlice';
 import { Button } from '../../components/common/UIComponents';
 import { cn } from '../../utils/cn';
 
@@ -81,7 +81,7 @@ const LecturerDashboard = () => {
   };
 
   const handleBulkSubmit = async () => {
-    const draftIds = logs.filter(log => log.status === 'DRAFT').map(log => log.id);
+    const draftIds = logs.filter(log => (log.log_status || log.status) === 'DRAFT').map(log => log.id);
     if (draftIds.length === 0) return;
     
     if (window.confirm(`Submit all ${draftIds.length} draft entries for verification?`)) {
@@ -98,7 +98,8 @@ const LecturerDashboard = () => {
     'DRAFT': 'bg-slate-100 text-slate-600',
     'SUBMITTED': 'bg-amber-100 text-amber-600',
     'VERIFIED': 'bg-emerald-100 text-emerald-600',
-    'REJECTED': 'bg-red-100 text-red-600'
+    'REJECTED': 'bg-red-100 text-red-600',
+    'FLAGGED': 'bg-rose-100 text-rose-600'
   };
 
   return (
@@ -193,7 +194,7 @@ const LecturerDashboard = () => {
               <Button 
                 variant="outline" 
                 onClick={handleBulkSubmit}
-                disabled={!logs.some(l => l.status === 'DRAFT')}
+                disabled={!logs.some(l => (l.log_status || l.status) === 'DRAFT')}
                 className="text-[10px] font-black uppercase tracking-widest h-10 border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all"
               >
                 Submit All Drafts
@@ -242,15 +243,33 @@ const LecturerDashboard = () => {
                         <td className="px-8 py-5">
                           <span className={cn(
                             "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
-                            statusColors[log.status] || 'bg-slate-100 text-slate-600'
+                            statusColors[log.log_status || log.status] || 'bg-slate-100 text-slate-600'
                           )}>
-                            {log.status}
+                            {log.log_status || log.status}
                           </span>
                         </td>
                         <td className="px-8 py-5 text-right">
-                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-white border-transparent">
-                            <MoreVertical size={16} className="text-slate-400" />
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            {(log.log_status || log.status) === 'DRAFT' && (
+                              <button 
+                                onClick={async () => {
+                                  const result = await dispatch(submitLog(log.id));
+                                  if (submitLog.fulfilled.match(result)) {
+                                    const credId = user?.faculty_credential_id || user?.id;
+                                    dispatch(fetchLogs({ faculty_credential_id: credId, month: currentMonth }));
+                                    dispatch(fetchMonthlySummary({ facultyCredentialId: credId, academicYear, month: currentMonth }));
+                                  }
+                                }}
+                                className="text-emerald-600 hover:bg-emerald-50 p-2 rounded-xl transition-all"
+                                title="Submit for verification"
+                              >
+                                <CheckCircle2 size={18} />
+                              </button>
+                            )}
+                            <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-white border-transparent">
+                              <MoreVertical size={16} className="text-slate-400" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))

@@ -65,7 +65,7 @@ const Sidebar = () => {
       { name: 'Billing Verification', icon: Briefcase, path: '/ro/billing' },
     ],
     [ROLES.TREASURY]: [
-      { name: 'Dashboard', icon: LayoutDashboard, path: '/treasury/dashboard' },
+      // { name: 'Dashboard', icon: LayoutDashboard, path: '/treasury/dashboard' },
       { name: 'Disbursements', icon: Banknote, path: '/treasury/billing' },
     ],
     [ROLES.CANDIDATE]: [
