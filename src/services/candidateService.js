@@ -22,8 +22,14 @@ export const getProfile = async () => {
   return response.data;
 };
 
+export const getCandidateProfile = async (candidateId) => {
+  const response = await api.get(`/candidates/${candidateId}/profile`);
+  return response.data;
+};
+
 export const candidateService = {
   getProfile,
+  getCandidateProfile,
   updateExperience,
   updateQualifications,
   updateProfile,

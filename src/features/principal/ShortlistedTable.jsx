@@ -11,10 +11,12 @@ import {
 import { fetchShortlisted } from './selectionSlice';
 import { Button } from '../../components/common/UIComponents';
 import { cn } from '../../utils/cn';
+import CandidateProfileModal from '../../components/CandidateProfileModal';
 
 const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings }) => {
   const dispatch = useDispatch();
   const { shortlisted, loading } = useSelector((state) => state.selection);
+  const [selectedCandidateId, setSelectedCandidateId] = React.useState(null);
 
   useEffect(() => {
     if (advertisementId) {
@@ -61,6 +63,7 @@ const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings
                   "relative group bg-white border border-slate-100 rounded-[2rem] p-6 transition-all hover:shadow-xl hover:shadow-slate-100 hover:-translate-y-1",
                   hasMarks ? "bg-emerald-50/20 border-emerald-100" : "bg-white"
                 )}
+                onClick={() => setSelectedCandidateId(cand.candidate_id)}
               >
                 {hasMarks && (
                   <div className="absolute top-4 right-4 text-emerald-500 bg-emerald-100 rounded-full p-1 shadow-sm">
@@ -116,6 +119,13 @@ const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings
           })
         )}
       </div>
+
+      {selectedCandidateId && (
+        <CandidateProfileModal 
+          candidateId={selectedCandidateId} 
+          onClose={() => setSelectedCandidateId(null)} 
+        />
+      )}
     </div>
   );
 };

@@ -135,6 +135,14 @@ const selectionService = {
   overrideWeights: async (advertisementId, weightData) => {
     const response = await api.post(`/scoring-weights/advertisement/${advertisementId}`, weightData);
     return response.data;
+  },
+
+  /**
+   * Fetch selection results with filters
+   */
+  getResults: async (params) => {
+    const response = await api.get('/selection/results', { params });
+    return response.data;
   }
 };
 

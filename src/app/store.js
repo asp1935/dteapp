@@ -15,6 +15,7 @@ import selectionReducer from '../features/principal/selectionSlice';
 import attendanceReducer from '../features/faculty/attendanceSlice';
 import billingReducer from '../features/admin/billingSlice';
 import applicationReducer from '../features/candidate/applicationSlice';
+import principalReducer from '../features/principal/principalSlice';
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +35,7 @@ export const store = configureStore({
     attendance: attendanceReducer,
     billing: billingReducer,
     application: applicationReducer,
+    principal: principalReducer,
   },
 });
 

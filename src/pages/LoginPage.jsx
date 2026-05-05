@@ -8,7 +8,7 @@ import { cn } from '../utils/cn';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('password123'); // Default for demo
+  const [password, setPassword] = useState('');
   
   const dispatch = useDispatch();
   const navigate = useNavigate();

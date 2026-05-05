@@ -31,6 +31,7 @@ import LecturerDashboard from './features/faculty/LecturerDashboard';
 import AdminBillingDashboard from './features/admin/AdminBillingDashboard';
 import PrincipalBillingDashboard from './features/principal/PrincipalBillingDashboard';
 import PrincipalWorkLogs from './features/principal/PrincipalWorkLogs';
+import PrincipalAppointmentManagement from './features/principal/PrincipalAppointmentManagement';
 import ApplicationManagement from './features/admin/ApplicationManagement';
 import MyApplications from './features/candidate/MyApplications';
 
@@ -154,16 +155,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="admin/applications"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <div className="p-6">
-                <ApplicationManagement />
-              </div>
-            </ProtectedRoute>
-          }
-        />
 
         {/* Principal Routes */}
         <Route
@@ -218,6 +209,16 @@ function App() {
           } 
         />
         <Route 
+          path="principal/appointments" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <PrincipalAppointmentManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="principal/applications" 
           element={
             <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
@@ -227,7 +228,6 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route path="principal/interviews" element={<div className="p-8 font-bold">Interview Scheduler UI</div>} />
         <Route 
           path="principal/billing" 
           element={

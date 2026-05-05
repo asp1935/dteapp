@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   FileText, 
@@ -17,33 +17,46 @@ import { Button } from '../../components/common/UIComponents';
 import { cn } from '../../utils/cn';
 import { useNavigate } from 'react-router-dom';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchDashboardData } from './principalSlice';
+import { Loader2 } from 'lucide-react';
+import CandidateProfileModal from '../../components/CandidateProfileModal';
+
 const PrincipalDashboard = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { dashboardData, loading } = useSelector((state) => state.principal);
+  const [selectedCandidateId, setSelectedCandidateId] = useState(null);
 
-  const stats = [
-    { label: 'Total Faculty', value: '42', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: '+2 this month' },
-    { label: 'Vacancies Identified', value: '08', icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50', trend: 'Audit pending' },
-    { label: 'Live Applications', value: '156', icon: FileText, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '12 new today' },
-    { label: 'Interviews', value: '04', icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50', trend: 'Scheduled' },
+  React.useEffect(() => {
+    dispatch(fetchDashboardData());
+  }, [dispatch]);
+
+  const stats = dashboardData ? [
+    { label: 'Total Faculty', value: dashboardData.stats.total_faculty.toString().padStart(2, '0'), icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: dashboardData.stats.faculty_trend },
+    { label: 'Vacancies Identified', value: dashboardData.stats.vacancies_identified.toString().padStart(2, '0'), icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50', trend: dashboardData.stats.vacancy_trend },
+    { label: 'Live Applications', value: dashboardData.stats.live_applications.toString().padStart(2, '0'), icon: FileText, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: dashboardData.stats.application_trend },
+    { label: 'Interviews', value: dashboardData.stats.scheduled_interviews.toString().padStart(2, '0'), icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50', trend: dashboardData.stats.interview_trend },
+  ] : [
+    { label: 'Total Faculty', value: '--', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: 'Loading...' },
+    { label: 'Vacancies Identified', value: '--', icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50', trend: 'Loading...' },
+    { label: 'Live Applications', value: '--', icon: FileText, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: 'Loading...' },
+    { label: 'Interviews', value: '--', icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50', trend: 'Loading...' },
   ];
 
-  const applications = [
-    { id: 'APP-001', name: 'Amit Sharma', post: 'Lecturer in Computer', status: 'Pending', score: 85 },
-    { id: 'APP-002', name: 'Priya Verma', post: 'Lecturer in Mechanical', status: 'Shortlisted', score: 92 },
-    { id: 'APP-003', name: 'Rahul More', post: 'Lecturer in Civil', status: 'Interviewed', score: 78 },
-  ];
+  const applications = dashboardData?.recent_applications || [];
 
   const columns = [
     { 
       key: 'name', 
       label: 'Candidate',
       render: (val, row) => (
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">
+        <div className="flex items-center space-x-3 cursor-pointer group/name" onClick={() => setSelectedCandidateId(row.id)}>
+          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover/name:bg-indigo-100 group-hover/name:text-indigo-600 transition-colors">
             {val.split(' ').map(n => n[0]).join('')}
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-sm">{val}</p>
+            <p className="font-bold text-slate-900 text-sm group-hover/name:text-indigo-600 transition-colors">{val}</p>
             <p className="text-[10px] text-slate-400 font-medium">{row.id}</p>
           </div>
         </div>
@@ -80,6 +93,11 @@ const PrincipalDashboard = () => {
 
   return (
     <div className="space-y-10 pb-20 animate-in fade-in duration-700">
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+        </div>
+      )}
       {/* Welcome Header */}
       <div className="relative overflow-hidden rounded-[40px] bg-slate-950 p-10 text-white shadow-2xl">
         <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-indigo-500/20 to-transparent" />
@@ -146,8 +164,11 @@ const PrincipalDashboard = () => {
               data={applications}
               actions={(row) => (
                 <div className="flex justify-end space-x-2">
-                  <Button variant="secondary" className="h-9 px-4 rounded-xl text-[10px] font-black border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100">Review</Button>
-                  <Button variant="ghost" className="h-9 w-9 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-9 w-9 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center"
+                    onClick={() => setSelectedCandidateId(row.id)}
+                  >
                     <ArrowUpRight size={16} className="text-slate-400" />
                   </Button>
                 </div>
@@ -158,26 +179,6 @@ const PrincipalDashboard = () => {
 
         {/* Quick Actions & Interviews */}
         <div className="space-y-8">
-          <div className="bg-indigo-600 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl shadow-indigo-100">
-            <TrendingUp size={120} className="absolute -right-6 -bottom-6 opacity-10" />
-            <h4 className="text-lg font-black mb-4">Quick Tasks</h4>
-            <div className="space-y-3">
-              <button className="w-full p-4 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-between transition-all group border border-white/10">
-                <div className="flex items-center">
-                  <Plus size={18} className="mr-3 text-indigo-200" />
-                  <span className="text-sm font-bold">New Interview Panel</span>
-                </div>
-                <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-              <button className="w-full p-4 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-between transition-all group border border-white/10">
-                <div className="flex items-center">
-                  <CheckCircle2 size={18} className="mr-3 text-indigo-200" />
-                  <span className="text-sm font-bold">Verify Documents</span>
-                </div>
-                <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            </div>
-          </div>
 
           <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
             <div className="flex items-center justify-between mb-8">
@@ -207,6 +208,12 @@ const PrincipalDashboard = () => {
           </div>
         </div>
       </div>
+      {selectedCandidateId && (
+        <CandidateProfileModal 
+          candidateId={selectedCandidateId} 
+          onClose={() => setSelectedCandidateId(null)} 
+        />
+      )}
     </div>
   );
 };

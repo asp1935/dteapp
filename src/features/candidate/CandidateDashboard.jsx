@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle, Loader2 } from 'lucide-react';
+import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle, Loader2, Award } from 'lucide-react';
 import { Table } from '../../components/common/Table';
 import { Button, Input } from '../../components/common/UIComponents';
 import CandidateProfile from './CandidateProfile';
@@ -8,6 +8,9 @@ import JobApplicationFlow from './JobApplicationFlow';
 import { fetchPublishedAds } from '../admin/advertisementSlice';
 import { getMyApplications } from './applicationSlice';
 import { cn } from '../../utils/cn';
+import { appointmentService } from '../../services/appointmentService';
+import AppointmentLetterResponseModal from '../../components/AppointmentLetterResponseModal';
+import { toast } from 'react-hot-toast';
 
 const CandidateDashboard = () => {
   const dispatch = useDispatch();
@@ -16,11 +19,32 @@ const CandidateDashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [showApplyFlow, setShowApplyFlow] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
     dispatch(fetchPublishedAds({}));
     dispatch(getMyApplications({ skip: 0, limit: 10 }));
+    fetchAppointments();
   }, [dispatch]);
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await appointmentService.listCandidateAppointments();
+      setAppointments(response.data || []);
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+    }
+  };
+
+  const handleViewAppointment = async (id) => {
+    try {
+      const response = await appointmentService.getLetter(id);
+      setSelectedAppointment(response.data);
+    } catch (error) {
+      toast.error('Failed to load appointment details');
+    }
+  };
 
   const loading = adsLoading || appsLoading;
 
@@ -107,10 +131,49 @@ const CandidateDashboard = () => {
             </div>
           </div>
 
+          {/* My Appointments */}
+          {appointments.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold flex items-center">
+                <Award className="mr-2 text-indigo-600" size={20} /> 
+                Appointment Offers
+              </h3>
+              <div className="grid gap-4">
+                {appointments.map((app) => (
+                  <div key={app.id} className="p-6 bg-white border border-indigo-100 rounded-[2rem] shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                        <FileText size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-indigo-600 uppercase tracking-widest">{app.appointment_number}</p>
+                        <h4 className="font-bold text-slate-900">Offer from {app.institution_name}</h4>
+                        <p className="text-xs text-slate-500 font-medium">Position: {app.course_name} • Joining: {new Date(app.joining_date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className={cn(
+                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                        app.status === 'ISSUED' ? "bg-amber-100 text-amber-600" :
+                        app.status === 'ACCEPTED' ? "bg-emerald-100 text-emerald-600" : 
+                        app.status === 'DECLINED' ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-400"
+                      )}>
+                        {app.status === 'ISSUED' ? 'PENDING ACTION' : app.status}
+                      </span>
+                      <Button variant="accent" size="sm" className="rounded-xl shadow-lg shadow-indigo-50" onClick={() => handleViewAppointment(app.id)}>
+                        View & Respond
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* My Applications */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold">Your Applications</h3>
-            <div className="bg-background rounded-xl border border-border overflow-hidden">
+            <div className="bg-background rounded-xl border border-border overflow-hidden shadow-sm">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 border-b border-border">
                   <tr>
@@ -178,6 +241,15 @@ const CandidateDashboard = () => {
           </div>
         </div>
         </div>
+      )}
+
+      {/* Appointment Response Modal */}
+      {selectedAppointment && (
+        <AppointmentLetterResponseModal 
+          appointment={selectedAppointment} 
+          onClose={() => setSelectedAppointment(null)} 
+          onRefresh={fetchAppointments}
+        />
       )}
 
       {/* Job Application Flow Overlay */}
