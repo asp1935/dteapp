@@ -31,31 +31,52 @@ const LecturerDashboard = () => {
   const [formData, setFormData] = useState({
     faculty_credential_id: user?.id || '',
     timetable_slot_id: '',
-    log_date: new Date().toISOString().split('T')[0],
+    lecture_date: new Date().toISOString().split('T')[0],
     lecture_type: 'THEORY',
     topic_covered: '',
-    hours: 1
+    attendance_count: 0,
+    slot_number: 1,
+    subject_name: ''
   });
 
   const academicYear = '2026-27';
   const currentMonth = new Date().getMonth() + 1;
 
   useEffect(() => {
-    if (user?.id) {
-      dispatch(fetchMonthlySummary({ facultyCredentialId: user.id, academicYear, month: currentMonth }));
-      dispatch(fetchLogs({ faculty_credential_id: user.id, month: currentMonth }));
-      dispatch(fetchTimetable({ facultyCredentialId: user.id, academicYear }));
-      setFormData(prev => ({ ...prev, faculty_credential_id: user.id }));
+    if (user) {
+      const credId = user.faculty_credential_id || user.id;
+      dispatch(fetchMonthlySummary({ academicYear, month: currentMonth, facultyCredentialId: credId }));
+      dispatch(fetchLogs({ month: currentMonth, faculty_credential_id: credId }));
+      dispatch(fetchTimetable({ isMy: true, academicYear }));
+      setFormData(prev => ({ ...prev, faculty_credential_id: credId }));
     }
   }, [dispatch, user]);
 
   const handleCreateLog = async (e) => {
     e.preventDefault();
-    const result = await dispatch(createLog(formData));
+    
+    // Find the selected slot to get the correct slot_number and subject_name if applicable
+    const selectedSlot = timetable.find(s => s.id === formData.timetable_slot_id);
+    
+    const payload = {
+      ...formData,
+      slot_number: selectedSlot ? selectedSlot.slot_number : formData.slot_number,
+      subject_name: selectedSlot ? selectedSlot.subject_name : formData.subject_name,
+      is_extra: !formData.timetable_slot_id
+    };
+
+    const result = await dispatch(createLog(payload));
     if (createLog.fulfilled.match(result)) {
       setIsModalOpen(false);
-      dispatch(fetchLogs({ faculty_credential_id: user.id, month: currentMonth }));
-      dispatch(fetchMonthlySummary({ facultyCredentialId: user.id, academicYear, month: currentMonth }));
+      const credId = user?.faculty_credential_id || user?.id;
+      dispatch(fetchLogs({ faculty_credential_id: credId, month: currentMonth }));
+      dispatch(fetchMonthlySummary({ facultyCredentialId: credId, academicYear, month: currentMonth }));
+      // Reset form
+      setFormData({
+        ...formData,
+        topic_covered: '',
+        attendance_count: 0
+      });
     }
   };
 
@@ -66,7 +87,9 @@ const LecturerDashboard = () => {
     if (window.confirm(`Submit all ${draftIds.length} draft entries for verification?`)) {
       const result = await dispatch(bulkSubmit(draftIds));
       if (bulkSubmit.fulfilled.match(result)) {
-        dispatch(fetchLogs({ faculty_credential_id: user.id, month: currentMonth }));
+        const credId = user?.faculty_credential_id || user?.id;
+        dispatch(fetchLogs({ faculty_credential_id: credId, month: currentMonth }));
+        dispatch(fetchMonthlySummary({ facultyCredentialId: credId, academicYear, month: currentMonth }));
       }
     }
   };
@@ -119,7 +142,7 @@ const LecturerDashboard = () => {
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">This Month</span>
           </div>
           <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Total Hours</p>
-          <p className="text-3xl font-black text-slate-900 mt-1">{summary?.total_hours || 0}</p>
+          <p className="text-3xl font-black text-slate-900 mt-1">{summary?.total_conducted || 0}</p>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
@@ -129,8 +152,8 @@ const LecturerDashboard = () => {
             </div>
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified</span>
           </div>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Approved Hours</p>
-          <p className="text-3xl font-black text-slate-900 mt-1">{summary?.verified_hours || 0}</p>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Billable Hours</p>
+          <p className="text-3xl font-black text-slate-900 mt-1">{summary?.total_billable || 0}</p>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
@@ -140,9 +163,9 @@ const LecturerDashboard = () => {
             </div>
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending</span>
           </div>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Draft/Pending</p>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Anomalies</p>
           <p className="text-3xl font-black text-slate-900 mt-1">
-            {(summary?.total_hours || 0) - (summary?.verified_hours || 0)}
+            {summary?.anomaly_count || 0}
           </p>
         </div>
 
@@ -151,10 +174,10 @@ const LecturerDashboard = () => {
             <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
               <TrendingUp size={24} />
             </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expected</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scheduled</span>
           </div>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Est. Honorarium</p>
-          <p className="text-3xl font-black text-slate-900 mt-1">₹ {summary?.verified_amount || 0}</p>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-tighter">Monthly Target</p>
+          <p className="text-3xl font-black text-slate-900 mt-1">{summary?.total_scheduled || 0}</p>
         </div>
       </div>
 
@@ -207,14 +230,14 @@ const LecturerDashboard = () => {
                     logs.map((log) => (
                       <tr key={log.id} className="group hover:bg-slate-50/50 transition-colors">
                         <td className="px-8 py-5">
-                          <p className="text-sm font-bold text-slate-900">{new Date(log.log_date).toLocaleDateString()}</p>
+                          <p className="text-sm font-bold text-slate-900">{log.lecture_date ? new Date(log.lecture_date).toLocaleDateString() : 'N/A'}</p>
                           <p className="text-[10px] font-bold text-slate-400 uppercase">{log.lecture_type}</p>
                         </td>
                         <td className="px-8 py-5">
                           <p className="text-sm font-medium text-slate-600 line-clamp-1">{log.topic_covered}</p>
                         </td>
                         <td className="px-8 py-5 text-center">
-                          <span className="text-sm font-black text-slate-900">{log.hours}</span>
+                          <span className="text-sm font-black text-slate-900">{log.hours || 1}</span>
                         </td>
                         <td className="px-8 py-5">
                           <span className={cn(
@@ -244,14 +267,14 @@ const LecturerDashboard = () => {
             <BookOpen size={120} className="absolute -right-6 -bottom-6 opacity-10" />
             <h4 className="text-lg font-black mb-4">Your Schedule</h4>
             <div className="space-y-4">
-              {timetable.length > 0 ? timetable.map((slot, i) => (
+              {timetable.filter(s => s.is_active).length > 0 ? timetable.filter(s => s.is_active).map((slot, i) => (
                 <div key={i} className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl border border-white/10">
                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-xs">
                     {slot.start_time?.split(':')[0]}
                   </div>
                   <div>
                     <p className="text-xs font-black uppercase tracking-widest text-emerald-200">{slot.day_of_week}</p>
-                    <p className="text-sm font-bold">{slot.course_name || 'Subject'}</p>
+                    <p className="text-sm font-bold">{slot.subject_name || 'Subject'}</p>
                   </div>
                 </div>
               )) : (
@@ -295,8 +318,8 @@ const LecturerDashboard = () => {
                   <input 
                     type="date"
                     required
-                    value={formData.log_date}
-                    onChange={(e) => setFormData({...formData, log_date: e.target.value})}
+                    value={formData.lecture_date}
+                    onChange={(e) => setFormData({...formData, lecture_date: e.target.value})}
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold"
                   />
                 </div>
@@ -323,8 +346,8 @@ const LecturerDashboard = () => {
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold"
                 >
                   <option value="">Select Slot...</option>
-                  {timetable.map(slot => (
-                    <option key={slot.id} value={slot.id}>{slot.day_of_week} - {slot.start_time} ({slot.subject_name || 'Class'})</option>
+                  {timetable.filter(s => s.day_of_week === new Date(formData.lecture_date).toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()).map(slot => (
+                    <option key={slot.id} value={slot.id}>{slot.start_time} - {slot.subject_name || 'Class'}</option>
                   ))}
                 </select>
               </div>
@@ -342,14 +365,12 @@ const LecturerDashboard = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Duration (Hours)</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Students Present</label>
                   <input 
                     type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="8"
-                    value={formData.hours}
-                    onChange={(e) => setFormData({...formData, hours: parseFloat(e.target.value)})}
+                    min="0"
+                    value={formData.attendance_count}
+                    onChange={(e) => setFormData({...formData, attendance_count: parseInt(e.target.value)})}
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold"
                   />
                 </div>

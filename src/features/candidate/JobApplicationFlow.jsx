@@ -5,7 +5,7 @@ import { Button, Input } from '../../components/common/UIComponents';
 import { createApplication, uploadDocuments, submitApplication, resetApplicationState, setStep } from './applicationSlice';
 import { cn } from '../../utils/cn';
 
-const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) => {
+const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const { currentApplication, loading, error, success, step } = useSelector((state) => state.application);
   
@@ -19,6 +19,7 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
     OTHER: []
   });
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
+  const safeTitle = advertisementTitle?.trim() || 'the selected post';
 
   useEffect(() => {
     return () => {
@@ -67,21 +68,34 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
     dispatch(submitApplication({ applicationId: currentApplication.id, submissionData: { declaration_accepted: declarationAccepted } }));
   };
 
-  const handleFileChange = (e) => {
-    setDocuments(Array.from(e.target.files));
-  };
-
   if (success) {
     return (
-      <div className="p-12 text-center space-y-6 animate-in fade-in zoom-in duration-300">
-        <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle size={40} />
+      <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl border border-slate-100 p-16 text-center space-y-8 animate-in fade-in zoom-in duration-300">
+        <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-2 shadow-inner">
+          <CheckCircle size={48} />
         </div>
-        <h3 className="text-2xl font-bold text-foreground">Application Submitted!</h3>
-        <p className="text-secondary max-w-sm mx-auto">
-          Your application for <strong>{advertisementTitle}</strong> has been successfully submitted. You can track its status in your dashboard.
-        </p>
-        <Button variant="accent" className="px-12" onClick={onClose}>Done</Button>
+        <div className="space-y-3">
+          <h3 className="text-3xl font-black text-slate-900 tracking-tight">Application Submitted!</h3>
+          <p className="text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
+            Your application for <strong className="text-slate-900">{safeTitle}</strong> has been successfully received.
+          </p>
+        </div>
+        
+        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100/50">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Next Step</p>
+          <p className="text-sm font-semibold text-slate-600 mt-1">You can track your status in the "My Applications" section.</p>
+        </div>
+
+        <Button
+          variant="accent"
+          className="w-full h-16 rounded-2xl text-lg font-black shadow-xl shadow-indigo-100"
+          onClick={() => {
+            if (onSuccess) onSuccess();
+            onClose();
+          }}
+        >
+          Done
+        </Button>
       </div>
     );
   }
@@ -92,7 +106,7 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
       <div className="p-6 border-b border-border flex items-center justify-between bg-muted/20">
         <div>
           <h3 className="text-xl font-bold text-foreground">Apply for Position</h3>
-          <p className="text-xs text-secondary mt-1">{advertisementTitle}</p>
+          <p className="text-xs text-secondary mt-1">{safeTitle}</p>
         </div>
         <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-all text-secondary hover:text-foreground">
           <X size={20} />
@@ -280,7 +294,7 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose }) =>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-secondary">Position</span>
-                  <span className="font-bold">{advertisementTitle}</span>
+                  <span className="font-bold">{safeTitle}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-secondary">Documents Uploaded</span>

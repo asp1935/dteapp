@@ -4,11 +4,44 @@ import { toast } from 'react-hot-toast';
 
 export const fetchTimetable = createAsyncThunk(
   'attendance/fetchTimetable',
-  async ({ facultyCredentialId, academicYear }, { rejectWithValue }) => {
+  async ({ facultyCredentialId, academicYear, isMy }, { rejectWithValue }) => {
     try {
+      if (isMy) {
+        return await attendanceService.getMyTimetable(academicYear);
+      }
       return await attendanceService.getTimetable(facultyCredentialId, academicYear);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to fetch timetable');
+    }
+  }
+);
+
+export const createTimetable = createAsyncThunk(
+  'attendance/createTimetable',
+  async (timetableData, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.createTimetable(timetableData);
+      toast.success('Timetable updated successfully');
+      return response;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to update timetable';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
+    }
+  }
+);
+
+export const updateTimetableSlot = createAsyncThunk(
+  'attendance/updateSlot',
+  async ({ slotId, slotData }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.updateTimetableSlot(slotId, slotData);
+      toast.success('Slot updated successfully');
+      return response;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to update slot';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
     }
   }
 );
@@ -19,7 +52,7 @@ export const fetchLogs = createAsyncThunk(
     try {
       return await attendanceService.getLogs(params);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to fetch logs');
     }
   }
 );
@@ -32,8 +65,9 @@ export const createLog = createAsyncThunk(
       toast.success('Lecture log created');
       return response;
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create log');
-      return rejectWithValue(err.response?.data || err.message);
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to create log';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
     }
   }
 );
@@ -46,8 +80,9 @@ export const submitLog = createAsyncThunk(
       toast.success('Log submitted for verification');
       return { logId, ...response };
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Submission failed');
-      return rejectWithValue(err.response?.data || err.message);
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Submission failed';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
     }
   }
 );
@@ -60,8 +95,9 @@ export const bulkSubmit = createAsyncThunk(
       toast.success(`Successfully submitted ${response.success_count} logs`);
       return response;
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Bulk submission failed');
-      return rejectWithValue(err.response?.data || err.message);
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Bulk submission failed';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
     }
   }
 );
@@ -74,8 +110,9 @@ export const verifyLog = createAsyncThunk(
       toast.success(`Log ${action.toLowerCase()} successfully`);
       return { logId, ...response };
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Verification failed');
-      return rejectWithValue(err.response?.data || err.message);
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Verification failed';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
     }
   }
 );
@@ -88,8 +125,9 @@ export const upsertCalendar = createAsyncThunk(
       toast.success('Calendar updated successfully');
       return response;
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update calendar');
-      return rejectWithValue(err.response?.data || err.message);
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to update calendar';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
     }
   }
 );
@@ -100,32 +138,7 @@ export const fetchCalendar = createAsyncThunk(
     try {
       return await attendanceService.getCalendar(institutionId, academicYear, month);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
-
-export const fetchAnomalies = createAsyncThunk(
-  'attendance/fetchAnomalies',
-  async (params, { rejectWithValue }) => {
-    try {
-      return await attendanceService.getAnomalies(params);
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
-
-export const acknowledgeAnomaly = createAsyncThunk(
-  'attendance/acknowledgeAnomaly',
-  async ({ anomalyId, remarks }, { rejectWithValue }) => {
-    try {
-      const response = await attendanceService.acknowledgeAnomaly(anomalyId, remarks);
-      toast.success('Anomaly acknowledged');
-      return { anomalyId, ...response };
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Acknowledgement failed');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to fetch calendar');
     }
   }
 );
@@ -136,7 +149,7 @@ export const fetchMonthlySummary = createAsyncThunk(
     try {
       return await attendanceService.getMonthlySummary(facultyCredentialId, academicYear, month);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to fetch monthly summary');
     }
   }
 );
@@ -147,7 +160,6 @@ const attendanceSlice = createSlice({
     timetable: [],
     logs: [],
     calendar: [],
-    anomalies: [],
     summary: null,
     loading: false,
     submitting: false,
@@ -158,7 +170,6 @@ const attendanceSlice = createSlice({
       state.timetable = [];
       state.logs = [];
       state.calendar = [];
-      state.anomalies = [];
       state.summary = null;
       state.error = null;
     }
@@ -170,7 +181,11 @@ const attendanceSlice = createSlice({
       })
       .addCase(fetchTimetable.fulfilled, (state, action) => {
         state.loading = false;
-        state.timetable = action.payload.data || action.payload;
+        const data = action.payload.data || action.payload;
+        // Backend returns dict grouped by day, flatten it for UI components that expect array
+        state.timetable = (typeof data === 'object' && !Array.isArray(data)) 
+          ? Object.values(data).flat() 
+          : (data || []);
       })
       .addCase(fetchTimetable.rejected, (state, action) => {
         state.loading = false;
@@ -179,14 +194,17 @@ const attendanceSlice = createSlice({
       .addCase(fetchCalendar.fulfilled, (state, action) => {
         state.calendar = action.payload.data || action.payload;
       })
-      .addCase(fetchAnomalies.fulfilled, (state, action) => {
-        state.anomalies = action.payload.data || action.payload;
-      })
       .addCase(fetchLogs.fulfilled, (state, action) => {
         state.logs = action.payload.data || action.payload;
       })
       .addCase(fetchMonthlySummary.fulfilled, (state, action) => {
         state.summary = action.payload.data || action.payload;
+      })
+      .addCase(createTimetable.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateTimetableSlot.fulfilled, (state) => {
+        state.loading = false;
       })
       .addCase(createLog.pending, (state) => {
         state.submitting = true;
@@ -196,7 +214,23 @@ const attendanceSlice = createSlice({
       })
       .addCase(createLog.rejected, (state) => {
         state.submitting = false;
-      });
+      })
+
+      // --- Global Matchers ---
+      .addMatcher(
+        (action) => action.type.endsWith('/pending'),
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith('/rejected'),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
   }
 });
 

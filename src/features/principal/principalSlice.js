@@ -7,7 +7,7 @@ export const fetchDashboardData = createAsyncThunk(
     try {
       return await principalService.getDashboardData();
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch dashboard data');
     }
   }
 );

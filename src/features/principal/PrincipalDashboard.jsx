@@ -162,17 +162,17 @@ const PrincipalDashboard = () => {
             <Table 
               columns={columns} 
               data={applications}
-              actions={(row) => (
-                <div className="flex justify-end space-x-2">
-                  <Button 
-                    variant="ghost" 
-                    className="h-9 w-9 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center"
-                    onClick={() => setSelectedCandidateId(row.id)}
-                  >
-                    <ArrowUpRight size={16} className="text-slate-400" />
-                  </Button>
-                </div>
-              )}
+              // actions={(row) => (
+              //   <div className="flex justify-end space-x-2">
+              //     <Button 
+              //       variant="ghost" 
+              //       className="h-9 w-9 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center"
+              //       onClick={() => setSelectedCandidateId(row.id)}
+              //     >
+              //       <ArrowUpRight size={16} className="text-slate-400" />
+              //     </Button>
+              //   </div>
+              // )}
             />
           </div>
         </div>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle, Loader2, Award } from 'lucide-react';
+import { Briefcase, FileText, CheckCircle, Clock, Search, MapPin, User, UserCircle, Loader2, Award, ArrowRight } from 'lucide-react';
 import { Table } from '../../components/common/Table';
 import { Button, Input } from '../../components/common/UIComponents';
 import CandidateProfile from './CandidateProfile';
 import JobApplicationFlow from './JobApplicationFlow';
 import { fetchPublishedAds } from '../admin/advertisementSlice';
 import { getMyApplications } from './applicationSlice';
+import { getProfile } from './candidateSlice';
 import { cn } from '../../utils/cn';
 import { appointmentService } from '../../services/appointmentService';
 import AppointmentLetterResponseModal from '../../components/AppointmentLetterResponseModal';
@@ -16,6 +17,7 @@ const CandidateDashboard = () => {
   const dispatch = useDispatch();
   const { publishedList = [], loading: adsLoading } = useSelector(state => state.ads);
   const { myApplications = [], loading: appsLoading } = useSelector(state => state.application);
+  const { profile } = useSelector(state => state.candidate);
   const [activeView, setActiveView] = useState('dashboard');
   const [showApplyFlow, setShowApplyFlow] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
@@ -25,6 +27,7 @@ const CandidateDashboard = () => {
   useEffect(() => {
     dispatch(fetchPublishedAds({}));
     dispatch(getMyApplications({ skip: 0, limit: 10 }));
+    dispatch(getProfile());
     fetchAppointments();
   }, [dispatch]);
 
@@ -47,6 +50,16 @@ const CandidateDashboard = () => {
   };
 
   const loading = adsLoading || appsLoading;
+  const profileComplete = !!profile?.is_profile_complete;
+  const profileProgress = profileComplete ? 100 : 65;
+  
+  // Build a map of applied ads to exclude WITHDRAWN ones if we want to allow re-application
+  const appliedAdStatusMap = (myApplications || []).reduce((acc, app) => {
+    acc[String(app.advertisement_id)] = app.status;
+    return acc;
+  }, {});
+
+  const allAds = publishedList || [];
 
   return (
     <div className="space-y-8">
@@ -89,10 +102,12 @@ const CandidateDashboard = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold">Latest Advertisements</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" size={14} />
-                <input type="text" placeholder="Filter by subject..." className="pl-9 pr-4 py-1.5 bg-background border border-border rounded-md text-xs outline-none" />
-              </div>
+              <button 
+                onClick={() => window.location.href = '/candidate/ads'}
+                className="text-xs font-bold text-accent hover:underline flex items-center"
+              >
+                View All Jobs <ArrowRight size={14} className="ml-1" />
+              </button>
             </div>
             
             <div className="grid gap-4">
@@ -103,31 +118,42 @@ const CandidateDashboard = () => {
                 </div>
               )}
               
-              {!loading && publishedList.length === 0 && (
+              {!loading && allAds.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 bg-background border border-border border-dashed rounded-xl">
                   <Briefcase className="text-muted mb-2" size={32} />
-                  <p className="text-xs text-secondary font-medium">No active advertisements at the moment.</p>
+                  <p className="text-xs text-secondary font-medium">No new advertisements to apply right now.</p>
                 </div>
               )}
 
-              {!loading && publishedList.map((ad) => (
-                <div key={ad.id} className="p-5 bg-background border border-border rounded-xl hover:border-accent transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-foreground group-hover:text-accent transition-colors">
-                      Lecturer in {ad.course_name}
-                    </h4>
-                    <div className="flex items-center space-x-4 text-xs text-secondary">
-                      <span className="flex items-center font-medium"><MapPin size={12} className="mr-1" /> {ad.institution_name}</span>
-                      <span className="flex items-center"><Clock size={12} className="mr-1" /> Closes: {new Date(ad.application_end_date).toLocaleDateString()}</span>
-                      <span className="flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase tracking-wider">{ad.vacancy_count} Openings</span>
+              {!loading && allAds.slice(0, 5).map((ad) => {
+                const appStatus = appliedAdStatusMap[String(ad.id)];
+                const isApplied = appStatus && appStatus !== 'WITHDRAWN';
+                
+                return (
+                  <div key={ad.id} className="p-5 bg-background border border-border rounded-xl hover:border-accent transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-foreground group-hover:text-accent transition-colors">
+                        Lecturer in {ad.course_name}
+                      </h4>
+                      <div className="flex items-center space-x-4 text-xs text-secondary">
+                        <span className="flex items-center font-medium"><MapPin size={12} className="mr-1" /> {ad.institution_name}</span>
+                        <span className="flex items-center"><Clock size={12} className="mr-1" /> Closes: {new Date(ad.application_end_date).toLocaleDateString()}</span>
+                        <span className="flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase tracking-wider">{ad.vacancy_count} Openings</span>
+                      </div>
                     </div>
+                    {isApplied ? (
+                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                        Applied
+                      </span>
+                    ) : (
+                      <Button variant="accent" size="sm" onClick={() => {
+                        setSelectedAd(ad);
+                        setShowApplyFlow(true);
+                      }}>Apply Now</Button>
+                    )}
                   </div>
-                  <Button variant="accent" size="sm" onClick={() => {
-                    setSelectedAd(ad);
-                    setShowApplyFlow(true);
-                  }}>Apply Now</Button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -199,7 +225,8 @@ const CandidateDashboard = () => {
                       <td className="px-6 py-4">
                         <span className={cn(
                           "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                          app.status === 'SUBMITTED' ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
+                          app.status === 'SUBMITTED' ? "bg-emerald-100 text-emerald-800" : 
+                          app.status === 'WITHDRAWN' ? "bg-slate-100 text-slate-600" : "bg-blue-100 text-blue-800"
                         )}>
                           {app.status}
                         </span>
@@ -219,12 +246,24 @@ const CandidateDashboard = () => {
         <div className="space-y-6">
           <div className="bg-primary text-white rounded-2xl p-6 relative overflow-hidden">
             <div className="relative z-10">
-              <h3 className="text-lg font-bold mb-2">Complete Your Profile</h3>
-              <p className="text-white/70 text-sm mb-4">Complete profiles have a 40% higher chance of being shortlisted.</p>
+              <h3 className="text-lg font-bold mb-2">
+                {profileComplete ? 'Profile Complete' : 'Complete Your Profile'}
+              </h3>
+              <p className="text-white/70 text-sm mb-4">
+                {profileComplete
+                  ? 'Your profile is complete and ready for applications.'
+                  : 'Complete profiles have a 40% higher chance of being shortlisted.'}
+              </p>
               <div className="w-full bg-white/20 h-2 rounded-full mb-6">
-                <div className="bg-accent h-full rounded-full w-[65%]"></div>
+                <div className="bg-accent h-full rounded-full transition-all duration-500" style={{ width: `${profileProgress}%` }}></div>
               </div>
-              <Button variant="accent" className="w-full bg-white text-primary hover:bg-white/90">Edit Profile</Button>
+              <Button
+                variant="accent"
+                className="w-full bg-white text-primary hover:bg-white/90"
+                onClick={() => setActiveView('profile')}
+              >
+                {profileComplete ? 'View Profile' : 'Edit Profile'}
+              </Button>
             </div>
             <div className="absolute -right-4 -bottom-4 opacity-10">
               <UserCircle size={120} />
@@ -257,7 +296,11 @@ const CandidateDashboard = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <JobApplicationFlow 
             advertisementId={selectedAd.id} 
-            advertisementTitle={selectedAd.title}
+            advertisementTitle={`Lecturer in ${selectedAd.course_name}`}
+            onSuccess={() => {
+              dispatch(getMyApplications({ skip: 0, limit: 50 }));
+              dispatch(fetchPublishedAds({}));
+            }}
             onClose={() => {
               setShowApplyFlow(false);
               setSelectedAd(null);
@@ -268,6 +311,5 @@ const CandidateDashboard = () => {
     </div>
   );
 };
-
 
 export default CandidateDashboard;

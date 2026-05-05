@@ -9,9 +9,16 @@ import { fetchInstitutions } from './institutionSlice';
 import { fetchCourses } from './courseSlice';
 import { 
   generateAdAI, clearAdStatus, fetchAds, fetchRecruitmentContext, 
-  clearRecruitmentContext, saveAd, submitAd, approveAd, publishAd 
+  clearRecruitmentContext, saveAd, submitAd, approveAd, publishAd, deleteAd, fetchAdById
 } from './advertisementSlice';
 import { cn } from '../../utils/cn';
+import Modal from '../../components/common/Modal';
+
+const getMinDeadline = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  return d.toISOString().split('T')[0];
+};
 
 const StatusBadge = ({ status }) => {
   const map = {
@@ -46,6 +53,10 @@ const AdGenerationDashboard = () => {
   const [deadline, setDeadline] = useState('');
   const [applicationMode, setApplicationMode] = useState('Walk-in');
   const [activeTab, setActiveTab] = useState('EN');
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [viewAd, setViewAd] = useState(null);
+  const [viewLang, setViewLang] = useState('EN');
+  const minDeadline = getMinDeadline();
 
   useEffect(() => {
     dispatch(fetchInstitutions({ page: 1, limit: 100 }));
@@ -72,6 +83,10 @@ const AdGenerationDashboard = () => {
 
   const handleGenerate = () => {
     if (!canGenerate || !deadline) return;
+    if (deadline < minDeadline) {
+      alert(`Deadline must be at least ${minDeadline} (7 days from today).`);
+      return;
+    }
     dispatch(generateAdAI({
       institution_id: parseInt(selectedInst),
       course_id: parseInt(selectedCourse),
@@ -107,6 +122,20 @@ const AdGenerationDashboard = () => {
 
   const handlePublish = (id) => {
     dispatch(publishAd(id)).then(() => dispatch(fetchAds()));
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm('Are you sure you want to delete this advertisement?');
+    if (!confirmed) return;
+    await dispatch(deleteAd(id));
+    dispatch(fetchAds());
+  };
+
+  const handleView = async (id) => {
+    const result = await dispatch(fetchAdById(id)).unwrap();
+    setViewAd(result?.data || result);
+    setViewLang('EN');
+    setIsViewOpen(true);
   };
 
   const filteredCourses = courses.filter(c => c.institution_id === parseInt(selectedInst));
@@ -263,7 +292,7 @@ const AdGenerationDashboard = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Deadline</label>
-                      <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)}
+                      <input type="date" min={minDeadline} value={deadline} onChange={(e) => setDeadline(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
                     </div>
                     <div className="space-y-1.5">
@@ -381,12 +410,17 @@ const AdGenerationDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {list.map(ad => (
               <div key={ad.id} className="bg-white rounded-3xl border border-slate-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all group">
+                {(() => {
+                  const institutionName = ad.institution_name || institutions.find(i => i.id === ad.institution_id)?.name || `Institution #${ad.institution_id}`;
+                  const courseName = ad.course_name || courses.find(c => c.id === ad.course_id)?.name || `Course #${ad.course_id}`;
+                  return (
+                    <>
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all"><FileText size={20} /></div>
                   <StatusBadge status={ad.status} />
                 </div>
-                <h3 className="font-bold text-slate-800 truncate">{ad.course_name}</h3>
-                <p className="text-xs text-slate-500 mt-1">{ad.institution_name}</p>
+                <h3 className="font-bold text-slate-800 truncate">{courseName}</h3>
+                <p className="text-xs text-slate-500 mt-1">{institutionName}</p>
                 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {ad.status === 'DRAFT' && (
@@ -401,17 +435,57 @@ const AdGenerationDashboard = () => {
                   {ad.status === 'PUBLISHED' && (
                     <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1"><CheckCircle2 size={12} /> Live</span>
                   )}
+                  {ad.status !== 'PUBLISHED' && (
+                    <button onClick={() => handleDelete(ad.id)} className="px-3 py-1 bg-rose-600 text-white text-[10px] font-bold rounded-lg hover:bg-rose-700 transition-colors uppercase">Delete</button>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50">
                   <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase"><Calendar size={12} />{new Date(ad.created_at).toLocaleDateString()}</span>
-                  <button className="text-indigo-600 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 group/btn">View<ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" /></button>
+                  <button onClick={() => handleView(ad.id)} className="text-indigo-600 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 group/btn">View<ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" /></button>
                 </div>
+                    </>
+                  );
+                })()}
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        title="Advertisement Preview"
+        size="xl"
+      >
+        {!viewAd ? (
+          <div className="text-slate-500 font-medium">Loading advertisement...</div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <StatusBadge status={viewAd.status} />
+              <div className="flex bg-white rounded-lg border border-slate-200 p-1">
+                {['EN', 'MR'].map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setViewLang(tab)}
+                    className={cn("px-3 py-1.5 rounded-md text-xs font-bold transition-all", viewLang === tab ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-50")}
+                  >
+                    {tab === 'EN' ? 'English' : 'Marathi'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="text-xs text-slate-500">
+              Application window: {viewAd.application_start_date} to {viewAd.application_end_date}
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 prose prose-slate max-w-none">
+              <div dangerouslySetInnerHTML={{ __html: viewLang === 'EN' ? (viewAd.content_en || '') : (viewAd.content_mr || '') }} />
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

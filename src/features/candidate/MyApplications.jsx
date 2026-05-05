@@ -2,27 +2,28 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   FileText, 
-  Search, 
   Clock, 
   ExternalLink, 
   Trash2, 
-  AlertCircle,
   Loader2,
-  CheckCircle,
-  XCircle,
-  Info
+  X
 } from 'lucide-react';
 import { Button } from '../../components/common/UIComponents';
 import applicationService from '../../services/applicationService';
 import { getMyApplications } from './applicationSlice';
 import { toast } from 'react-hot-toast';
 import { cn } from '../../utils/cn';
+import Modal from '../../components/common/Modal';
 
 const MyApplications = () => {
   const dispatch = useDispatch();
   const { myApplications = [], loading, total } = useSelector(state => state.application);
   const [page, setPage] = useState(1);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [docLoading, setDocLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getMyApplications({ skip: (page - 1) * 10, limit: 10 }));
@@ -39,9 +40,31 @@ const MyApplications = () => {
       toast.success('Application withdrawn successfully');
       dispatch(getMyApplications({ skip: (page - 1) * 10, limit: 10 }));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to withdraw application');
+      const detail = error.response?.data?.detail;
+      const message =
+        detail?.message ||
+        detail?.error ||
+        error.response?.data?.message ||
+        'Failed to withdraw application';
+      toast.error(message);
     } finally {
       setIsWithdrawing(false);
+    }
+  };
+
+  const handleViewDetails = async (app) => {
+    setSelectedApp(app);
+    setViewOpen(true);
+    setDocLoading(true);
+    try {
+      const response = await applicationService.listDocuments(app.application_id);
+      setDocuments(response?.data || []);
+    } catch (error) {
+      setDocuments([]);
+      const detail = error.response?.data?.detail;
+      toast.error(detail?.message || 'Failed to load application details');
+    } finally {
+      setDocLoading(false);
     }
   };
 
@@ -135,7 +158,12 @@ const MyApplications = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="outline" size="sm" className="h-8 text-[10px] font-bold border-border hover:border-accent">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-[10px] font-bold border-border hover:border-accent"
+                        onClick={() => handleViewDetails(app)}
+                      >
                         <ExternalLink size={12} className="mr-1" /> View Detail
                       </Button>
                       {(app.status === 'DRAFT' || app.status === 'SUBMITTED') && (
@@ -184,6 +212,71 @@ const MyApplications = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={viewOpen}
+        onClose={() => {
+          setViewOpen(false);
+          setSelectedApp(null);
+          setDocuments([]);
+        }}
+        title="Application Details"
+        size="lg"
+      >
+        {!selectedApp ? null : (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs text-secondary font-semibold">Application Number</p>
+                <p className="font-bold">{selectedApp.application_number}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Status</p>
+                <span className={cn(
+                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border mt-1",
+                  getStatusStyle(selectedApp.status)
+                )}>
+                  {selectedApp.status}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Post</p>
+                <p className="font-medium">{selectedApp.advertisement_name || selectedApp.course_name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Institution</p>
+                <p className="font-medium">{selectedApp.institution_name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Academic Year</p>
+                <p className="font-medium">{selectedApp.academic_year}</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-2">Uploaded Documents</h4>
+              {docLoading ? (
+                <div className="text-sm text-secondary flex items-center">
+                  <Loader2 size={16} className="animate-spin mr-2" /> Loading documents...
+                </div>
+              ) : documents.length === 0 ? (
+                <p className="text-sm text-secondary">No documents uploaded yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="p-3 border border-border rounded-lg text-sm flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{doc.file_name}</p>
+                        <p className="text-xs text-secondary">{doc.document_type} • {doc.validation_status}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

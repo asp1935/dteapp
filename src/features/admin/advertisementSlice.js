@@ -184,9 +184,17 @@ const advertisementSlice = createSlice({
         state.aiLoading = false;
         state.error = action.payload;
       })
+      .addCase(saveAd.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(saveAd.fulfilled, (state) => {
+        state.loading = false;
         state.success = true;
         state.preview = null;
+      })
+      .addCase(saveAd.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       .addCase(fetchAdById.pending, (state) => { state.loading = true; })
       .addCase(fetchAdById.fulfilled, (state, action) => {

@@ -34,6 +34,12 @@ import PrincipalWorkLogs from './features/principal/PrincipalWorkLogs';
 import PrincipalAppointmentManagement from './features/principal/PrincipalAppointmentManagement';
 import ApplicationManagement from './features/admin/ApplicationManagement';
 import MyApplications from './features/candidate/MyApplications';
+import MISReportsDashboard from './features/admin/MISReportsDashboard';
+import ROBillingDashboard from './features/ro/ROBillingDashboard';
+import TreasurerBillingDashboard from './features/treasury/TreasurerBillingDashboard';
+import TimetableManagement from './features/principal/TimetableManagement';
+import AcademicCalendar from './features/admin/AcademicCalendar';
+import JobListings from './features/candidate/JobListings';
 
 function App() {
   const dispatch = useDispatch();
@@ -136,6 +142,46 @@ function App() {
           } 
         />
         <Route 
+          path="admin/reports" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <MISReportsDashboard />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="ro/billing" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.RO]}>
+              <div className="p-6">
+                <ROBillingDashboard />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="treasury/billing" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.TREASURY]}>
+              <div className="p-6">
+                <TreasurerBillingDashboard />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="admin/calendar" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <div className="p-6">
+                <AcademicCalendar />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="admin/billing" 
           element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
@@ -173,6 +219,26 @@ function App() {
             <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
               <div className="p-6">
                 <FacultyManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="principal/timetable" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <TimetableManagement />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="principal/calendar" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <AcademicCalendar />
               </div>
             </ProtectedRoute>
           } 
@@ -258,7 +324,16 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="candidate/ads" element={<div className="p-8 font-bold">Browse Job Advertisements</div>} />
+        <Route 
+          path="candidate/ads" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.CANDIDATE]}>
+              <div className="p-6">
+                <JobListings />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="candidate/applications" 
           element={
@@ -276,6 +351,16 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
               <LecturerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="faculty/timetable"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
+              <div className="p-6">
+                <TimetableManagement />
+              </div>
             </ProtectedRoute>
           }
         />

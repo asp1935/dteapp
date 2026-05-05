@@ -119,7 +119,7 @@ const PrincipalBillingDashboard = () => {
       dispatch(resetBillingStatus());
     }
     if (error) {
-      toast.error(error);
+      toast.error(typeof error === 'string' ? error : (error?.message || JSON.stringify(error)));
       dispatch(resetBillingStatus());
     }
   }, [success, error, dispatch, user, limit]);
@@ -197,8 +197,10 @@ const PrincipalBillingDashboard = () => {
       case 'DRAFT': return 'bg-slate-100 text-slate-600';
       case 'SUBMITTED': return 'bg-blue-100 text-blue-600';
       case 'PRINCIPAL_APPROVED': return 'bg-emerald-100 text-emerald-600';
+      case 'RO_APPROVED': return 'bg-indigo-100 text-indigo-600';
+      case 'TREASURY_PROCESSED': return 'bg-emerald-500 text-white shadow-sm';
       case 'REJECTED': return 'bg-red-100 text-red-600';
-      default: return 'bg-indigo-100 text-indigo-600';
+      default: return 'bg-slate-100 text-slate-400';
     }
   };
 
@@ -598,7 +600,7 @@ const PrincipalBillingDashboard = () => {
               >
                 <option value="">Select a Faculty Member...</option>
                 {facultyList.map(f => (
-                  <option key={f.id} value={f.id}>{f.name} ({f.designation})</option>
+                  <option key={f.id} value={f.id}>{f.full_name} ({f.designation})</option>
                 ))}
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
@@ -637,8 +639,8 @@ const PrincipalBillingDashboard = () => {
               value={genData.academic_year}
               onChange={(e) => setGenData({...genData, academic_year: e.target.value})}
             >
-              <option value="2026-2027">2026-2027</option>
-              <option value="2025-2026">2025-2026</option>
+              <option value="2026-27">2026-27</option>
+              <option value="2025-26">2025-26</option>
             </select>
           </div>
 

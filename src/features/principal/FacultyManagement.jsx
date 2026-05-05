@@ -150,6 +150,11 @@ const FacultyManagement = () => {
       limit: pageSize
     };
 
+    if (!params.institution_id || !params.course_id || !params.academic_year) {
+      console.warn('Delaying fetch: Missing required parameters.', params);
+      return;
+    }
+
     console.log('Dispatching getFaculties with:', params);
     dispatch(getFaculties(params));
   }, [dispatch, user, formData, currentPage]);

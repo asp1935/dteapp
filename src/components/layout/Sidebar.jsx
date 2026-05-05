@@ -1,21 +1,28 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Building2, 
-  FileText, 
-  Briefcase, 
-  GraduationCap, 
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  FileText,
+  Briefcase,
+  GraduationCap,
   BookOpen,
-  Calendar, 
+  Calendar,
   LogOut,
   Sparkles,
   ClipboardList,
   School,
   Calculator,
   UserCheck,
-  Award
+  Award,
+  Clock,
+  ShieldCheck,
+  Activity,
+  History,
+  TableProperties,
+  Banknote,
+  BarChart3
 } from 'lucide-react';
 import { setSidebar } from '../../features/ui/uiSlice';
 import { logout } from '../../features/auth/authSlice';
@@ -34,21 +41,32 @@ const Sidebar = () => {
       { name: 'Courses', icon: GraduationCap, path: '/admin/courses' },
       { name: 'Institutes', icon: Building2, path: '/admin/institutes' },
       { name: 'Advertisements', icon: FileText, path: '/admin/ads' },
+      { name: 'Applications', icon: ClipboardList, path: '/admin/applications' },
+      { name: 'Academic Calendar', icon: Calendar, path: '/admin/calendar' },
       { name: 'Billing', icon: Briefcase, path: '/admin/billing' },
+      // { name: 'MIS Reports', icon: BarChart3, path: '/admin/reports' },
       { name: 'Faculty Calculator', icon: Calculator, path: '/admin/ai-assistant' },
     ],
     [ROLES.PRINCIPAL]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
-      { name: 'Vacancy Assessment', icon: UserCheck, path: '/principal/vacancies' },
+      { name: 'Timetable', icon: TableProperties, path: '/principal/timetable' },
+      { name: 'Academic Calendar', icon: Calendar, path: '/principal/calendar' },
+      { name: 'Vacancy Assessment', icon: Activity, path: '/principal/vacancies' },
       { name: 'Candidate Selection', icon: Award, path: '/principal/selection' },
       { name: 'Appointments', icon: FileText, path: '/principal/appointments' },
       { name: 'Applications', icon: FileText, path: '/principal/applications' },
+      { name: 'Interviews', icon: Clock, path: '/principal/interviews' },
       { name: 'Work Logs', icon: ClipboardList, path: '/principal/work-logs' },
       { name: 'Billing', icon: Briefcase, path: '/principal/billing' },
     ],
     [ROLES.RO]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/ro/dashboard' },
+      { name: 'Billing Verification', icon: Briefcase, path: '/ro/billing' },
+    ],
+    [ROLES.TREASURY]: [
+      { name: 'Dashboard', icon: LayoutDashboard, path: '/treasury/dashboard' },
+      { name: 'Disbursements', icon: Banknote, path: '/treasury/billing' },
     ],
     [ROLES.CANDIDATE]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/candidate/dashboard' },
@@ -66,7 +84,7 @@ const Sidebar = () => {
   const isExpanded = isSidebarOpen;
 
   return (
-    <aside 
+    <aside
       onMouseEnter={() => dispatch(setSidebar(true))}
       onMouseLeave={() => dispatch(setSidebar(false))}
       className={cn(
@@ -110,7 +128,7 @@ const Sidebar = () => {
       </nav>
 
       <div className="h-12 border-t border-white/10 flex items-center px-4">
-        <button 
+        <button
           onClick={() => dispatch(logout())}
           className="flex items-center w-full p-3 rounded-lg text-white/70 hover:text-white hover:bg-red-500/20 transition-all duration-300 group overflow-hidden"
         >
