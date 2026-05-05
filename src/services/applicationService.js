@@ -6,6 +6,7 @@ export const createApplication = async (applicationData) => {
 };
 
 export const uploadDocuments = async (applicationId, formData) => {
+  console.log(`[OCR] Uploading documents for application ${applicationId}. Backend will process using OCR.space API.`);
   const response = await api.post(`/applications/${applicationId}/documents`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -15,6 +16,7 @@ export const uploadDocuments = async (applicationId, formData) => {
 };
 
 export const submitApplication = async (applicationId, submissionData) => {
+  console.log(`[OCR] Submitting application ${applicationId}. Triggering backend AI scrutiny with OCR.space document parsing.`);
   const response = await api.post(`/applications/${applicationId}/submit`, submissionData);
   return response.data;
 };
