@@ -7,6 +7,9 @@ const extractErrorMessage = (error) => {
     if (Array.isArray(detail)) {
       return detail.map(d => `${d.loc.join('.')}: ${d.msg}`).join(', ');
     }
+    if (typeof detail === 'object') {
+      return JSON.stringify(detail);
+    }
     return detail;
   }
   return error.response?.data?.message || error.message || 'An unknown error occurred';
@@ -295,7 +298,9 @@ const billingSlice = createSlice({
       })
       .addCase(fetchBillApprovals.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedBillApprovals = action.payload.data || action.payload || [];
+        // The backend returns { status: "success", data: { history: [...] } }
+        const data = action.payload.data || action.payload;
+        state.selectedBillApprovals = data.history || data.data || (Array.isArray(data) ? data : []);
       })
       .addCase(fetchAIReadiness.fulfilled, (state, action) => {
         state.loading = false;

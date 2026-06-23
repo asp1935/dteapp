@@ -13,8 +13,12 @@ import { ROLES } from '../../constants/roles';
 const InstitutionManagement = () => {
   const dispatch = useDispatch();
   const { institutions, loading } = useSelector((state) => state.institutions);
+<<<<<<< HEAD
   const role = useSelector((state) => state.auth.role);
   
+=======
+
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -30,7 +34,7 @@ const InstitutionManagement = () => {
     if (src.includes('hotel') || src.includes('hmct')) return "HMCT (Hotel Management)";
     if (src.includes('physics') || src.includes('chemistry') || src.includes('math') || src.includes('applied')) return "Non-Engineering (Applied Sciences)";
     if (src.includes('diploma')) return "Engineering & Technology (Diploma)";
-    if (src.includes('degree') || src.includes('ug') || src.includes('b.e') || src.includes('btech') || src.includes('engineering') || src.includes('pg')) 
+    if (src.includes('degree') || src.includes('ug') || src.includes('b.e') || src.includes('btech') || src.includes('engineering') || src.includes('pg'))
       return "Engineering (Degree - B.E./B.Tech)";
     return null;
   };
@@ -38,7 +42,7 @@ const InstitutionManagement = () => {
   const { intakes = [], loading: intakeLoading } = useSelector((state) => state.intakes || {});
   const { norms = [], loading: normLoading } = useSelector((state) => state.norms || {});
   const [selectedInstitutionForCourses, setSelectedInstitutionForCourses] = useState(null);
-  const activeInstitution = selectedInstitutionForCourses 
+  const activeInstitution = selectedInstitutionForCourses
     ? (institutions.find(i => i.id === selectedInstitutionForCourses.id) || selectedInstitutionForCourses)
     : null;
 
@@ -54,7 +58,7 @@ const InstitutionManagement = () => {
       dispatch(fetchNorms({ academicYear, institutionId: selectedInstitutionForCourses.id }));
     }
   }, [dispatch, selectedInstitutionForCourses, academicYear]);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -129,8 +133,8 @@ const InstitutionManagement = () => {
     { key: 'name', label: 'Institution Name' },
     { key: 'code', label: 'Code' },
     { key: 'district', label: 'District' },
-    { 
-      key: 'type', 
+    {
+      key: 'type',
       label: 'Type',
       render: (val) => (
         <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-500 uppercase">
@@ -155,12 +159,13 @@ const InstitutionManagement = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-background border border-border p-4 rounded-xl shadow-sm">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search institutions..." 
+          <input
+            type="text"
+            placeholder="Search institutions..."
             className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border focus:bg-background focus:border-accent rounded-lg text-sm transition-all outline-none"
           />
         </div>
+<<<<<<< HEAD
         {role === ROLES.RO && (
           <Button 
             variant="accent" 
@@ -171,48 +176,58 @@ const InstitutionManagement = () => {
             <span>Add Institution</span>
           </Button>
         )}
+=======
+        <Button
+          variant="accent"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center space-x-2 w-full sm:w-auto"
+        >
+          <Plus size={20} />
+          <span>Add Institution</span>
+        </Button>
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
       </div>
 
       {/* Form Modal */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={resetForm} 
+      <Modal
+        isOpen={isModalOpen}
+        onClose={resetForm}
         title={isEditing ? 'Edit Institution' : 'Add New Institution'}
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <h4 className="text-xs font-bold text-secondary uppercase tracking-widest border-b border-border pb-1">Basic Information</h4>
-            <Input 
-              label="Institution Name" 
-              name="name" 
-              value={formData.name} 
-              onChange={handleInputChange} 
+            <Input
+              label="Institution Name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
               placeholder="e.g. Government Polytechnic, Pune"
               required
             />
             <div className="grid grid-cols-2 gap-4">
-              <Input 
-                label="Institution Code" 
-                name="code" 
-                value={formData.code} 
-                onChange={handleInputChange} 
+              <Input
+                label="Institution Code"
+                name="code"
+                value={formData.code}
+                onChange={handleInputChange}
                 placeholder="e.g. 1001"
                 required
               />
-              <Input 
-                label="District" 
-                name="district" 
-                value={formData.district} 
-                onChange={handleInputChange} 
+              <Input
+                label="District"
+                name="district"
+                value={formData.district}
+                onChange={handleInputChange}
                 placeholder="e.g. Pune"
                 required
               />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-secondary">Type</label>
-              <select 
-                name="type" 
-                value={formData.type} 
+              <select
+                name="type"
+                value={formData.type}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-sm"
               >
@@ -231,7 +246,7 @@ const InstitutionManagement = () => {
                 {formData.courses.length} ACTIVE
               </span>
             </div>
-            
+
             {/* Dynamic Course List */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
               {formData.courses.length === 0 ? (
@@ -246,9 +261,9 @@ const InstitutionManagement = () => {
                       <span className="text-sm font-bold text-foreground break-words">{course.name}</span>
                       <span className="text-[10px] text-secondary font-semibold uppercase tracking-tight">{course.level}</span>
                     </div>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
+                    <Button
+                      type="button"
+                      variant="ghost"
                       className="p-1.5 h-auto text-secondary hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                       onClick={() => {
                         const newCourses = [...formData.courses];
@@ -268,16 +283,16 @@ const InstitutionManagement = () => {
               <div className="bg-muted/20 p-4 rounded-2xl border border-border space-y-4 shadow-inner">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-2">
-                    <input 
+                    <input
                       type="text"
-                      placeholder="e.g. Computer Engineering" 
+                      placeholder="e.g. Computer Engineering"
                       value={newCourse.name}
                       onChange={(e) => setNewCourse(prev => ({ ...prev, name: e.target.value }))}
                       className="w-full h-10 px-4 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-sm"
                     />
                   </div>
                   <div>
-                    <select 
+                    <select
                       value={newCourse.level}
                       onChange={(e) => setNewCourse(prev => ({ ...prev, level: e.target.value }))}
                       className="w-full h-10 px-3 rounded-lg border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-xs font-bold uppercase"
@@ -288,9 +303,9 @@ const InstitutionManagement = () => {
                     </select>
                   </div>
                 </div>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={handleAddCourse}
                   className="w-full py-2.5 h-auto text-xs font-bold uppercase tracking-wider bg-background hover:bg-accent hover:text-white transition-all border-dashed"
                 >
@@ -299,7 +314,7 @@ const InstitutionManagement = () => {
               </div>
             )}
           </div>
-          
+
           <div className="flex justify-end space-x-3 pt-6 border-t border-border mt-6">
             <Button type="button" variant="secondary" onClick={resetForm}>
               Cancel
@@ -313,8 +328,8 @@ const InstitutionManagement = () => {
       </Modal>
 
       {/* View Courses & Intake Modal */}
-      <Modal 
-        isOpen={!!selectedInstitutionForCourses} 
+      <Modal
+        isOpen={!!selectedInstitutionForCourses}
         onClose={() => {
           setSelectedInstitutionForCourses(null);
           setSelectedCourse(null);
@@ -329,7 +344,7 @@ const InstitutionManagement = () => {
               <span className="text-sm font-bold text-foreground">Select a course to configure:</span>
               <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-border shadow-sm">
                 <Calendar size={14} className="text-secondary" />
-                <select 
+                <select
                   className="bg-transparent text-sm font-bold text-foreground outline-none cursor-pointer"
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
@@ -342,16 +357,16 @@ const InstitutionManagement = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {activeInstitution?.courses?.map((course) => {
-                const currentIntake = intakes.find(i => 
-                  i.course_id === course.id && 
+                const currentIntake = intakes.find(i =>
+                  i.course_id === course.id &&
                   i.institution_id === activeInstitution.id &&
                   i.academic_year === academicYear
                 );
                 const approvedSeats = currentIntake?.approved_seats || 0;
                 const derivedCat = deriveCategory(course.name, course.level);
-                const courseNorm = norms.find(n => n.course_id === course.id && n.academic_year === academicYear) || 
-                                  norms.find(n => n.norm_type === 'COURSE_WISE' && n.course_category === derivedCat && n.academic_year === academicYear) ||
-                                  norms.find(n => n.norm_type === 'GENERAL' && n.academic_year === academicYear);
+                const courseNorm = norms.find(n => n.course_id === course.id && n.academic_year === academicYear) ||
+                  norms.find(n => n.norm_type === 'COURSE_WISE' && n.course_category === derivedCat && n.academic_year === academicYear) ||
+                  norms.find(n => n.norm_type === 'GENERAL' && n.academic_year === academicYear);
                 const isNormExpanded = expandedNormCourseId === course.id;
 
                 return (
@@ -376,19 +391,18 @@ const InstitutionManagement = () => {
 
                         <button
                           onClick={() => setExpandedNormCourseId(isNormExpanded ? null : course.id)}
-                          className={`p-2 rounded-lg text-xs font-bold transition-all border ${
-                            isNormExpanded
+                          className={`p-2 rounded-lg text-xs font-bold transition-all border ${isNormExpanded
                               ? 'bg-accent/10 text-accent border-accent/30'
                               : courseNorm
                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
                                 : 'bg-orange-50 text-orange-500 border-orange-200 hover:bg-orange-100'
-                          }`}
+                            }`}
                           title={courseNorm ? 'View Norm' : 'No Norm Set'}
                         >
                           {isNormExpanded ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>
-                        <Button 
-                          variant="accent" 
+                        <Button
+                          variant="accent"
                           onClick={() => setSelectedCourse(course)}
                           className="text-xs px-4 py-2 h-auto transition-all shadow-lg"
                         >
@@ -446,8 +460,8 @@ const InstitutionManagement = () => {
             {/* Inline Add Course Form */}
             <div className="mt-6 pt-6 border-t border-border">
               {!showAddCourseForm ? (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowAddCourseForm(true)}
                   className="w-full py-4 border-dashed border-2 hover:border-accent hover:text-accent transition-all group"
                 >
@@ -464,16 +478,16 @@ const InstitutionManagement = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                     <div className="md:col-span-2">
-                      <input 
+                      <input
                         type="text"
-                        placeholder="Course Name (e.g. Civil Engineering)" 
+                        placeholder="Course Name (e.g. Civil Engineering)"
                         value={inlineNewCourse.name}
                         onChange={(e) => setInlineNewCourse(prev => ({ ...prev, name: e.target.value }))}
                         className="w-full h-11 px-4 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-sm font-medium"
                       />
                     </div>
                     <div>
-                      <select 
+                      <select
                         value={inlineNewCourse.level}
                         onChange={(e) => setInlineNewCourse(prev => ({ ...prev, level: e.target.value }))}
                         className="w-full h-11 px-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all text-xs font-bold uppercase"
@@ -486,17 +500,17 @@ const InstitutionManagement = () => {
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <Button 
-                      variant="accent" 
+                    <Button
+                      variant="accent"
                       className="flex-1 h-11 shadow-lg shadow-accent/20"
                       onClick={async () => {
                         if (!inlineNewCourse.name.trim()) return;
                         try {
-                          await dispatch(addCourse({ 
-                            institutionId: activeInstitution.id, 
-                            courseData: inlineNewCourse 
+                          await dispatch(addCourse({
+                            institutionId: activeInstitution.id,
+                            courseData: inlineNewCourse
                           })).unwrap();
-                          
+
                           setInlineNewCourse({ name: '', level: 'DIPLOMA' });
                           setShowAddCourseForm(false);
                           alert('Course added successfully!');
@@ -529,10 +543,10 @@ const InstitutionManagement = () => {
                   <p className="text-xs text-secondary font-medium uppercase tracking-tighter">{selectedCourse.level}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-border shadow-sm">
                 <Calendar size={14} className="text-secondary" />
-                <select 
+                <select
                   className="bg-transparent text-sm font-bold text-foreground outline-none cursor-pointer"
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
@@ -548,17 +562,15 @@ const InstitutionManagement = () => {
             <div className="flex space-x-1 bg-muted p-1 rounded-xl w-fit">
               <button
                 onClick={() => setActiveConfigTab('intake')}
-                className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                  activeConfigTab === 'intake' ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
-                }`}
+                className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeConfigTab === 'intake' ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
+                  }`}
               >
                 Intake Management
               </button>
               <button
                 onClick={() => setActiveConfigTab('norms')}
-                className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                  activeConfigTab === 'norms' ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
-                }`}
+                className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeConfigTab === 'norms' ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
+                  }`}
               >
                 Recruitment Norms
               </button>
@@ -578,9 +590,9 @@ const InstitutionManagement = () => {
                     actual_admitted: parseInt(formData.get('actual_admitted'))
                   };
 
-                  const currentIntake = intakes.find(i => 
-                    i.course_id === selectedCourse.id && 
-                    i.institution_id === activeInstitution.id && 
+                  const currentIntake = intakes.find(i =>
+                    i.course_id === selectedCourse.id &&
+                    i.institution_id === activeInstitution.id &&
                     i.academic_year === academicYear
                   );
 
@@ -594,22 +606,22 @@ const InstitutionManagement = () => {
                   dispatch(fetchIntakes({ institutionId: activeInstitution.id, academicYear }));
                 }} className="space-y-6">
                   {(() => {
-                    const currentIntake = intakes.find(i => 
-                      i.course_id === selectedCourse.id && 
-                      i.institution_id === activeInstitution.id && 
+                    const currentIntake = intakes.find(i =>
+                      i.course_id === selectedCourse.id &&
+                      i.institution_id === activeInstitution.id &&
                       i.academic_year === academicYear
                     );
                     return (
                       <>
                         <div className="grid grid-cols-2 gap-6">
-                          <Input 
+                          <Input
                             label="Approved Intake Seats"
                             name="approved_seats"
                             type="number"
                             defaultValue={currentIntake?.approved_seats || 60}
                             required
                           />
-                          <Input 
+                          <Input
                             label="Actual Admitted Count"
                             name="actual_admitted"
                             type="number"
@@ -619,9 +631,9 @@ const InstitutionManagement = () => {
                         </div>
                         <div className="flex justify-end space-x-3 pt-4">
                           {currentIntake && (
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
+                            <Button
+                              type="button"
+                              variant="ghost"
                               className="text-red-500 hover:bg-red-50"
                               onClick={async () => {
                                 if (window.confirm('Are you sure you want to delete this intake record?')) {
@@ -634,7 +646,7 @@ const InstitutionManagement = () => {
                             </Button>
                           )}
                           <Button type="submit" variant="accent" className="px-8 h-12 shadow-lg shadow-accent/20">
-                            <Save size={18} className="mr-2" /> 
+                            <Save size={18} className="mr-2" />
                             {currentIntake ? 'Update Intake Record' : 'Save Intake Record'}
                           </Button>
                         </div>
@@ -659,8 +671,8 @@ const InstitutionManagement = () => {
                     workload_hours_per_week: parseInt(formData.get('workload_hours_per_week'))
                   };
 
-                  const courseSpecificNorm = norms.find(n => 
-                    n.course_id === selectedCourse.id && 
+                  const courseSpecificNorm = norms.find(n =>
+                    n.course_id === selectedCourse.id &&
                     n.academic_year === academicYear
                   );
 
@@ -674,14 +686,14 @@ const InstitutionManagement = () => {
                   dispatch(fetchNorms({ academicYear, institutionId: activeInstitution.id }));
                 }} className="space-y-6">
                   {(() => {
-                    const courseSpecificNorm = norms.find(n => 
-                      n.course_id === selectedCourse.id && 
+                    const courseSpecificNorm = norms.find(n =>
+                      n.course_id === selectedCourse.id &&
                       n.academic_year === academicYear
                     );
                     const derivedCat = deriveCategory(selectedCourse.name, selectedCourse.level);
-                    const currentNorm = courseSpecificNorm || 
-                                       norms.find(n => n.norm_type === 'COURSE_WISE' && n.course_category === derivedCat && n.academic_year === academicYear) ||
-                                       norms.find(n => n.norm_type === 'GENERAL' && n.academic_year === academicYear);
+                    const currentNorm = courseSpecificNorm ||
+                      norms.find(n => n.norm_type === 'COURSE_WISE' && n.course_category === derivedCat && n.academic_year === academicYear) ||
+                      norms.find(n => n.norm_type === 'GENERAL' && n.academic_year === academicYear);
                     return (
                       <>
                         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-center justify-between">
@@ -694,9 +706,9 @@ const InstitutionManagement = () => {
                               <p className="text-[10px] font-medium text-blue-600 uppercase tracking-wider">Bulk seed common norms for this year</p>
                             </div>
                           </div>
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
+                          <Button
+                            type="button"
+                            variant="ghost"
                             className="bg-white hover:bg-blue-100 text-blue-600 border border-blue-200 text-xs py-1.5 h-auto font-bold shadow-sm"
                             onClick={async () => {
                               if (window.confirm('This will seed the 5 standard DTE course-wise norms for this institution and year. Existing norms for these categories might be updated. Continue?')) {
@@ -717,9 +729,9 @@ const InstitutionManagement = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-1.5 md:col-span-2">
                             <label className="block text-sm font-medium text-secondary">Course Category</label>
-                            <select 
-                              name="course_category" 
-                              required 
+                            <select
+                              name="course_category"
+                              required
                               defaultValue={currentNorm?.course_category || 'Engineering & Technology (Diploma)'}
                               className="w-full px-4 py-2.5 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none text-sm"
                             >
@@ -729,29 +741,29 @@ const InstitutionManagement = () => {
                               <option value="Non-Engineering (Applied Sciences)">Non-Engineering (Applied Sciences)</option>
                             </select>
                           </div>
-                          <Input 
-                            label="Min Qualification" 
-                            name="min_qualification" 
-                            defaultValue={currentNorm?.min_qualification || "M.E./M.Tech in relevant branch"} 
-                            required 
+                          <Input
+                            label="Min Qualification"
+                            name="min_qualification"
+                            defaultValue={currentNorm?.min_qualification || "M.E./M.Tech in relevant branch"}
+                            required
                           />
-                          <Input 
-                            label="Grade Requirement" 
-                            name="grade_requirement" 
-                            defaultValue={currentNorm?.grade_requirement || "First Class"} 
-                            required 
+                          <Input
+                            label="Grade Requirement"
+                            name="grade_requirement"
+                            defaultValue={currentNorm?.grade_requirement || "First Class"}
+                            required
                           />
                           <div className="grid grid-cols-3 gap-4 md:col-span-2">
                             <Input label="F:S Ratio" name="faculty_student_ratio" type="number" step="0.1" defaultValue={currentNorm?.faculty_student_ratio || 20} required />
                             <Input label="Max Age" name="max_age" type="number" defaultValue={currentNorm?.max_age || 38} required />
-                            <Input label="Workload" name="workload_hours_per_week" type="number" defaultValue={currentNorm?.workload_hours_per_week || 1} required />
+                            <Input label="Workload(hr/wk)" name="workload_hours_per_week" type="number" defaultValue={currentNorm?.workload_hours_per_week || 1} required />
                           </div>
                         </div>
                         <div className="flex justify-end space-x-3 pt-4">
                           {courseSpecificNorm && (
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
+                            <Button
+                              type="button"
+                              variant="ghost"
                               className="text-red-500 hover:bg-red-50"
                               onClick={async () => {
                                 if (window.confirm('Are you sure you want to remove this course-specific norm? It will fall back to the category default.')) {
@@ -764,7 +776,7 @@ const InstitutionManagement = () => {
                             </Button>
                           )}
                           <Button type="submit" variant="accent" className="px-8 h-12 shadow-lg shadow-accent/20">
-                            <Save size={18} className="mr-2" /> 
+                            <Save size={18} className="mr-2" />
                             {currentNorm ? 'Update Recruitment Norms' : 'Apply Recruitment Norms'}
                           </Button>
                         </div>
@@ -793,19 +805,20 @@ const InstitutionManagement = () => {
         {loading ? (
           <div className="py-20 text-center text-secondary italic">Updating list...</div>
         ) : (
-          <Table 
-            columns={columns} 
-            data={institutions} 
+          <Table
+            columns={columns}
+            data={institutions}
             actions={(row) => (
               <div className="flex justify-end space-x-2">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="p-2 h-auto text-accent hover:bg-accent/10"
                   onClick={() => setSelectedInstitutionForCourses(row)}
                   title="View Courses & Intake"
                 >
                   <BarChart3 size={16} />
                 </Button>
+<<<<<<< HEAD
                 {[ROLES.ADMIN, ROLES.RO].includes(role) && (
                   <>
                     <Button 
@@ -830,6 +843,24 @@ const InstitutionManagement = () => {
                     </button>
                   </>
                 )}
+=======
+                <Button
+                  variant="ghost"
+                  className="p-2 h-auto text-blue-500 hover:bg-blue-500/10"
+                  onClick={() => handleEdit(row)}
+                  title="Edit Institution"
+                >
+                  <Edit size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="p-2 h-auto text-red-500 hover:bg-red-500/10"
+                  onClick={() => handleDelete(row.id)}
+                  title="Delete Institution"
+                >
+                  <Trash2 size={16} />
+                </Button>
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
               </div>
             )}
           />

@@ -29,9 +29,17 @@ export const login = createAsyncThunk(
 
       return { user: data.user, token: data.access_token };
     } catch (error) {
-      // 401 means credentials wrong, 422 means format wrong
-      // If we are here with 401, it's a success in terms of format, but failure in credentials.
-      return rejectWithValue(error.response?.data?.message || error.response?.data?.detail || 'Login failed');
+      const detail = error.response?.data?.detail;
+      const message = error.response?.data?.message;
+      let finalError = 'Login failed';
+      
+      if (typeof detail === 'string') finalError = detail;
+      else if (Array.isArray(detail)) finalError = detail.map(d => `${d.loc.join('.')}: ${d.msg}`).join(', ');
+      else if (typeof detail === 'object' && detail !== null) finalError = JSON.stringify(detail);
+      else if (message) finalError = message;
+      else if (error.message) finalError = error.message;
+
+      return rejectWithValue(finalError);
     }
   }
 );

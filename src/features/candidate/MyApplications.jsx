@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   FileText, 
-  Search, 
   Clock, 
   ExternalLink, 
   Trash2, 
-  AlertCircle,
   Loader2,
+<<<<<<< HEAD
   CheckCircle,
   XCircle,
   Info,
@@ -16,12 +15,16 @@ import {
   Building2,
   Calendar,
   GraduationCap
+=======
+  X
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 } from 'lucide-react';
 import { Button } from '../../components/common/UIComponents';
 import applicationService from '../../services/applicationService';
 import { getMyApplications } from './applicationSlice';
 import { toast } from 'react-hot-toast';
 import { cn } from '../../utils/cn';
+import Modal from '../../components/common/Modal';
 
 const MyApplications = () => {
   const dispatch = useDispatch();
@@ -30,9 +33,16 @@ const MyApplications = () => {
   const totalPages = pagination?.total_pages || 1;
   const [page, setPage] = useState(1);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+<<<<<<< HEAD
   const [selectedApp, setSelectedApp] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
+=======
+  const [viewOpen, setViewOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [docLoading, setDocLoading] = useState(false);
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 
   useEffect(() => {
     dispatch(getMyApplications({ skip: (page - 1) * 10, limit: 10 }));
@@ -49,12 +59,19 @@ const MyApplications = () => {
       toast.success('Application withdrawn successfully');
       dispatch(getMyApplications({ skip: (page - 1) * 10, limit: 10 }));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to withdraw application');
+      const detail = error.response?.data?.detail;
+      const message =
+        detail?.message ||
+        detail?.error ||
+        error.response?.data?.message ||
+        'Failed to withdraw application';
+      toast.error(message);
     } finally {
       setIsWithdrawing(false);
     }
   };
 
+<<<<<<< HEAD
   const handleViewApp = async (app) => {
     setSelectedApp(app);
     setDocsLoading(true);
@@ -66,6 +83,21 @@ const MyApplications = () => {
       toast.error('Failed to fetch documents');
     } finally {
       setDocsLoading(false);
+=======
+  const handleViewDetails = async (app) => {
+    setSelectedApp(app);
+    setViewOpen(true);
+    setDocLoading(true);
+    try {
+      const response = await applicationService.listDocuments(app.application_id);
+      setDocuments(response?.data || []);
+    } catch (error) {
+      setDocuments([]);
+      const detail = error.response?.data?.detail;
+      toast.error(detail?.message || 'Failed to load application details');
+    } finally {
+      setDocLoading(false);
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
     }
   };
 
@@ -121,6 +153,7 @@ const MyApplications = () => {
                     <h4 className="text-xl font-bold text-slate-900 mb-1">{app.advertisement_name || app.course_name}</h4>
                     <p className="text-sm text-slate-500 font-medium">{app.institution_name} • AY {app.academic_year}</p>
                   </div>
+<<<<<<< HEAD
                 </div>
                 <div className="flex items-center space-x-6 mt-6 md:mt-0">
                   <span className={cn(
@@ -145,6 +178,48 @@ const MyApplications = () => {
                         disabled={isWithdrawing}
                       >
                         <Trash2 size={18} />
+=======
+                </td>
+              </tr>
+            ) : (
+              myApplications.map((app) => (
+                <tr key={app.application_id} className="hover:bg-muted/30 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] font-bold bg-muted px-1.5 py-0.5 rounded text-secondary tracking-tight">
+                          {app.application_number}
+                        </span>
+                      </div>
+                      <p className="font-bold text-foreground leading-tight">{app.advertisement_name || app.course_name}</p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-secondary">
+                    <div className="space-y-0.5">
+                      <p className="font-medium text-xs text-foreground/80">{app.institution_name}</p>
+                      <p className="text-[10px] flex items-center">
+                        <Clock size={10} className="mr-1" /> AY {app.academic_year}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={cn(
+                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border",
+                      getStatusStyle(app.status)
+                    )}>
+                      {app.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-[10px] font-bold border-border hover:border-accent"
+                        onClick={() => handleViewDetails(app)}
+                      >
+                        <ExternalLink size={12} className="mr-1" /> View Detail
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
                       </Button>
                     )}
                   </div>
@@ -292,6 +367,71 @@ const MyApplications = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={viewOpen}
+        onClose={() => {
+          setViewOpen(false);
+          setSelectedApp(null);
+          setDocuments([]);
+        }}
+        title="Application Details"
+        size="lg"
+      >
+        {!selectedApp ? null : (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs text-secondary font-semibold">Application Number</p>
+                <p className="font-bold">{selectedApp.application_number}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Status</p>
+                <span className={cn(
+                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border mt-1",
+                  getStatusStyle(selectedApp.status)
+                )}>
+                  {selectedApp.status}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Post</p>
+                <p className="font-medium">{selectedApp.advertisement_name || selectedApp.course_name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Institution</p>
+                <p className="font-medium">{selectedApp.institution_name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-secondary font-semibold">Academic Year</p>
+                <p className="font-medium">{selectedApp.academic_year}</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-2">Uploaded Documents</h4>
+              {docLoading ? (
+                <div className="text-sm text-secondary flex items-center">
+                  <Loader2 size={16} className="animate-spin mr-2" /> Loading documents...
+                </div>
+              ) : documents.length === 0 ? (
+                <p className="text-sm text-secondary">No documents uploaded yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="p-3 border border-border rounded-lg text-sm flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{doc.file_name}</p>
+                        <p className="text-xs text-secondary">{doc.document_type} • {doc.validation_status}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -21,6 +21,29 @@ const attendanceService = {
     return response.data;
   },
 
+  getMyTimetable: async (academicYear) => {
+    const response = await api.get('/attendance/timetable/my', {
+      params: { academic_year: academicYear }
+    });
+    return response.data;
+  },
+  
+  /**
+   * Create or update timetable in bulk
+   */
+  createTimetable: async (timetableData) => {
+    const response = await api.post('/attendance/timetable', timetableData);
+    return response.data;
+  },
+
+  /**
+   * Update a specific timetable slot
+   */
+  updateTimetableSlot: async (slotId, slotData) => {
+    const response = await api.put(`/attendance/timetable/${slotId}`, slotData);
+    return response.data;
+  },
+
   /**
    * Fetch attendance logs
    */
@@ -97,24 +120,6 @@ const attendanceService = {
   },
 
   /**
-   * Fetch attendance anomalies (Admin/Principal)
-   */
-  getAnomalies: async (params) => {
-    const response = await api.get('/attendance/anomalies', { params });
-    return response.data;
-  },
-
-  /**
-   * Acknowledge an attendance anomaly (Principal only)
-   */
-  acknowledgeAnomaly: async (anomalyId, remarks) => {
-    const response = await api.post(`/attendance/anomalies/${anomalyId}/acknowledge`, {
-      remarks
-    });
-    return response.data;
-  },
-
-  /**
    * Get monthly summary for dashboard
    */
   getMonthlySummary: async (facultyCredentialId, academicYear, month) => {
@@ -136,7 +141,7 @@ const attendanceService = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
-  }
+  },
 };
 
 export default attendanceService;

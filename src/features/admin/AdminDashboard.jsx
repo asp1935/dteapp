@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { Users, Building2, FileText, Briefcase } from 'lucide-react';
 import api from '../../services/api';
+=======
+import { useDispatch, useSelector } from 'react-redux';
+import { Users, Building2, FileText, Search, GraduationCap, Briefcase } from 'lucide-react';
+import { Table } from '../../components/common/Table';
+import { Button, Input } from '../../components/common/UIComponents';
+import InstitutionManagement from './InstitutionManagement';
+import CourseManagement from './CourseManagement';
+import { fetchCourses } from './courseSlice';
+import NormsIntakeManagement from './NormsIntakeManagement';
+import AIValidationDashboard from './AIValidationDashboard';
+import { fetchBillingRates } from './billingSlice';
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 
 const AdminDashboard = () => {
   const [liveStats, setLiveStats] = useState({
@@ -52,6 +65,117 @@ const AdminDashboard = () => {
           </div>
         ))}
       </div>
+<<<<<<< HEAD
+=======
+
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
+        {['institutes', 'courses', 'requirements', 'advertisements', 'ai_validation', 'rates'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-6 py-2.5 text-sm font-semibold rounded-md transition-all capitalize ${
+              activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
+            }`}
+          >
+            {tab === 'requirements' ? 'Requirements' : 
+             tab === 'ai_validation' ? 'AI Validation' : 
+             tab === 'rates' ? 'Honorarium Rates' :
+             tab.replace('_', ' & ')}
+          </button>
+        ))}
+      </div>
+
+      {/* Content Section */}
+      <div>
+        {activeTab === 'institutes' && <InstitutionManagement />}
+        {activeTab === 'courses' && <CourseManagement />}
+        {activeTab === 'requirements' && <NormsIntakeManagement />}
+        {activeTab === 'ai_validation' && <AIValidationDashboard />}
+        {activeTab === 'rates' && <HonorariumRatesView />}
+        
+        {activeTab !== 'institutes' && activeTab !== 'courses' && activeTab !== 'requirements' && activeTab !== 'advertisements' && (
+          <div className="bg-background border border-border rounded-xl p-20 text-center text-secondary italic">
+            Management UI for {activeTab} is coming soon.
+          </div>
+        )}
+
+        {/* Advertisement Generation UI */}
+        {activeTab === 'advertisements' && (
+          <div className="bg-background rounded-xl border border-border shadow-sm p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold">Generate Advertisement</h3>
+              <div className="flex items-center bg-muted p-1 rounded-lg">
+                <button className="px-3 py-1 text-xs font-semibold bg-background rounded shadow-sm">English</button>
+                <button className="px-3 py-1 text-xs font-semibold text-secondary">Marathi</button>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <Input label="Advertisement Title" placeholder="e.g. Recruitment for Faculty Positions 2026" />
+                <Input label="Reference Number" placeholder="DTE/RECRUIT/2026/01" />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label="Opening Date" type="date" />
+                  <Input label="Closing Date" type="date" />
+                </div>
+              </div>
+              <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center space-y-4 bg-muted/20">
+                <FileText className="text-secondary/40" size={48} />
+                <div>
+                  <p className="font-medium text-secondary">Ad Content Preview</p>
+                  <p className="text-xs text-secondary/60 mt-1">Configure parameters to see the generated content.</p>
+                </div>
+                <Button variant="outline" size="sm">Download PDF Draft</Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
+    </div>
+  );
+};
+
+const HonorariumRatesView = () => {
+  const dispatch = useDispatch();
+  const { rates, loading } = useSelector((state) => state.billing);
+  const { institutions } = useSelector((state) => state.institutions);
+  const [instId, setInstId] = useState('1');
+  const [year] = useState('2026-2027');
+
+  useEffect(() => {
+    if (instId) {
+      dispatch(fetchBillingRates({ institution_id: parseInt(instId), academic_year: year }));
+    }
+  }, [dispatch, instId, year]);
+
+  const columns = [
+    { key: 'designation', label: 'Designation' },
+    { key: 'lecture_type', label: 'Type' },
+    { key: 'rate_per_lecture', label: 'Rate', render: (val) => <span className="font-bold">₹{val}</span> },
+    { key: 'effective_from', label: 'Effective From' },
+    { key: 'is_active', label: 'Status', render: (val) => <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${val ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{val ? 'Active' : 'Inactive'}</span> }
+  ];
+
+  return (
+    <div className="bg-background rounded-xl border border-border shadow-sm p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">Institutional Honorarium Rates</h3>
+        <select 
+          className="bg-muted border border-border rounded-lg px-4 py-2 text-sm font-semibold outline-none"
+          value={instId}
+          onChange={(e) => setInstId(e.target.value)}
+        >
+          {institutions.map(inst => (
+            <option key={inst.id} value={inst.id}>{inst.name}</option>
+          ))}
+        </select>
+      </div>
+      <Table 
+        columns={columns}
+        data={rates}
+        loading={loading}
+      />
     </div>
   );
 };

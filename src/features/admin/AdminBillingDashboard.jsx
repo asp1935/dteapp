@@ -141,7 +141,7 @@ const AdminBillingDashboard = () => {
       dispatch(resetBillingStatus());
     }
     if (error) {
-      toast.error(error);
+      toast.error(typeof error === 'string' ? error : (error?.message || JSON.stringify(error)));
       dispatch(resetBillingStatus());
     }
   }, [success, error, dispatch, selectedInstituteId, selectedYear, limit, editingRateId, activeTab]);
@@ -318,6 +318,7 @@ const AdminBillingDashboard = () => {
       {/* Tabs */}
       <div className="flex space-x-1 bg-slate-100 p-1.5 rounded-2xl w-fit">
         <button 
+<<<<<<< HEAD
           onClick={() => { setActiveTab('rates'); dispatch(setPage(1)); }}
           className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'rates' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
@@ -335,6 +336,12 @@ const AdminBillingDashboard = () => {
         >
           AI Monitor
         </button>
+=======
+          className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-white text-indigo-600 shadow-sm"
+        >
+          Rate Management
+        </button>
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
       </div>
 
       {activeTab === 'rates' && (

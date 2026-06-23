@@ -8,7 +8,7 @@ export const fetchShortlisted = createAsyncThunk(
     try {
       return await selectionService.getShortlisted(advertisementId);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch shortlisted candidates');
     }
   }
 );
@@ -22,7 +22,7 @@ export const shortlistCandidates = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to shortlist candidates');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to shortlist candidates');
     }
   }
 );
@@ -36,7 +36,7 @@ export const enterMarks = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save marks');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to save marks');
     }
   }
 );
@@ -50,7 +50,7 @@ export const updateMarks = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update marks');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to update marks');
     }
   }
 );
@@ -64,7 +64,7 @@ export const markAttendance = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update attendance');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to update attendance');
     }
   }
 );
@@ -78,7 +78,7 @@ export const generateRankings = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to generate rankings');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to generate rankings');
     }
   }
 );
@@ -89,7 +89,7 @@ export const fetchRankedList = createAsyncThunk(
     try {
       return await selectionService.getRankedList(advertisementId);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch shortlisted candidates');
     }
   }
 );
@@ -100,7 +100,7 @@ export const fetchDashboard = createAsyncThunk(
     try {
       return await selectionService.getDashboard(advertisementId);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch shortlisted candidates');
     }
   }
 );
@@ -114,7 +114,7 @@ export const runAiAnalysis = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'AI Analysis failed');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'AI Analysis failed');
     }
   }
 );
@@ -128,7 +128,7 @@ export const createAiSnapshot = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create AI snapshot');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to create AI snapshot');
     }
   }
 );
@@ -139,7 +139,7 @@ export const fetchWeights = createAsyncThunk(
     try {
       return await selectionService.getWeights(courseId, level, advertisementId);
     } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch shortlisted candidates');
     }
   }
 );
@@ -153,7 +153,7 @@ export const overrideWeights = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update weights');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to update weights');
     }
   }
 );
@@ -167,7 +167,7 @@ export const confirmSelection = createAsyncThunk(
       return response;
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to confirm selection');
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to confirm selection');
     }
   }
 );

@@ -1,14 +1,14 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Building2, 
-  FileText, 
-  Briefcase, 
-  GraduationCap, 
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  FileText,
+  Briefcase,
+  GraduationCap,
   BookOpen,
-  Calendar, 
+  Calendar,
   LogOut,
   Sparkles,
   ClipboardList,
@@ -16,7 +16,17 @@ import {
   Calculator,
   UserCheck,
   Award,
+<<<<<<< HEAD
   UserCircle
+=======
+  Clock,
+  ShieldCheck,
+  Activity,
+  History,
+  TableProperties,
+  Banknote,
+  BarChart3
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 } from 'lucide-react';
 import { setSidebar } from '../../features/ui/uiSlice';
 import { logout } from '../../features/auth/authSlice';
@@ -35,24 +45,49 @@ const Sidebar = () => {
       { name: 'Faculty Calculator', icon: Calculator, path: '/admin/ai-assistant' },
       { name: 'User Management', icon: Users, path: '/admin/users' },
       { name: 'Advertisements', icon: FileText, path: '/admin/ads' },
+      { name: 'Applications', icon: ClipboardList, path: '/admin/applications' },
+      { name: 'Academic Calendar', icon: Calendar, path: '/admin/calendar' },
       { name: 'Billing', icon: Briefcase, path: '/admin/billing' },
+<<<<<<< HEAD
+=======
+      // { name: 'MIS Reports', icon: BarChart3, path: '/admin/reports' },
+      { name: 'Faculty Calculator', icon: Calculator, path: '/admin/ai-assistant' },
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
     ],
     [ROLES.PRINCIPAL]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/principal/dashboard' },
       { name: 'Faculty', icon: Users, path: '/principal/faculty' },
+<<<<<<< HEAD
       { name: 'Vacancy Assessment', icon: UserCheck, path: '/principal/vacancies' },
       { name: 'Applications', icon: FileText, path: '/principal/applications' },
       { name: 'Candidate Selection', icon: Award, path: '/principal/selection' },
       { name: 'Appointments', icon: FileText, path: '/principal/appointments' },
       { name: 'Timetable', icon: Calendar, path: '/principal/timetable' },
+=======
+      { name: 'Timetable', icon: TableProperties, path: '/principal/timetable' },
+      { name: 'Academic Calendar', icon: Calendar, path: '/principal/calendar' },
+      { name: 'Vacancy Assessment', icon: Activity, path: '/principal/vacancies' },
+      { name: 'Candidate Selection', icon: Award, path: '/principal/selection' },
+      { name: 'Appointments', icon: FileText, path: '/principal/appointments' },
+      { name: 'Applications', icon: FileText, path: '/principal/applications' },
+      { name: 'Interviews', icon: Clock, path: '/principal/interviews' },
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
       { name: 'Work Logs', icon: ClipboardList, path: '/principal/work-logs' },
       { name: 'Billing', icon: Briefcase, path: '/principal/billing' },
     ],
     [ROLES.RO]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/ro/dashboard' },
+<<<<<<< HEAD
       { name: 'Institutes', icon: Building2, path: '/ro/institutes' },
       { name: 'Courses', icon: GraduationCap, path: '/ro/courses' },
       { name: 'Billing', icon: Briefcase, path: '/ro/billing' },
+=======
+      { name: 'Billing Verification', icon: Briefcase, path: '/ro/billing' },
+    ],
+    [ROLES.TREASURY]: [
+      // { name: 'Dashboard', icon: LayoutDashboard, path: '/treasury/dashboard' },
+      { name: 'Disbursements', icon: Banknote, path: '/treasury/billing' },
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
     ],
     [ROLES.CANDIDATE]: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/candidate/dashboard' },
@@ -74,7 +109,7 @@ const Sidebar = () => {
   const isExpanded = isSidebarOpen;
 
   return (
-    <aside 
+    <aside
       onMouseEnter={() => dispatch(setSidebar(true))}
       onMouseLeave={() => dispatch(setSidebar(false))}
       className={cn(
@@ -117,6 +152,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
+<<<<<<< HEAD
       <div className="border-t border-slate-200 p-4 flex items-center justify-between overflow-hidden">
         <div className="flex items-center overflow-hidden">
           <div className="min-w-[32px] flex justify-center shrink-0">
@@ -137,6 +173,10 @@ const Sidebar = () => {
           </div>
         </div>
         <button 
+=======
+      <div className="h-12 border-t border-white/10 flex items-center px-4">
+        <button
+>>>>>>> f965a7779698e7959403db83782d5c9815a657c5
           onClick={() => dispatch(logout())}
           title="Logout"
           className={cn(
