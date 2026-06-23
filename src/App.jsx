@@ -28,12 +28,19 @@ import AdGenerationDashboard from './features/admin/AdGenerationDashboard';
 import SelectionManagement from './features/principal/SelectionManagement';
 import PublicAdView from './pages/PublicAdView';
 import LecturerDashboard from './features/faculty/LecturerDashboard';
+import FacultyTimetable from './features/faculty/FacultyTimetable';
+import FacultyWorkLogs from './features/faculty/FacultyWorkLogs';
 import AdminBillingDashboard from './features/admin/AdminBillingDashboard';
 import PrincipalBillingDashboard from './features/principal/PrincipalBillingDashboard';
+import ROBillingDashboard from './features/ro/ROBillingDashboard';
+import TreasuryBillingDashboard from './features/treasury/TreasuryBillingDashboard';
 import PrincipalWorkLogs from './features/principal/PrincipalWorkLogs';
 import PrincipalAppointmentManagement from './features/principal/PrincipalAppointmentManagement';
 import ApplicationManagement from './features/admin/ApplicationManagement';
 import MyApplications from './features/candidate/MyApplications';
+import CandidateAdsPage from './features/candidate/CandidateAdsPage';
+import CandidateOffers from './features/candidate/CandidateOffers';
+import ManageTimetable from './features/principal/ManageTimetable';
 
 function App() {
   const dispatch = useDispatch();
@@ -105,16 +112,7 @@ function App() {
           }
         />
         <Route path="admin/principals" element={<div className="p-8 font-bold">Principals Management UI</div>} />
-        <Route 
-          path="admin/courses" 
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <div className="p-6">
-                <CourseManagement />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
+
         <Route 
           path="admin/ads" 
           element={
@@ -145,16 +143,7 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route
-          path="admin/institutes"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <div className="p-6">
-                <InstitutionManagement />
-              </div>
-            </ProtectedRoute>
-          }
-        />
+
 
         {/* Principal Routes */}
         <Route
@@ -238,6 +227,16 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="principal/timetable" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PRINCIPAL]}>
+              <div className="p-6">
+                <ManageTimetable />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
 
         {/* RO Routes */}
         <Route
@@ -245,6 +244,48 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.RO]}>
               <RODashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="ro/institutes"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.RO]}>
+              <div className="p-6">
+                <InstitutionManagement />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="ro/courses"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.RO]}>
+              <div className="p-6">
+                <CourseManagement />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="ro/billing"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.RO]}>
+              <div className="p-6">
+                <ROBillingDashboard />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Treasury Routes */}
+        <Route
+          path="treasury/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.TREASURY]}>
+              <div className="p-6">
+                <TreasuryBillingDashboard />
+              </div>
             </ProtectedRoute>
           }
         />
@@ -258,7 +299,22 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="candidate/ads" element={<div className="p-8 font-bold">Browse Job Advertisements</div>} />
+        <Route 
+          path="candidate/ads" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.CANDIDATE]}>
+              <CandidateAdsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="candidate/offers" 
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.CANDIDATE]}>
+              <CandidateOffers />
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="candidate/applications" 
           element={
@@ -276,6 +332,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
               <LecturerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="faculty/timetable"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
+              <FacultyTimetable />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="faculty/work-logs"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.FACULTY]}>
+              <FacultyWorkLogs />
             </ProtectedRoute>
           }
         />

@@ -46,7 +46,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
               <FileText size={32} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Appointment Offer</h2>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Appointment Offer</h2>
               <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mt-1">{appointment.appointment_number}</p>
             </div>
           </div>
@@ -70,7 +70,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
             {/* Sidebar Details & Actions */}
             <div className="space-y-6">
               <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-6">
-                <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">Offer Details</h4>
+                <h4 className="font-bold text-slate-900 uppercase tracking-widest text-xs">Offer Details</h4>
                 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
@@ -78,7 +78,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
                       <Building2 size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase">Institution</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Institution</p>
                       <p className="text-sm font-bold text-slate-700">{appointment.institution_name}</p>
                     </div>
                   </div>
@@ -88,7 +88,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
                       <Award size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase">Course</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Course</p>
                       <p className="text-sm font-bold text-slate-700">{appointment.course_name}</p>
                     </div>
                   </div>
@@ -98,7 +98,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
                       <Calendar size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase">Joining Date</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Joining Date</p>
                       <p className="text-sm font-bold text-slate-700">{new Date(appointment.joining_date).toLocaleDateString()}</p>
                     </div>
                   </div>
@@ -116,7 +116,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
 
               {appointment.status === 'ISSUED' && (
                 <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
-                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">Your Response</h4>
+                  <h4 className="font-bold text-slate-900 uppercase tracking-widest text-xs">Your Response</h4>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none focus:border-indigo-200 transition-all min-h-[100px]"
                     placeholder="Enter any remarks or reason for rejection..."
@@ -152,21 +152,21 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
                   )}>
                     <div className="flex flex-col items-center">
                       {appointment.status === 'ACCEPTED' ? <CheckCircle className="mb-2" size={32} /> : <XCircle className="mb-2" size={32} />}
-                      <p className="font-black uppercase tracking-widest text-xs">Offer {appointment.status}</p>
+                      <p className="font-bold uppercase tracking-widest text-xs">Offer {appointment.status}</p>
                     </div>
                   </div>
 
                   {appointment.status === 'ACCEPTED' && appointment.credentials && (
                     <div className="bg-indigo-600 p-8 rounded-[32px] text-white shadow-xl shadow-indigo-200 animate-in slide-in-from-bottom-4 duration-700">
-                      <h4 className="font-black uppercase tracking-widest text-xs mb-4 text-indigo-200">Your Faculty Account</h4>
+                      <h4 className="font-bold uppercase tracking-widest text-xs mb-4 text-indigo-200">Your Faculty Account</h4>
                       <div className="space-y-4">
                         <div>
                           <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-tighter">Portal Username</p>
-                          <p className="text-sm font-black select-all">{appointment.credentials.username}</p>
+                          <p className="text-sm font-bold select-all">{appointment.credentials.username}</p>
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-tighter">Temporary Password</p>
-                          <p className="text-sm font-black select-all">
+                          <p className="text-sm font-bold select-all">
                             {appointment.credentials.password || "Password already used or unavailable. Contact Admin."}
                           </p>
                         </div>

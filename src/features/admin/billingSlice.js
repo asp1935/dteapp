@@ -291,7 +291,7 @@ const billingSlice = createSlice({
       })
       .addCase(fetchBillDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedBill = action.payload;
+        state.selectedBill = action.payload.data || action.payload;
       })
       .addCase(fetchBillApprovals.fulfilled, (state, action) => {
         state.loading = false;

@@ -5,9 +5,19 @@ const attendanceService = {
    * Fetch timetable for a faculty
    */
   getTimetable: async (facultyCredentialId, academicYear) => {
-    const response = await api.get(`/attendance/timetable/${facultyCredentialId}`, {
-      params: { academic_year: academicYear }
-    });
+    const params = { academic_year: academicYear };
+    if (facultyCredentialId) {
+        params.faculty_credential_id = facultyCredentialId;
+    }
+    const response = await api.get(`/attendance/timetable`, { params });
+    return response.data;
+  },
+
+  /**
+   * Create timetable slots
+   */
+  createTimetableSlot: async (data) => {
+    const response = await api.post('/attendance/timetable', data);
     return response.data;
   },
 
@@ -108,8 +118,22 @@ const attendanceService = {
    * Get monthly summary for dashboard
    */
   getMonthlySummary: async (facultyCredentialId, academicYear, month) => {
-    const response = await api.get('/attendance/logs/summary', {
-      params: { faculty_credential_id: facultyCredentialId, academic_year: academicYear, month }
+    const params = { academic_year: academicYear, month };
+    if (facultyCredentialId) {
+        params.faculty_credential_id = facultyCredentialId;
+    }
+    const response = await api.get('/attendance/logs/summary', { params });
+    return response.data;
+  },
+
+  /**
+   * Count faces in an image using AI
+   */
+  countFaces: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/attendance/ai-face-count', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   }

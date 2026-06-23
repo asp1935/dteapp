@@ -19,8 +19,11 @@ export const login = createAsyncThunk(
 
       const data = response.data;
 
-      // The API response user object structure: { access_token, user: { role, ... } }
+      // The API response user object structure: { access_token, refresh_token, user: { role, ... } }
       localStorage.setItem('auth_token', data.access_token);
+      if (data.refresh_token) {
+        localStorage.setItem('refresh_token', data.refresh_token);
+      }
       localStorage.setItem('user_role', data.user.role);
       localStorage.setItem('user_data', JSON.stringify(data.user));
 
@@ -123,6 +126,7 @@ const authSlice = createSlice({
       state.role = null;
       state.isAuthenticated = false;
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_role');
       localStorage.removeItem('user_data');
     },
@@ -160,6 +164,10 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.role = null;
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_data');
       });
   },
 });

@@ -13,4 +13,5 @@ export const DASHBOARD_ROUTES = {
   [ROLES.RO]: '/ro/dashboard',
   [ROLES.CANDIDATE]: '/candidate/dashboard',
   [ROLES.FACULTY]: '/faculty/dashboard',
+  [ROLES.TREASURY]: '/treasury/dashboard',
 };

@@ -1,29 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Users, Building2, FileText, Search, GraduationCap, Briefcase } from 'lucide-react';
-import { Table } from '../../components/common/Table';
-import { Button, Input } from '../../components/common/UIComponents';
-import InstitutionManagement from './InstitutionManagement';
-import CourseManagement from './CourseManagement';
-import { fetchCourses } from './courseSlice';
-import NormsIntakeManagement from './NormsIntakeManagement';
-import AIValidationDashboard from './AIValidationDashboard';
+import { Users, Building2, FileText, Briefcase } from 'lucide-react';
+import api from '../../services/api';
 
 const AdminDashboard = () => {
-  const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState('institutes');
-  const { institutions = [] } = useSelector((state) => state.institutions || {});
-  const { courses = [] } = useSelector((state) => state.courses || {});
+  const [liveStats, setLiveStats] = useState({
+    advertisements: 0,
+    vacancies: 0,
+    users: 0,
+    bills: 0
+  });
 
   useEffect(() => {
-    dispatch(fetchCourses());
-  }, [dispatch]);
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/requirements/dashboard/admin-stats');
+        if (res.data && res.data.status === 'success') {
+          setLiveStats(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch admin stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const stats = [
-    { label: 'Institutes', value: institutions.length || '0', icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Advertisements', value: '12', icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { label: 'Total Courses', value: courses.length || '0', icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Registered Users', value: '1,284', icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Actual Advertisements', value: liveStats.advertisements, icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Vacancy Generated', value: liveStats.vacancies, icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Registered Users', value: liveStats.users, icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Bills Passed', value: liveStats.bills, icon: Briefcase, color: 'text-green-500', bg: 'bg-green-500/10' },
   ];
 
   return (
@@ -46,68 +51,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
-        {['institutes', 'courses', 'requirements', 'advertisements', 'ai_validation'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2.5 text-sm font-semibold rounded-md transition-all capitalize ${
-              activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'text-secondary hover:text-foreground'
-            }`}
-          >
-            {tab === 'requirements' ? 'Requirements' : 
-             tab === 'ai_validation' ? 'AI Validation' : 
-             tab.replace('_', ' & ')}
-          </button>
-        ))}
-      </div>
-
-      {/* Content Section */}
-      <div>
-        {activeTab === 'institutes' && <InstitutionManagement />}
-        {activeTab === 'courses' && <CourseManagement />}
-        {activeTab === 'requirements' && <NormsIntakeManagement />}
-        {activeTab === 'ai_validation' && <AIValidationDashboard />}
-        
-        {activeTab !== 'institutes' && activeTab !== 'courses' && activeTab !== 'requirements' && activeTab !== 'advertisements' && (
-          <div className="bg-background border border-border rounded-xl p-20 text-center text-secondary italic">
-            Management UI for {activeTab} is coming soon.
-          </div>
-        )}
-
-        {/* Advertisement Generation UI */}
-        {activeTab === 'advertisements' && (
-          <div className="bg-background rounded-xl border border-border shadow-sm p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold">Generate Advertisement</h3>
-              <div className="flex items-center bg-muted p-1 rounded-lg">
-                <button className="px-3 py-1 text-xs font-semibold bg-background rounded shadow-sm">English</button>
-                <button className="px-3 py-1 text-xs font-semibold text-secondary">Marathi</button>
-              </div>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <Input label="Advertisement Title" placeholder="e.g. Recruitment for Faculty Positions 2026" />
-                <Input label="Reference Number" placeholder="DTE/RECRUIT/2026/01" />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input label="Opening Date" type="date" />
-                  <Input label="Closing Date" type="date" />
-                </div>
-              </div>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center space-y-4 bg-muted/20">
-                <FileText className="text-secondary/40" size={48} />
-                <div>
-                  <p className="font-medium text-secondary">Ad Content Preview</p>
-                  <p className="text-xs text-secondary/60 mt-1">Configure parameters to see the generated content.</p>
-                </div>
-                <Button variant="outline" size="sm">Download PDF Draft</Button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

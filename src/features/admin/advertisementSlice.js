@@ -139,6 +139,7 @@ const advertisementSlice = createSlice({
   initialState: {
     list: [],
     publishedList: [],
+    totalPublished: 0,
     meta: null,
     currentAd: null,
     preview: null,
@@ -157,6 +158,9 @@ const advertisementSlice = createSlice({
     },
     clearRecruitmentContext: (state) => {
       state.recruitmentContext = null;
+    },
+    setPreview: (state, action) => {
+      state.preview = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -184,9 +188,15 @@ const advertisementSlice = createSlice({
         state.aiLoading = false;
         state.error = action.payload;
       })
+      .addCase(saveAd.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(saveAd.fulfilled, (state) => {
+        state.loading = false;
         state.success = true;
         state.preview = null;
+      })
+      .addCase(saveAd.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       .addCase(fetchAdById.pending, (state) => { state.loading = true; })
       .addCase(fetchAdById.fulfilled, (state, action) => {
@@ -221,6 +231,7 @@ const advertisementSlice = createSlice({
       .addCase(fetchPublishedAds.fulfilled, (state, action) => {
         state.loading = false;
         state.publishedList = action.payload.data;
+        state.totalPublished = action.payload.total || 0;
       })
       .addCase(deleteAd.fulfilled, (state, action) => {
         state.list = state.list.filter(ad => ad.id !== action.payload);
@@ -242,5 +253,5 @@ const advertisementSlice = createSlice({
   }
 });
 
-export const { clearAdStatus, clearRecruitmentContext } = advertisementSlice.actions;
+export const { clearAdStatus, clearRecruitmentContext, setPreview } = advertisementSlice.actions;
 export default advertisementSlice.reducer;

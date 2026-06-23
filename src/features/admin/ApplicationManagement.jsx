@@ -431,7 +431,10 @@ const ApplicationManagement = () => {
                             variant="ghost" 
                             size="sm" 
                             className="p-2 h-9 w-9 rounded-full"
-                            onClick={() => window.open(`http://localhost:8000/${doc.file_path}`, '_blank')}
+                            onClick={() => {
+                              const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:8080';
+                              window.open(`${baseUrl}/${doc.file_path}`, '_blank');
+                            }}
                           >
                             <ExternalLink size={16} />
                           </Button>

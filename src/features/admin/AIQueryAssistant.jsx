@@ -80,15 +80,11 @@ const FacultyRequirementCalculator = () => {
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
               <Calculator size={20} />
             </div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
               Faculty Requirement <span className="text-indigo-600">Calculator</span>
             </h1>
           </div>
           <p className="text-slate-500 font-medium ml-[52px]">AI-assisted rule validation engine for DTE normative compliance.</p>
-        </div>
-        <div className="flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2 self-start">
-          <Shield size={14} className="text-indigo-600" />
-          <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Final Approval: Directorate</span>
         </div>
       </div>
 
@@ -96,7 +92,7 @@ const FacultyRequirementCalculator = () => {
       <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row items-end gap-6">
           <div className="flex-1 w-full space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center">
               <Building2 size={12} className="mr-1.5" /> Institution
             </label>
             <select
@@ -116,7 +112,7 @@ const FacultyRequirementCalculator = () => {
           </div>
 
           <div className="flex-1 w-full space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center">
               <GraduationCap size={12} className="mr-1.5" /> Course (Optional — leave blank for all)
             </label>
             <select
@@ -133,7 +129,7 @@ const FacultyRequirementCalculator = () => {
           </div>
 
           <div className="w-full lg:w-48 space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center">
               <Calendar size={12} className="mr-1.5" /> Academic Year
             </label>
             <select
@@ -150,7 +146,7 @@ const FacultyRequirementCalculator = () => {
             onClick={handleCalculate}
             disabled={!selectedInst || aiLoading}
             className={cn(
-              "h-[52px] px-10 rounded-2xl font-black text-sm flex items-center justify-center transition-all duration-300 shrink-0",
+              "h-[52px] px-10 rounded-2xl font-bold text-sm flex items-center justify-center transition-all duration-300 shrink-0",
               selectedInst && !aiLoading
                 ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 cursor-pointer"
                 : "bg-slate-100 text-slate-400 cursor-not-allowed"
@@ -174,26 +170,26 @@ const FacultyRequirementCalculator = () => {
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Courses Analyzed</p>
-              <p className="text-4xl font-black text-slate-900">{courseSummaries.length}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Courses Analyzed</p>
+              <p className="text-4xl font-bold text-slate-900">{courseSummaries.length}</p>
               <p className="text-xs text-slate-400 font-bold mt-1">{data.academic_year}</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Students Admitted</p>
-              <p className="text-4xl font-black text-slate-900">{data.total_admitted}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Students Admitted</p>
+              <p className="text-4xl font-bold text-slate-900">{data.total_admitted}</p>
               <p className="text-xs text-slate-400 font-bold mt-1">of {data.total_approved} approved</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2">Faculty Required</p>
-              <p className="text-4xl font-black text-indigo-600">{data.total_required}</p>
+              <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2">Faculty Required</p>
+              <p className="text-4xl font-bold text-indigo-600">{data.total_required}</p>
               <p className="text-xs text-slate-400 font-bold mt-1">As per DTE norms</p>
             </div>
             <div className={cn(
               "rounded-2xl p-6 shadow-sm border",
               data.anomalies?.length > 0 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"
             )}>
-              <p className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-60">Anomalies</p>
-              <p className="text-4xl font-black">{data.anomalies?.length || 0}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-60">Anomalies</p>
+              <p className="text-4xl font-bold">{data.anomalies?.length || 0}</p>
               <p className="text-xs font-bold mt-1 opacity-60">
                 {data.anomalies?.length > 0 ? 'Review required' : 'All normal'}
               </p>
@@ -210,7 +206,7 @@ const FacultyRequirementCalculator = () => {
                 <BarChart3 size={20} />
               </div>
               <div>
-                <p className="text-sm font-black text-slate-900">AI Confidence Score</p>
+                <p className="text-sm font-bold text-slate-900">AI Confidence Score</p>
                 <p className="text-xs text-slate-500 font-medium">{(result.confidence_score * 100).toFixed(0)}% — {result.confidence_score > 0.8 ? 'High confidence' : result.confidence_score > 0.5 ? 'Moderate — manual review recommended' : 'Low — requires Directorate review'}</p>
               </div>
             </div>
@@ -228,8 +224,8 @@ const FacultyRequirementCalculator = () => {
           {/* Course-by-Course Breakdown */}
           <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-              <h3 className="text-lg font-black text-slate-900">Suggested Requirement Summary</h3>
-              <span className="text-[10px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">Per-Course Breakdown</span>
+              <h3 className="text-lg font-bold text-slate-900">Suggested Requirement Summary</h3>
+              <span className="text-[10px] font-bold bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">Per-Course Breakdown</span>
             </div>
 
             <div className="divide-y divide-slate-50">
@@ -241,13 +237,13 @@ const FacultyRequirementCalculator = () => {
                   >
                     <div className="flex-1 flex items-center space-x-4">
                       <div className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-black",
+                        "w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold",
                         c.ai_status === 'OK' ? 'bg-emerald-500' : 'bg-amber-500'
                       )}>
                         {c.ai_status === 'OK' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-900">{c.course_name}</p>
+                        <p className="text-sm font-bold text-slate-900">{c.course_name}</p>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{c.level} • Ratio 1:{c.norm_ratio}</p>
                       </div>
                     </div>
@@ -255,19 +251,19 @@ const FacultyRequirementCalculator = () => {
                     <div className="hidden md:flex items-center space-x-12 mr-8">
                       <div className="text-center">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">Admitted</p>
-                        <p className="text-lg font-black text-slate-900">{c.actual_admitted}</p>
+                        <p className="text-lg font-bold text-slate-900">{c.actual_admitted}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] text-indigo-500 font-bold uppercase">Required</p>
-                        <p className="text-lg font-black text-indigo-600">{c.computed_required}</p>
+                        <p className="text-lg font-bold text-indigo-600">{c.computed_required}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">Existing</p>
-                        <p className="text-lg font-black text-slate-900">{c.existing_faculty}</p>
+                        <p className="text-lg font-bold text-slate-900">{c.existing_faculty}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] font-bold uppercase" style={{ color: c.vacancy_gap > 0 ? '#dc2626' : '#16a34a' }}>Gap</p>
-                        <p className="text-lg font-black" style={{ color: c.vacancy_gap > 0 ? '#dc2626' : '#16a34a' }}>{c.vacancy_gap}</p>
+                        <p className="text-lg font-bold" style={{ color: c.vacancy_gap > 0 ? '#dc2626' : '#16a34a' }}>{c.vacancy_gap}</p>
                       </div>
                     </div>
 
@@ -279,19 +275,19 @@ const FacultyRequirementCalculator = () => {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div className="bg-white rounded-xl p-4 border border-slate-100">
                           <p className="text-[10px] text-slate-400 font-bold uppercase">Approved Seats</p>
-                          <p className="text-xl font-black text-slate-900 mt-1">{c.approved_seats}</p>
+                          <p className="text-xl font-bold text-slate-900 mt-1">{c.approved_seats}</p>
                         </div>
                         <div className="bg-white rounded-xl p-4 border border-slate-100">
                           <p className="text-[10px] text-slate-400 font-bold uppercase">Actual Admitted</p>
-                          <p className="text-xl font-black text-slate-900 mt-1">{c.actual_admitted}</p>
+                          <p className="text-xl font-bold text-slate-900 mt-1">{c.actual_admitted}</p>
                         </div>
                         <div className="bg-white rounded-xl p-4 border border-slate-100">
                           <p className="text-[10px] text-indigo-500 font-bold uppercase">Computed Required</p>
-                          <p className="text-xl font-black text-indigo-600 mt-1">{c.computed_required}</p>
+                          <p className="text-xl font-bold text-indigo-600 mt-1">{c.computed_required}</p>
                         </div>
                         <div className="bg-white rounded-xl p-4 border border-slate-100">
                           <p className="text-[10px] text-slate-400 font-bold uppercase">Norm Ratio</p>
-                          <p className="text-xl font-black text-slate-900 mt-1">1:{c.norm_ratio}</p>
+                          <p className="text-xl font-bold text-slate-900 mt-1">1:{c.norm_ratio}</p>
                         </div>
                       </div>
 
@@ -300,19 +296,19 @@ const FacultyRequirementCalculator = () => {
                         <div className="bg-white rounded-xl p-4 border border-slate-100 flex items-center gap-4 mb-4">
                           <Clock size={16} className="text-slate-400" />
                           <div className="flex-1">
-                            <p className="text-xs font-black text-slate-700">Historical Comparison (Previous Year)</p>
+                            <p className="text-xs font-bold text-slate-700">Historical Comparison (Previous Year)</p>
                             <p className="text-xs text-slate-500 font-medium mt-1">
-                              Previous Required: <span className="font-black text-slate-900">{c.historical.previous_required_count}</span>
-                              {' | '}Previous Admitted: <span className="font-black text-slate-900">{c.historical.previous_actual_admitted}</span>
+                              Previous Required: <span className="font-bold text-slate-900">{c.historical.previous_required_count}</span>
+                              {' | '}Previous Admitted: <span className="font-bold text-slate-900">{c.historical.previous_actual_admitted}</span>
                             </p>
                           </div>
                           {c.computed_required > (c.historical?.previous_required_count || 0) ? (
-                            <div className="flex items-center text-amber-600 text-xs font-black">
+                            <div className="flex items-center text-amber-600 text-xs font-bold">
                               <TrendingUp size={14} className="mr-1" />
                               +{c.computed_required - c.historical.previous_required_count}
                             </div>
                           ) : (
-                            <div className="flex items-center text-emerald-600 text-xs font-black">
+                            <div className="flex items-center text-emerald-600 text-xs font-bold">
                               <TrendingDown size={14} className="mr-1" />
                               {c.computed_required - (c.historical?.previous_required_count || 0)}
                             </div>
@@ -345,7 +341,7 @@ const FacultyRequirementCalculator = () => {
                   <div className="w-8 h-8 bg-indigo-500/20 border border-indigo-500/30 rounded-lg flex items-center justify-center">
                     <Info className="text-indigo-400" size={16} />
                   </div>
-                  <h3 className="text-base font-black tracking-tight">AI Engine Insights</h3>
+                  <h3 className="text-base font-bold tracking-tight">AI Engine Insights</h3>
                 </div>
                 <div className="space-y-3">
                   {(data.insights || []).map((insight, idx) => (
@@ -370,7 +366,7 @@ const FacultyRequirementCalculator = () => {
                 )}>
                   {data.anomalies?.length > 0 ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
                 </div>
-                <h3 className="text-base font-black text-slate-900 tracking-tight">Flagged Variations</h3>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">Flagged Variations</h3>
               </div>
 
               {data.anomalies?.length > 0 ? (
@@ -381,9 +377,9 @@ const FacultyRequirementCalculator = () => {
                       a.severity === 'CRITICAL' ? 'bg-red-50 border-red-100' : a.severity === 'HIGH' ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-100'
                     )}>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{a.type?.replace(/_/g, ' ')}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{a.type?.replace(/_/g, ' ')}</span>
                         <span className={cn(
-                          "text-[10px] font-black uppercase px-2 py-0.5 rounded-full",
+                          "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full",
                           a.severity === 'CRITICAL' ? 'bg-red-600 text-white' : a.severity === 'HIGH' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-600'
                         )}>{a.severity}</span>
                       </div>
@@ -395,7 +391,7 @@ const FacultyRequirementCalculator = () => {
               ) : (
                 <div className="text-center py-10 text-slate-400">
                   <CheckCircle2 size={40} className="mx-auto mb-3 text-emerald-400" />
-                  <p className="text-sm font-black text-emerald-600">No Abnormal Variations Detected</p>
+                  <p className="text-sm font-bold text-emerald-600">No Abnormal Variations Detected</p>
                   <p className="text-xs font-medium mt-1 text-slate-400">All courses are within normative thresholds.</p>
                 </div>
               )}
@@ -407,7 +403,7 @@ const FacultyRequirementCalculator = () => {
             <div className="flex items-center space-x-4">
               <Shield size={24} className="text-slate-400" />
               <div>
-                <p className="text-sm font-black text-slate-900">Pending Directorate Approval</p>
+                <p className="text-sm font-bold text-slate-900">Pending Directorate Approval</p>
                 <p className="text-xs text-slate-500 font-medium">This is an AI-generated Suggested Requirement Summary. Final approval remains with the Directorate of Technical Education.</p>
               </div>
             </div>
@@ -418,7 +414,7 @@ const FacultyRequirementCalculator = () => {
           <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-sm mb-6">
             <Calculator size={32} className="text-slate-300" />
           </div>
-          <h3 className="text-xl font-black text-slate-900">Select an Institution to Begin</h3>
+          <h3 className="text-xl font-bold text-slate-900">Select an Institution to Begin</h3>
           <p className="text-slate-500 font-medium max-w-md mt-2">
             The AI engine will calculate faculty requirements based on intake data, DTE norms, and historical utilization — flagging any abnormal variations for Directorate review.
           </p>

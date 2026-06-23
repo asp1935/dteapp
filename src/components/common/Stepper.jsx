@@ -20,11 +20,11 @@ const Stepper = ({ steps, currentStep }) => {
                   "bg-white border-2 border-slate-200 text-slate-400"
                 )}
               >
-                {isCompleted ? <Check size={18} strokeWidth={3} /> : <span className="text-sm font-black">{index + 1}</span>}
+                {isCompleted ? <Check size={18} strokeWidth={3} /> : <span className="text-sm font-bold">{index + 1}</span>}
               </div>
               <div className="mt-3 text-center">
                 <p className={cn(
-                  "text-[10px] font-black uppercase tracking-widest",
+                  "text-[10px] font-bold uppercase tracking-widest",
                   isActive ? "text-indigo-600" : isCompleted ? "text-slate-900" : "text-slate-400"
                 )}>
                   {step.label}

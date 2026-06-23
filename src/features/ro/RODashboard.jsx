@@ -1,10 +1,35 @@
-import { LayoutDashboard, Building2, Users, FileCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LayoutDashboard, Building2, Users, FileCheck, Loader2 } from 'lucide-react';
+import api from '../../services/api';
 
 const RODashboard = () => {
+  const [liveStats, setLiveStats] = useState({
+    institutes: 0,
+    verifiedAds: 0,
+    pendingApprovals: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/requirements/dashboard/ro-stats');
+        if (response.data.status === 'success') {
+          setLiveStats(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch RO stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const stats = [
-    { label: 'Institutes in Region', value: '24', icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Total Verified Ads', value: '45', icon: FileCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Pending Approvals', value: '12', icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Institutes in Region', value: liveStats.institutes, icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Total Verified Ads', value: liveStats.verifiedAds, icon: FileCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Pending Approvals', value: liveStats.pendingApprovals, icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10' },
   ];
 
   return (
@@ -14,7 +39,12 @@ const RODashboard = () => {
         <p className="text-secondary">Overview of regional activities, institute status, and recruitment approvals.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, i) => (
           <div key={i} className="p-8 bg-background rounded-2xl border border-border shadow-sm flex flex-col items-center text-center space-y-4">
             <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color}`}>
@@ -27,6 +57,7 @@ const RODashboard = () => {
           </div>
         ))}
       </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-8 mt-12">
         <div className="bg-background rounded-2xl border border-border p-8 border-dashed flex flex-col items-center justify-center text-center space-y-4">

@@ -8,10 +8,12 @@ import { fetchInstitutions, createInstitution, updateInstitution, deleteInstitut
 import { fetchIntakes, createIntake, updateIntake, deleteIntake } from './intakeSlice';
 import { fetchNorms, createNorm, updateNorm, deleteNorm, seedDTEDefaults } from './normSlice';
 import { generateRequirements } from './requirementSlice';
+import { ROLES } from '../../constants/roles';
 
 const InstitutionManagement = () => {
   const dispatch = useDispatch();
   const { institutions, loading } = useSelector((state) => state.institutions);
+  const role = useSelector((state) => state.auth.role);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -102,9 +104,16 @@ const InstitutionManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this institution?')) {
-      dispatch(deleteInstitution(id));
+  const handleDelete = async (id) => {
+    console.log('[DELETE] handleDelete called with id:', id);
+    try {
+      const result = await dispatch(deleteInstitution(id)).unwrap();
+      console.log('[DELETE] Success result:', result);
+      dispatch(fetchInstitutions({ page: 1, limit: 10 }));
+      alert('Institution deleted successfully!');
+    } catch (err) {
+      console.error('[DELETE] Error:', err);
+      alert('Failed to delete institution: ' + JSON.stringify(err));
     }
   };
 
@@ -152,14 +161,16 @@ const InstitutionManagement = () => {
             className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border focus:bg-background focus:border-accent rounded-lg text-sm transition-all outline-none"
           />
         </div>
-        <Button 
-          variant="accent" 
-          onClick={() => setIsModalOpen(true)} 
-          className="flex items-center space-x-2 w-full sm:w-auto"
-        >
-          <Plus size={20} />
-          <span>Add Institution</span>
-        </Button>
+        {role === ROLES.RO && (
+          <Button 
+            variant="accent" 
+            onClick={() => setIsModalOpen(true)} 
+            className="flex items-center space-x-2 w-full sm:w-auto"
+          >
+            <Plus size={20} />
+            <span>Add Institution</span>
+          </Button>
+        )}
       </div>
 
       {/* Form Modal */}
@@ -355,7 +366,7 @@ const InstitutionManagement = () => {
                         <div className="flex items-baseline space-x-2">
                           <span className="text-sm font-bold text-foreground">{approvedSeats} Seats</span>
                           {generationResults[course.id] && (
-                            <span className="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-md font-black border border-indigo-200">
+                            <span className="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-md font-bold border border-indigo-200">
                               REQ: {generationResults[course.id].computed_required_count}
                             </span>
                           )}
@@ -446,7 +457,7 @@ const InstitutionManagement = () => {
               ) : (
                 <div className="bg-muted/30 p-4 rounded-2xl border border-border animate-in zoom-in-95 duration-200">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-xs font-black text-secondary uppercase tracking-widest">New Course Details</h4>
+                    <h4 className="text-xs font-bold text-secondary uppercase tracking-widest">New Course Details</h4>
                     <button onClick={() => setShowAddCourseForm(false)} className="text-secondary hover:text-foreground">
                       <X size={16} />
                     </button>
@@ -795,22 +806,30 @@ const InstitutionManagement = () => {
                 >
                   <BarChart3 size={16} />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  className="p-2 h-auto text-blue-500 hover:bg-blue-500/10"
-                  onClick={() => handleEdit(row)}
-                  title="Edit Institution"
-                >
-                  <Edit size={16} />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="p-2 h-auto text-red-500 hover:bg-red-500/10"
-                  onClick={() => handleDelete(row.id)}
-                  title="Delete Institution"
-                >
-                  <Trash2 size={16} />
-                </Button>
+                {[ROLES.ADMIN, ROLES.RO].includes(role) && (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="p-2 h-auto text-blue-500 hover:bg-blue-500/10"
+                      onClick={() => handleEdit(row)}
+                      title="Edit Institution"
+                    >
+                      <Edit size={16} />
+                    </Button>
+                    <button 
+                      type="button"
+                      style={{ background: 'none', border: '1px solid red', cursor: 'pointer', padding: '6px', borderRadius: '6px', color: 'red' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('[DELETE CLICK] Button clicked for row:', row.id, row.name);
+                        handleDelete(row.id);
+                      }}
+                      title="Delete Institution"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                )}
               </div>
             )}
           />

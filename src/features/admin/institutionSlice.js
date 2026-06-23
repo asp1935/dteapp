@@ -42,10 +42,14 @@ export const deleteInstitution = createAsyncThunk(
   'institutions/deleteInstitution',
   async (id, { rejectWithValue }) => {
     try {
-      await institutionService.deleteInstitution(id);
+      console.log('[DELETE THUNK] Calling institutionService.deleteInstitution with id:', id);
+      const response = await institutionService.deleteInstitution(id);
+      console.log('[DELETE THUNK] API response:', response);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete institution');
+      console.error('[DELETE THUNK] API error:', error);
+      console.error('[DELETE THUNK] Error response:', error.response);
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to delete institution');
     }
   }
 );

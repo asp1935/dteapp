@@ -116,7 +116,7 @@ const PublicAdView = () => {
             </div>
             
             <div className="space-y-2">
-              <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight">
+              <h1 className="text-3xl md:text-5xl font-bold text-slate-900 leading-tight">
                 {ad.course_name} <br/>
                 <span className="text-indigo-600 font-medium text-2xl md:text-3xl">Recruitment (CHB)</span>
               </h1>

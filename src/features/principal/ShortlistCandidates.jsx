@@ -81,7 +81,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
-          <h2 className="text-xl font-black text-slate-900">Applied Candidates</h2>
+          <h2 className="text-xl font-bold text-slate-900">Applied Candidates</h2>
           <p className="text-sm text-slate-500 font-medium">Review and select candidates for the interview phase.</p>
         </div>
         <div className="flex gap-3">
@@ -91,7 +91,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
           <Button 
             disabled={selectedIds.length === 0 || shortlisting} 
             onClick={handleShortlist}
-            className="bg-indigo-600 hover:bg-indigo-700 min-w-[200px] shadow-lg shadow-indigo-100"
+            className="min-w-[200px] shadow-sm"
           >
             {shortlisting ? (
               <Loader2 size={18} className="animate-spin mr-2" />
@@ -106,7 +106,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
       <div className="overflow-x-auto rounded-3xl border border-slate-100">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+            <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
               <th className="py-4 px-6 w-10 text-center">
                 <input 
                   type="checkbox" 
@@ -129,7 +129,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
                       <Search size={48} className="mb-4 opacity-20" />
                       <p className="font-medium italic text-lg text-slate-500">All applications processed.</p>
                       <p className="text-sm mt-1 mb-6">Your shortlist is ready. Proceed to interview scoring.</p>
-                      <Button variant="primary" onClick={onSkip} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+                      <Button variant="primary" onClick={onSkip} className="shadow-sm">
                         Proceed to Interview Marks
                         <ArrowRight size={16} className="ml-2" />
                       </Button>
@@ -156,7 +156,7 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
                   </td>
                   <td className="py-5 px-6 text-sm text-slate-600 font-medium">
                     <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-black uppercase tracking-tight">{cand.qualification}</span>
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold uppercase tracking-tight">{cand.qualification}</span>
                       <span>{cand.experience_years} Years Experience</span>
                     </div>
                   </td>
@@ -168,11 +168,11 @@ const ShortlistCandidates = ({ advertisementId, onSuccess, onSkip }) => {
                             cand.ai_confidence_score > 70 ? "bg-emerald-500" : "bg-amber-500"
                           )} style={{ width: `${cand.ai_confidence_score || 0}%` }} />
                         </div>
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{cand.ai_confidence_score || 0}% Fit</span>
+                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{cand.ai_confidence_score || 0}% Fit</span>
                      </div>
                   </td>
                   <td className="py-5 px-6 text-right">
-                    <button className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors flex items-center gap-1 ml-auto group/btn">
+                    <button className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors flex items-center gap-1 ml-auto group/btn">
                       View Profile <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
                     </button>
                   </td>

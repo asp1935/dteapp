@@ -41,11 +41,11 @@ const CandidateProfileModal = ({ candidateId, onClose }) => {
         {/* Header */}
         <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
           <div className="flex items-center space-x-6">
-            <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-indigo-200">
+            <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg shadow-indigo-200">
               {profile?.full_name?.charAt(0) || <User size={32} />}
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">{profile?.full_name || 'Loading Profile...'}</h2>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{profile?.full_name || 'Loading Profile...'}</h2>
               <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mt-1">Candidate Profile Portfolio</p>
             </div>
           </div>
@@ -65,7 +65,7 @@ const CandidateProfileModal = ({ candidateId, onClose }) => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center space-x-2 px-6 py-4 text-xs font-black uppercase tracking-widest transition-all border-b-2",
+                "flex items-center space-x-2 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2",
                 activeTab === tab.id ? "border-indigo-600 text-indigo-600 bg-indigo-50/30" : "border-transparent text-slate-400 hover:text-slate-600"
               )}
             >
@@ -113,8 +113,8 @@ const CandidateProfileModal = ({ candidateId, onClose }) => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passing Year</p>
-                          <p className="text-sm font-black text-indigo-600">{qual.year_of_passing}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Passing Year</p>
+                          <p className="text-sm font-bold text-indigo-600">{qual.year_of_passing}</p>
                         </div>
                       </div>
                     ))
@@ -132,12 +132,12 @@ const CandidateProfileModal = ({ candidateId, onClose }) => {
                         <div className="absolute left-[-4px] top-0 w-2 h-2 rounded-full bg-indigo-600 shadow-lg shadow-indigo-200"></div>
                         <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:border-indigo-200 transition-all">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-black text-slate-900">{exp.designation}</h4>
-                            <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            <h4 className="font-bold text-slate-900">{exp.designation}</h4>
+                            <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500">
                               {exp.from_date} - {exp.is_current ? 'Present' : exp.to_date}
                             </span>
                           </div>
-                          <p className="text-sm text-indigo-600 font-black mb-3">{exp.institution_name}</p>
+                          <p className="text-sm text-indigo-600 font-bold mb-3">{exp.institution_name}</p>
                           <p className="text-sm text-slate-500 leading-relaxed">{exp.description}</p>
                         </div>
                       </div>
@@ -165,7 +165,7 @@ const DetailCard = ({ label, value, icon: Icon }) => (
       <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
         <Icon size={14} />
       </div>
-      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
     </div>
     <p className="font-bold text-slate-900">{value || 'Not provided'}</p>
   </div>

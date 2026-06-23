@@ -24,7 +24,6 @@ import {
   Eye,
   History,
   FileText,
-  ScanSearch,
   Cpu,
   Zap,
   ShieldAlert,
@@ -44,7 +43,6 @@ import {
   fetchBillDetails,
   fetchBillApprovals,
   fetchAIReadiness,
-  aiValidateBill,
   createAISnapshot,
   resetBillingStatus, 
   setPage,
@@ -180,10 +178,6 @@ const AdminBillingDashboard = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleAIValidate = (billId) => {
-    dispatch(aiValidateBill(billId));
-  };
-
   const handleSnapshot = (billId) => {
     dispatch(createAISnapshot(billId));
   };
@@ -266,7 +260,7 @@ const AdminBillingDashboard = () => {
     { key: 'lecture_type', label: 'Type', render: (val) => LECTURE_TYPES[val] || val },
     { key: 'rate_per_lecture', label: 'Rate (₹)', render: (val) => <span className="font-bold text-indigo-600">₹{val}</span> },
     { key: 'effective_from', label: 'From' },
-    { key: 'is_active', label: 'Status', render: (val) => <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${val ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{val ? 'Active' : 'Inactive'}</span> },
+    { key: 'is_active', label: 'Status', render: (val) => <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${val ? 'bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-500'}`}>{val ? 'Active' : 'Inactive'}</span> },
   ];
 
   const billColumns = [
@@ -274,21 +268,21 @@ const AdminBillingDashboard = () => {
     { key: 'faculty_name', label: 'Faculty' },
     { key: 'academic_year', label: 'Year' },
     { key: 'period', label: 'Period', render: (_, row) => <span className="text-[10px] font-bold text-slate-500">{row.period_start} to {row.period_end}</span> },
-    { key: 'total_amount', label: 'Amount', render: (val) => <span className="font-black text-indigo-600">₹{val}</span> },
-    { key: 'bill_status', label: 'Status', render: (val) => <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${val === 'DRAFT' ? 'bg-slate-100 text-slate-600' : val === 'SUBMITTED' ? 'bg-blue-100 text-blue-600' : val.includes('APPROVED') ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>{(val || '').replace('_', ' ')}</span> }
+    { key: 'total_amount', label: 'Amount', render: (val) => <span className="font-bold text-indigo-600">₹{val}</span> },
+    { key: 'bill_status', label: 'Status', render: (val) => <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${val === 'DRAFT' ? 'bg-slate-100 text-slate-600' : val === 'SUBMITTED' ? 'bg-blue-100 text-blue-600' : val.includes('APPROVED') ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>{(val || '').replace('_', ' ')}</span> }
   ];
 
   const anomalyColumns = [
     { key: 'faculty_name', label: 'Faculty' },
     { key: 'institution_name', label: 'Institution' },
-    { key: 'anomaly_type', label: 'Issue', render: (val) => <span className="text-xs font-black text-red-600 uppercase tracking-tighter italic">{val.replace('_', ' ')}</span> },
-    { key: 'confidence', label: 'AI Confidence', render: (val) => <span className={`text-xs font-black ${val > 90 ? 'text-emerald-600' : 'text-amber-600'}`}>{val}%</span> },
+    { key: 'anomaly_type', label: 'Issue', render: (val) => <span className="text-xs font-bold text-red-600 uppercase tracking-tighter italic">{val.replace('_', ' ')}</span> },
+    { key: 'confidence', label: 'AI Confidence', render: (val) => <span className={`text-xs font-bold ${val > 90 ? 'text-emerald-600' : 'text-amber-600'}`}>{val}%</span> },
     { key: 'created_at', label: 'Detected On', render: (val) => <span className="text-[10px] font-medium text-slate-400">{new Date(val).toLocaleDateString()}</span> }
   ];
 
   const approvalColumns = [
-    { key: 'level', label: 'Level', render: (val) => <span className="font-black text-[10px] uppercase tracking-tighter">{val.replace('_', ' ')}</span> },
-    { key: 'action', label: 'Action', render: (val) => <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter ${val === 'APPROVE' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>{val}</span> },
+    { key: 'level', label: 'Level', render: (val) => <span className="font-bold text-[10px] uppercase tracking-tighter">{val.replace('_', ' ')}</span> },
+    { key: 'action', label: 'Action', render: (val) => <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter ${val === 'APPROVE' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>{val}</span> },
     { key: 'approver_name', label: 'Approver' },
     { key: 'remarks', label: 'Remarks' },
     { key: 'created_at', label: 'Date', render: (val) => <span className="text-[10px] text-slate-400 font-medium">{new Date(val).toLocaleDateString()}</span> }
@@ -301,7 +295,7 @@ const AdminBillingDashboard = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             Institutional <span className="text-indigo-600">Billing Control</span>
           </h1>
           <p className="text-slate-500 font-medium mt-1">
@@ -313,7 +307,7 @@ const AdminBillingDashboard = () => {
           <Button 
             onClick={() => setIsModalOpen(true)}
             disabled={!selectedInstituteId}
-            className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-slate-200 flex items-center transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
+            className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-slate-200 flex items-center transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
           >
             <Plus size={20} className="mr-2" />
             CREATE RATE
@@ -325,19 +319,19 @@ const AdminBillingDashboard = () => {
       <div className="flex space-x-1 bg-slate-100 p-1.5 rounded-2xl w-fit">
         <button 
           onClick={() => { setActiveTab('rates'); dispatch(setPage(1)); }}
-          className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'rates' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'rates' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
           Rate Management
         </button>
         <button 
           onClick={() => { setActiveTab('bills'); dispatch(setPage(1)); }}
-          className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'bills' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'bills' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
           Bill Tracking
         </button>
         <button 
           onClick={() => setActiveTab('ai-monitor')}
-          className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'ai-monitor' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'ai-monitor' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
           AI Monitor
         </button>
@@ -351,10 +345,10 @@ const AdminBillingDashboard = () => {
                 <Building2 size={28} />
               </div>
               <div className="flex-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Target Institution</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Target Institution</label>
                 <div className="relative">
                   <select 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-sm font-black outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none pr-10"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-sm font-bold outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none pr-10"
                     value={selectedInstituteId}
                     onChange={(e) => setSelectedInstituteId(e.target.value)}
                   >
@@ -369,9 +363,9 @@ const AdminBillingDashboard = () => {
                 </div>
               </div>
               <div className="w-full lg:w-48">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Academic Year</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Academic Year</label>
                 <select 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-sm font-black outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none pr-10"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-sm font-bold outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none pr-10"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
                 >
@@ -385,7 +379,7 @@ const AdminBillingDashboard = () => {
             {fetching ? (
               <div className="h-64 flex flex-col items-center justify-center space-y-4">
                 <Loader2 size={40} className="animate-spin text-indigo-500" />
-                <p className="text-sm font-bold text-slate-400 animate-pulse text-center">Syncing records...<br/><span className="text-[10px] font-black uppercase tracking-widest">Please Wait</span></p>
+                <p className="text-sm font-bold text-slate-400 animate-pulse text-center">Syncing records...<br/><span className="text-[10px] font-bold uppercase tracking-widest">Please Wait</span></p>
               </div>
             ) : (
               <Table 
@@ -408,7 +402,7 @@ const AdminBillingDashboard = () => {
                 <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mr-4">
                   <FileText size={20} />
                 </div>
-                <h3 className="text-xl font-black text-slate-900">Global Bill Tracking</h3>
+                <h3 className="text-xl font-bold text-slate-900">Global Bill Tracking</h3>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -432,14 +426,6 @@ const AdminBillingDashboard = () => {
                   className="border-none shadow-none"
                   actions={(row) => (
                     <div className="flex items-center space-x-2">
-                       <Button 
-                        variant="ghost" 
-                        className="p-2 h-auto text-indigo-500 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-black uppercase tracking-tighter"
-                        onClick={() => handleAIValidate(row.id)}
-                        title="Run AI Validation"
-                      >
-                        <ScanSearch size={18} className="mr-1" /> AI CHECK
-                      </Button>
                       <Button 
                         variant="ghost" 
                         className="p-2 h-auto text-slate-400 hover:bg-slate-50 rounded-xl"
@@ -465,7 +451,7 @@ const AdminBillingDashboard = () => {
                   <Button variant="outline" size="sm" onClick={() => dispatch(setPage(page - 1))} disabled={page === 1} className="rounded-xl px-3 border-slate-200"><ChevronLeft size={18} /></Button>
                   <div className="flex items-center space-x-1">
                     {[...Array(totalPages)].map((_, i) => (
-                      <button key={i} onClick={() => dispatch(setPage(i + 1))} className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${page === i + 1 ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'hover:bg-slate-100 text-slate-500'}`}>{i + 1}</button>
+                      <button key={i} onClick={() => dispatch(setPage(i + 1))} className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${page === i + 1 ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'hover:bg-slate-100 text-slate-500'}`}>{i + 1}</button>
                     ))}
                   </div>
                   <Button variant="outline" size="sm" onClick={() => dispatch(setPage(page + 1))} disabled={page === totalPages} className="rounded-xl px-3 border-slate-200"><ChevronRight size={18} /></Button>
@@ -481,20 +467,20 @@ const AdminBillingDashboard = () => {
            {/* Summary Stats */}
            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center"><Zap size={12} className="mr-1 text-amber-500" /> Total Scanned</p>
-                <p className="text-3xl font-black text-slate-900">{aiMonitorData?.total_scanned || 0}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center"><Zap size={12} className="mr-1 text-amber-500" /> Total Scanned</p>
+                <p className="text-3xl font-bold text-slate-900">{aiMonitorData?.total_scanned || 0}</p>
               </div>
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-2 flex items-center"><ShieldAlert size={12} className="mr-1" /> Anomalies</p>
-                <p className="text-3xl font-black text-red-600">{aiMonitorData?.anomalies_count || 0}</p>
+                <p className="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-2 flex items-center"><ShieldAlert size={12} className="mr-1" /> Anomalies</p>
+                <p className="text-3xl font-bold text-red-600">{aiMonitorData?.anomalies_count || 0}</p>
               </div>
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><TrendingUp size={12} className="mr-1" /> Precision</p>
-                <p className="text-3xl font-black text-indigo-600">{aiMonitorData?.precision || '98'}%</p>
+                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><TrendingUp size={12} className="mr-1" /> Precision</p>
+                <p className="text-3xl font-bold text-indigo-600">{aiMonitorData?.precision || '98'}%</p>
               </div>
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm bg-indigo-50/20 border-indigo-100">
-                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><BarChart3 size={12} className="mr-1" /> Verified Rate</p>
-                <p className="text-3xl font-black text-indigo-600 italic tracking-tighter">{aiMonitorData?.verification_rate || '100'}%</p>
+                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center"><BarChart3 size={12} className="mr-1" /> Verified Rate</p>
+                <p className="text-3xl font-bold text-indigo-600 italic tracking-tighter">{aiMonitorData?.verification_rate || '100'}%</p>
               </div>
            </div>
 
@@ -506,7 +492,7 @@ const AdminBillingDashboard = () => {
                     <ShieldAlert size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-slate-900">AI Anomaly Reports</h3>
+                    <h3 className="text-xl font-bold text-slate-900">AI Anomaly Reports</h3>
                     <p className="text-xs font-bold text-slate-400">Claims flagged for manual administrative review.</p>
                   </div>
                 </div>
@@ -524,7 +510,7 @@ const AdminBillingDashboard = () => {
                 ) : (
                   <div className="h-64 flex flex-col items-center justify-center text-center p-10 grayscale opacity-40">
                     <ShieldCheck size={64} className="text-indigo-600 mb-6" />
-                    <h3 className="text-xl font-black text-slate-900">System Secure</h3>
+                    <h3 className="text-xl font-bold text-slate-900">System Secure</h3>
                     <p className="text-slate-500 font-medium max-w-sm">No anomalies detected by the AI monitor at this time.</p>
                   </div>
                 )}
@@ -539,30 +525,34 @@ const AdminBillingDashboard = () => {
           <div className="space-y-8 p-1">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Institution</p>
-                <p className="text-sm font-black text-slate-900">{selectedBill.institution_name}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Institution</p>
+                <p className="text-sm font-bold text-slate-900">
+                  {bills.find(b => b.id === selectedBill.id)?.institution_name || selectedBill.institution_name || 'N/A'}
+                </p>
               </div>
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Faculty</p>
-                <p className="text-sm font-black text-slate-900">{selectedBill.faculty_name}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Faculty</p>
+                <p className="text-sm font-bold text-slate-900">
+                  {bills.find(b => b.id === selectedBill.id)?.faculty_name || selectedBill.faculty_name || 'N/A'}
+                </p>
               </div>
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 border-l-4 border-l-indigo-500 text-indigo-600">
-                <p className="text-[9px] font-black uppercase tracking-widest mb-1">Amount</p>
-                <p className="text-xl font-black">₹{selectedBill.total_amount}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest mb-1">Amount</p>
+                <p className="text-xl font-bold">₹{selectedBill.net_amount || 0}</p>
               </div>
               <div className={`rounded-2xl p-4 border flex flex-col justify-center items-center ${selectedBillReadiness?.is_ready ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-amber-50 border-amber-100 text-amber-600'}`}>
                 <div className="flex items-center mb-1">
                    <Cpu size={14} className="mr-1" />
-                   <p className="text-[9px] font-black uppercase tracking-widest">AI Readiness</p>
+                   <p className="text-[9px] font-bold uppercase tracking-widest">AI Readiness</p>
                 </div>
-                <p className="text-xs font-black uppercase tracking-tighter">{selectedBillReadiness?.is_ready ? 'READY' : 'PENDING'}</p>
+                <p className="text-xs font-bold uppercase tracking-tighter">{selectedBillReadiness?.is_ready ? 'READY' : 'PENDING'}</p>
               </div>
             </div>
             
             {/* Readiness Details if not ready */}
             {!selectedBillReadiness?.is_ready && selectedBillReadiness?.reasons?.length > 0 && (
               <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 animate-in fade-in duration-500">
-                <p className="text-[9px] font-black text-amber-700 uppercase tracking-widest mb-2 flex items-center"><AlertCircle size={12} className="mr-1" /> Missing Prerequisites</p>
+                <p className="text-[9px] font-bold text-amber-700 uppercase tracking-widest mb-2 flex items-center"><AlertCircle size={12} className="mr-1" /> Missing Prerequisites</p>
                 <ul className="space-y-1">
                   {selectedBillReadiness.reasons.map((reason, idx) => (
                     <li key={idx} className="text-[10px] font-bold text-amber-600 flex items-center">
@@ -574,7 +564,7 @@ const AdminBillingDashboard = () => {
             )}
 
             <div className="space-y-4">
-               <div className="flex items-center px-1 text-slate-400"><History size={16} className="mr-2" /><h4 className="text-xs font-black uppercase tracking-widest">Approval History</h4></div>
+               <div className="flex items-center px-1 text-slate-400"><History size={16} className="mr-2" /><h4 className="text-xs font-bold uppercase tracking-widest">Approval History</h4></div>
                <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm">
                   <Table columns={approvalColumns} data={selectedBillApprovals} className="border-none shadow-none" />
                </div>
@@ -583,12 +573,12 @@ const AdminBillingDashboard = () => {
             <div className="flex justify-between items-center pt-4 border-t border-slate-100">
                <Button 
                 variant="outline" 
-                className="rounded-xl font-black text-indigo-600 border-indigo-100 hover:bg-indigo-50 flex items-center"
+                className="rounded-xl font-bold text-indigo-600 border-indigo-100 hover:bg-indigo-50 flex items-center"
                 onClick={() => handleSnapshot(selectedBill.id)}
                >
                  <Camera size={16} className="mr-2" /> TAKE SNAPSHOT
                </Button>
-               <Button onClick={closeModal} className="bg-slate-900 text-white px-8 py-3 rounded-xl font-black">CLOSE</Button>
+               <Button onClick={closeModal} className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold">CLOSE</Button>
             </div>
           </div>
         )}
@@ -598,7 +588,7 @@ const AdminBillingDashboard = () => {
       <Modal isOpen={isModalOpen} onClose={closeModal} title={editingRateId ? "Update Rate" : "Create Rates"} size="lg">
         <form onSubmit={handleSubmit} className="space-y-8 p-1">
            <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center"><Calendar size={14} className="mr-2 text-indigo-500" /> Academic Session</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center"><Calendar size={14} className="mr-2 text-indigo-500" /> Academic Session</label>
               <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500" value={formData.academic_year} onChange={(e) => setFormData({ ...formData, academic_year: e.target.value })} disabled={!!editingRateId}>
                 <option value="2026-2027">2026-2027</option>
                 <option value="2025-2026">2025-2026</option>
@@ -609,13 +599,13 @@ const AdminBillingDashboard = () => {
                 <div key={index} className="bg-slate-50 border border-slate-100 rounded-2xl p-6 relative">
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="text-[9px] font-black text-slate-400 uppercase mb-1">Designation</label>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase mb-1">Designation</label>
                       <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold disabled:opacity-50" value={rate.designation} onChange={(e) => handleRateChange(index, 'designation', e.target.value)} disabled={!!editingRateId}>
                         {Object.entries(DESIGNATIONS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="text-[9px] font-black text-slate-400 uppercase mb-1">Type</label>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase mb-1">Type</label>
                       <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold disabled:opacity-50" value={rate.lecture_type} onChange={(e) => handleRateChange(index, 'lecture_type', e.target.value)} disabled={!!editingRateId}>
                         {Object.entries(LECTURE_TYPES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
                       </select>
@@ -629,8 +619,8 @@ const AdminBillingDashboard = () => {
               ))}
            </div>
            <div className="flex gap-3 pt-4">
-             <Button type="button" variant="outline" onClick={closeModal} className="flex-1 rounded-xl font-black">CANCEL</Button>
-             <Button disabled={loading} className="flex-[2] bg-slate-900 text-white rounded-xl font-black">
+             <Button type="button" variant="outline" onClick={closeModal} className="flex-1 rounded-xl font-bold">CANCEL</Button>
+             <Button disabled={loading} className="flex-[2] bg-slate-900 text-white rounded-xl font-bold">
                {loading ? <Loader2 className="animate-spin" /> : editingRateId ? 'UPDATE RATE' : 'SUBMIT RATES'}
              </Button>
            </div>

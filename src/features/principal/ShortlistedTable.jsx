@@ -37,12 +37,12 @@ const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
-          <h2 className="text-xl font-black text-slate-900">Interview Marking</h2>
+          <h2 className="text-xl font-bold text-slate-900">Interview Marking</h2>
           <p className="text-sm text-slate-500 font-medium">Record scores for candidates who have completed their interviews.</p>
         </div>
         <Button 
           onClick={onGenerateRankings} 
-          className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100"
+          className="shadow-sm"
         >
           Generate AI Rankings
         </Button>
@@ -77,7 +77,7 @@ const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 line-clamp-1">{cand.candidate_name}</h3>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{cand.application_number}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{cand.application_number}</p>
                   </div>
                 </div>
 
@@ -94,7 +94,7 @@ const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings
 
                 <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Score Status</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Score Status</span>
                     <span className={cn(
                       "text-xs font-bold",
                       hasMarks ? "text-emerald-600" : "text-amber-500"
@@ -106,10 +106,7 @@ const ShortlistedTable = ({ advertisementId, onMarkCandidate, onGenerateRankings
                     size="sm" 
                     variant={hasMarks ? "ghost" : "primary"}
                     onClick={() => onMarkCandidate(cand)}
-                    className={cn(
-                      "text-xs px-4 py-2",
-                      !hasMarks && "bg-indigo-600 hover:bg-indigo-700"
-                    )}
+                    className="text-xs px-4 py-2"
                   >
                     {hasMarks ? 'Edit Marks' : 'Enter Marks'}
                   </Button>

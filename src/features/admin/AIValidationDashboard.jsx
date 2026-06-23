@@ -45,7 +45,7 @@ const AIValidationDashboard = () => {
             <Sparkles size={14} className="text-indigo-600" />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-600">Intelligent Auditor</span>
           </div>
-          <h1 className="text-4xl font-black tracking-tight mb-4 text-slate-900">
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-slate-900">
             Institutional <span className="text-indigo-600">AI Audit</span>
           </h1>
           <p className="text-slate-600 text-lg leading-relaxed font-medium">
@@ -134,7 +134,7 @@ const AIValidationDashboard = () => {
               </h2>
               <div className="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-indigo-100 shadow-sm">
                 <span className="text-xs font-bold text-secondary uppercase">Confidence</span>
-                <span className={`text-sm font-black ${
+                <span className={`text-sm font-bold ${
                   validationResult.ai_analysis?.confidence_score > 0.8 ? 'text-emerald-600' :
                   validationResult.ai_analysis?.confidence_score > 0.5 ? 'text-amber-500' : 'text-red-500'
                 }`}>
@@ -221,7 +221,7 @@ const AIValidationDashboard = () => {
                               <div key={anomaly.id} className="bg-white border border-red-100 rounded-xl p-4 shadow-sm">
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-center space-x-2">
-                                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-sm uppercase tracking-wider ${
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider ${
                                       anomaly.severity === 'CRITICAL' ? 'bg-red-600 text-white' :
                                       anomaly.severity === 'HIGH' ? 'bg-orange-500 text-white' :
                                       'bg-amber-400 text-amber-950'

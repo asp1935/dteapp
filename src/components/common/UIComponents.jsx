@@ -4,9 +4,9 @@ import { ChevronDown } from 'lucide-react';
 
 export const Button = ({ children, variant = 'primary', size = 'md', className, ...props }) => {
   const variants = {
-    primary: 'bg-primary text-white hover:bg-primary/90',
-    secondary: 'bg-muted text-foreground hover:bg-muted/80',
-    accent: 'bg-accent text-white hover:bg-accent/90',
+    primary: 'bg-white text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-sm',
+    secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200',
+    accent: 'bg-white text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-sm',
     outline: 'border border-border bg-transparent hover:bg-muted text-foreground',
     ghost: 'bg-transparent hover:bg-muted text-foreground',
     danger: 'bg-red-500 text-white hover:bg-red-600',

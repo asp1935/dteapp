@@ -115,7 +115,7 @@ const PrincipalAppointmentManagement = () => {
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">Appointment Letters</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Appointment Letters</h1>
           <p className="text-slate-500 font-medium mt-1">Issue and manage employment offers for selected candidates.</p>
         </div>
         <Button 
@@ -140,8 +140,8 @@ const PrincipalAppointmentManagement = () => {
               <stat.icon size={24} className={stat.color} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-900">{stat.value.toString().padStart(2, '0')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{stat.label}</p>
+              <p className="text-2xl font-bold text-slate-900">{stat.value.toString().padStart(2, '0')}</p>
             </div>
           </div>
         ))}
@@ -158,11 +158,11 @@ const PrincipalAppointmentManagement = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/30">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Candidate</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Course</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Joining Date</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Candidate</th>
+                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Course</th>
+                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Joining Date</th>
+                <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -200,11 +200,11 @@ const PrincipalAppointmentManagement = () => {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <p className="text-sm font-semibold text-slate-600">{app.Course}</p>
+                      <p className="text-sm font-semibold text-slate-600">{app.course}</p>
                     </td>
                     <td className="px-8 py-6">
                       <span className={cn(
-                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                        "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
                         getStatusColor(app.status)
                       )}>
                         {app.status}
@@ -219,7 +219,7 @@ const PrincipalAppointmentManagement = () => {
                           <Button 
                             variant="primary" 
                             size="sm" 
-                            className="bg-indigo-600 hover:bg-indigo-700 h-9 px-4 rounded-xl"
+                            className="bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 shadow-sm h-9 px-4 rounded-xl"
                             onClick={() => handleSubmitToCandidate(app.id)}
                           >
                             <Send size={14} className="mr-2" /> Send
@@ -254,7 +254,7 @@ const PrincipalAppointmentManagement = () => {
                   <FileText className="text-indigo-600" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">Letter Preview</h3>
+                  <h3 className="text-xl font-bold text-slate-900">Letter Preview</h3>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedApp.appointment_number}</p>
                 </div>
               </div>
@@ -273,7 +273,7 @@ const PrincipalAppointmentManagement = () => {
                 {/* English Version */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">English Version</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">English Version</span>
                   </div>
                   <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none">
                     <div dangerouslySetInnerHTML={{ __html: selectedApp.content_en }} />
@@ -283,7 +283,7 @@ const PrincipalAppointmentManagement = () => {
                 {/* Marathi Version */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Marathi Version</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Marathi Version</span>
                   </div>
                   <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none">
                     <div dangerouslySetInnerHTML={{ __html: selectedApp.content_mr }} />
@@ -324,9 +324,9 @@ const PrincipalAppointmentManagement = () => {
               <div>
                 <div className="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full mb-4">
                   <Sparkles size={14} className="text-indigo-600" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">AI Assistant</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">AI Assistant</span>
                 </div>
-                <h3 className="text-2xl font-black text-slate-900">Generate Appointment</h3>
+                <h3 className="text-2xl font-bold text-slate-900">Generate Appointment</h3>
               </div>
               <button onClick={() => setShowGenerator(false)} className="p-3 hover:bg-slate-100 rounded-2xl transition-all">
                 <XCircle size={24} className="text-slate-400" />
@@ -335,7 +335,7 @@ const PrincipalAppointmentManagement = () => {
 
             <form onSubmit={handleGenerate} className="p-10 space-y-6">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Select Confirmed Candidate</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Select Confirmed Candidate</label>
                 <select 
                   className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                   required
@@ -385,7 +385,7 @@ const PrincipalAppointmentManagement = () => {
 
               <Button 
                 variant="accent" 
-                className="w-full h-16 rounded-2xl text-lg font-black shadow-xl shadow-indigo-200"
+                className="w-full h-16 rounded-2xl text-lg font-bold shadow-xl shadow-indigo-200"
                 type="submit"
                 disabled={genLoading}
               >

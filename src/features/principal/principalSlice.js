@@ -12,6 +12,17 @@ export const fetchDashboardData = createAsyncThunk(
   }
 );
 
+export const setInstituteLocation = createAsyncThunk(
+  'principal/setLocation',
+  async ({ latitude, longitude }, { rejectWithValue }) => {
+    try {
+      return await principalService.setInstituteLocation(latitude, longitude);
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 const principalSlice = createSlice({
   name: 'principal',
   initialState: {
@@ -31,6 +42,16 @@ const principalSlice = createSlice({
         state.dashboardData = action.payload;
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(setInstituteLocation.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(setInstituteLocation.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(setInstituteLocation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

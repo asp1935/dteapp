@@ -4,6 +4,8 @@ import { User, Briefcase, GraduationCap, Save, Plus, Trash2, CheckCircle, AlertC
 import { Button, Input } from '../../components/common/UIComponents';
 import { updateProfile, updateExperience, updateQualifications, getProfile, resetState } from './candidateSlice';
 
+import { toast } from 'react-hot-toast';
+
 const CandidateProfile = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -121,10 +123,17 @@ const CandidateProfile = () => {
   useEffect(() => {
     if (success) {
       setIsEditing(false);
+      toast.success('Saved successfully!');
       const timer = setTimeout(() => dispatch(resetState()), 3000);
       return () => clearTimeout(timer);
     }
   }, [success, dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const DetailItem = ({ icon: Icon, label, value }) => (
     <div className="flex items-start space-x-3 p-4 bg-muted/5 rounded-xl border border-border/50">

@@ -1,55 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import { 
-  CreditCard, 
   ReceiptText, 
-  Plus, 
-  Filter, 
+  CheckCircle, 
   Loader2, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
   ChevronRight, 
   ChevronLeft,
   Search,
-  Calendar,
-  Building2,
-  FileText,
-  ShieldCheck,
-  Send,
-  Users,
-  Layers,
-  CheckCircle,
+  CheckCircle2,
   XCircle as CloseCircle,
   MessageSquare,
   History,
   Info,
-  RefreshCw,
-  Wallet,
   ListOrdered
 } from 'lucide-react';
-import { Button, Input } from '../../components/common/UIComponents';
+import { Button } from '../../components/common/UIComponents';
 import { Table } from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import { 
   fetchBills, 
   fetchBillingSummary,
-  generateBill, 
-  bulkGenerateBills,
-  submitBill, 
   approveBill,
   fetchBillDetails,
   fetchBillApprovals,
-  regenerateBill,
   resetBillingStatus, 
   setPage 
 } from '../admin/billingSlice';
-import { getAppointedFaculties } from './facultySlice';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
 
-const PrincipalBillingDashboard = () => {
+const TreasuryBillingDashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { 
@@ -62,33 +41,14 @@ const PrincipalBillingDashboard = () => {
     limit, 
     loading, 
     fetching, 
-    success,
+    success, 
     error 
   } = useSelector((state) => state.billing);
-  const { chbFacultyList, loading: facultyLoading } = useSelector((state) => state.faculty);
-  const location = useLocation();
 
-  const [isGenModalOpen, setIsGenModalOpen] = useState(false);
-  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   
   const [selectedBillId, setSelectedBillId] = useState(null);
-  const [availableDates, setAvailableDates] = useState([]);
-  
-  const [genData, setGenData] = useState({
-    faculty_credential_id: '',
-    period_start: '',
-    period_end: '',
-    academic_year: '2026-27'
-  });
-
-  const [bulkData, setBulkData] = useState({
-    institution_id: '',
-    period_start: '',
-    period_end: '',
-    academic_year: '2026-2027'
-  });
 
   const [approveData, setApproveData] = useState({
     action: 'APPROVE', // or 'REJECT'
@@ -97,66 +57,18 @@ const PrincipalBillingDashboard = () => {
 
   // Fetch data on load
   useEffect(() => {
-    if (user) {
-      const payload = { page, limit };
-      if (user.institution_id) payload.institution_id = user.institution_id;
-      
-      dispatch(fetchBills(payload));
-      dispatch(fetchBillingSummary(user.institution_id ? { institution_id: user.institution_id } : {}));
-      dispatch(getAppointedFaculties(user.institution_id ? { institution_id: user.institution_id } : {}));
-      
-      setBulkData(prev => ({ ...prev, institution_id: user.institution_id || '' }));
-    }
-  }, [dispatch, user, page, limit]);
-
-  useEffect(() => {
-    if (location.state?.action === 'open_generate_modal' && location.state?.faculty_credential_id) {
-      setGenData(prev => ({
-        ...prev,
-        faculty_credential_id: location.state.faculty_credential_id,
-        period_start: location.state.period_start || prev.period_start,
-        period_end: location.state.period_end || prev.period_end,
-        academic_year: location.state.academic_year || prev.academic_year
-      }));
-      setIsGenModalOpen(true);
-      
-      // Clear state so it doesn't reopen on refresh
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    if (genData.faculty_credential_id) {
-      api.get(`/attendance/logs?faculty_credential_id=${genData.faculty_credential_id}&log_status=VERIFIED&limit=100`)
-        .then(res => {
-          const logs = res.data?.data || [];
-          const uniqueDates = [...new Set(logs.map(log => log.lecture_date))];
-          setAvailableDates(uniqueDates);
-
-          if (uniqueDates.length > 0) {
-            // Automatically select the first available date
-            setGenData(prev => ({
-              ...prev,
-              period_start: uniqueDates[0],
-              period_end: uniqueDates[0],
-              academic_year: logs.find(l => l.lecture_date === uniqueDates[0])?.academic_year || prev.academic_year
-            }));
-          }
-        })
-        .catch(err => {
-          console.error("Failed to fetch verified logs", err);
-          setAvailableDates([]);
-        });
-    } else {
-      setAvailableDates([]);
-    }
-  }, [genData.faculty_credential_id]);
+    dispatch(fetchBills({ 
+      page,
+      limit
+    }));
+    dispatch(fetchBillingSummary({}));
+  }, [dispatch, page, limit]);
 
   useEffect(() => {
     if (success) {
       toast.success('Billing action successful!');
-      dispatch(fetchBills({ institution_id: user.institution_id, page: 1, limit }));
-      dispatch(fetchBillingSummary({ institution_id: user.institution_id }));
+      dispatch(fetchBills({ page: 1, limit }));
+      dispatch(fetchBillingSummary({}));
       closeModals();
       dispatch(resetBillingStatus());
     }
@@ -164,52 +76,16 @@ const PrincipalBillingDashboard = () => {
       toast.error(error);
       dispatch(resetBillingStatus());
     }
-  }, [success, error, dispatch, user, limit]);
+  }, [success, error, dispatch, limit]);
 
   const closeModals = () => {
-    setIsGenModalOpen(false);
-    setIsBulkModalOpen(false);
     setIsApproveModalOpen(false);
     setIsDetailsModalOpen(false);
     setSelectedBillId(null);
-    setGenData({
-      faculty_credential_id: '',
-      period_start: '',
-      period_end: '',
-      academic_year: '2026-2027'
-    });
-    setBulkData({
-      institution_id: user?.institution_id || '',
-      period_start: '',
-      period_end: '',
-      academic_year: '2026-2027'
-    });
     setApproveData({
       action: 'APPROVE',
       remarks: ''
     });
-  };
-
-  const handleGenerate = (e) => {
-    e.preventDefault();
-    if (!genData.faculty_credential_id) {
-      toast.error('Please select a faculty member');
-      return;
-    }
-    dispatch(generateBill(genData));
-  };
-
-  const handleBulkGenerate = (e) => {
-    e.preventDefault();
-    dispatch(bulkGenerateBills(bulkData));
-  };
-
-  const handleSubmitBill = (billId) => {
-    dispatch(submitBill(billId));
-  };
-
-  const handleRegenerateBill = (billId) => {
-    dispatch(regenerateBill(billId));
   };
 
   const handleOpenApproveModal = (billId) => {
@@ -239,6 +115,8 @@ const PrincipalBillingDashboard = () => {
       case 'DRAFT': return 'bg-slate-100 text-slate-600';
       case 'SUBMITTED': return 'bg-blue-100 text-blue-600';
       case 'PRINCIPAL_APPROVED': return 'bg-emerald-100 text-emerald-600';
+      case 'RO_APPROVED': return 'bg-teal-100 text-teal-600';
+      case 'TREASURY_PROCESSED': return 'bg-emerald-100 text-emerald-700 font-extrabold';
       case 'REJECTED': return 'bg-red-100 text-red-600';
       default: return 'bg-indigo-100 text-indigo-600';
     }
@@ -246,11 +124,16 @@ const PrincipalBillingDashboard = () => {
 
   const columns = [
     { 
+      key: 'institution_name', 
+      label: 'Institution',
+      render: (val) => <span className="font-bold text-slate-900">{val || 'N/A'}</span>
+    },
+    { 
       key: 'faculty_name', 
       label: 'Faculty',
       render: (val, row) => (
         <div className="flex flex-col">
-          <span className="font-bold text-slate-900">{row.faculty_name || 'N/A'}</span>
+          <span className="font-bold text-slate-700">{row.faculty_name || 'N/A'}</span>
           <span className="text-[10px] text-slate-400 font-medium">{row.academic_year}</span>
         </div>
       )
@@ -337,60 +220,34 @@ const PrincipalBillingDashboard = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-            Bill <span className="text-indigo-600">Generation</span>
+            Treasury <span className="text-indigo-600">Disbursements</span>
           </h1>
           <p className="text-slate-500 font-medium mt-1">
-            Manage honorarium claims and payment workflows for your faculty.
+            Process approved honorarium claims for final disbursement.
           </p>
-        </div>
-        
-        <div className="flex gap-3">
-          <Button 
-            onClick={() => setIsBulkModalOpen(true)}
-            variant="outline"
-            className="border-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-bold flex items-center transition-all active:scale-95 hover:bg-slate-50"
-          >
-            <Layers size={18} className="mr-2" />
-            BULK GENERATE
-          </Button>
-          <Button 
-            onClick={() => setIsGenModalOpen(true)}
-            className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-slate-200 flex items-center transition-all active:scale-95"
-          >
-            <Plus size={20} className="mr-2" />
-            GENERATE BILL
-          </Button>
         </div>
       </div>
 
       {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-slate-400">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pending Submission</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pending Treasury Disbursement</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-4xl font-bold text-slate-600">{summary?.draft_count || 0}</p>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Drafts</span>
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-blue-500">
-          <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2">In Approval Flow</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-4xl font-bold text-blue-600">{(summary?.bills_pending_principal || 0) + (summary?.bills_pending_ro || 0) + (summary?.bills_pending_directorate || 0) + (summary?.bills_pending_treasury || 0)}</p>
-            <span className="text-[10px] font-bold text-blue-400 uppercase">Submitted</span>
+            <p className="text-4xl font-bold text-amber-500">{summary?.bills_pending_treasury || 0}</p>
+            <span className="text-[10px] font-bold text-amber-400 uppercase">Claims</span>
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-emerald-500">
-          <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2">Total Approved</p>
+          <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2">Total Generated</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-4xl font-bold text-emerald-600">{summary?.bills_processed || 0}</p>
+            <p className="text-4xl font-bold text-emerald-600">{summary?.total_bills_generated || 0}</p>
             <span className="text-[10px] font-bold text-emerald-400 uppercase">Bills</span>
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm border-l-4 border-l-indigo-500 bg-indigo-50/20">
-          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2">Total Amount (Approved)</p>
+          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2">Total Gross Amount</p>
           <div className="flex items-center text-indigo-600">
-            <Wallet size={20} className="mr-2" />
-            <p className="text-3xl font-bold italic tracking-tighter">₹{summary?.total_approved_amount?.toLocaleString() || 0}</p>
+            <p className="text-3xl font-bold italic tracking-tighter">₹{summary?.total_gross_amount?.toLocaleString() || 0}</p>
           </div>
         </div>
       </div>
@@ -402,20 +259,17 @@ const PrincipalBillingDashboard = () => {
             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mr-4">
               <ReceiptText size={20} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Recent Claims</h3>
+            <h3 className="text-xl font-bold text-slate-900">Treasury Action Items</h3>
           </div>
           <div className="flex items-center space-x-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input 
                 type="text" 
-                placeholder="Search faculty..." 
+                placeholder="Search faculty or institute..." 
                 className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500 w-64"
               />
             </div>
-            <button className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 transition-colors">
-              <Filter size={18} />
-            </button>
           </div>
         </div>
 
@@ -423,7 +277,7 @@ const PrincipalBillingDashboard = () => {
           {fetching ? (
             <div className="h-64 flex flex-col items-center justify-center space-y-4">
               <Loader2 size={40} className="animate-spin text-indigo-500" />
-              <p className="text-sm font-bold text-slate-400 animate-pulse text-center">Syncing institutional billing records...<br/><span className="text-[10px] font-bold uppercase tracking-widest tracking-tighter">Please Wait</span></p>
+              <p className="text-sm font-bold text-slate-400 animate-pulse text-center">Syncing treasury records...<br/><span className="text-[10px] font-bold uppercase tracking-widest tracking-tighter">Please Wait</span></p>
             </div>
           ) : bills.length > 0 ? (
             <Table 
@@ -432,42 +286,13 @@ const PrincipalBillingDashboard = () => {
               className="border-none shadow-none"
               actions={(row) => (
                 <div className="flex justify-end space-x-2">
-                  {row.bill_status === 'DRAFT' && (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        className="p-2 h-auto text-indigo-500 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-bold uppercase tracking-tighter"
-                        onClick={() => handleRegenerateBill(row.id)}
-                        title="Regenerate Bill"
-                      >
-                        <RefreshCw size={14} className="mr-1" /> Re-gen
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="p-2 h-auto text-emerald-600 hover:bg-emerald-50 rounded-xl flex items-center text-[10px] font-bold uppercase tracking-tighter"
-                        onClick={() => handleSubmitBill(row.id)}
-                      >
-                        <Send size={14} className="mr-1" /> Submit
-                      </Button>
-                    </>
-                  )}
-                  {row.bill_status === 'REJECTED' && (
-                    <Button 
-                      variant="ghost" 
-                      className="p-2 h-auto text-indigo-500 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-bold uppercase tracking-tighter"
-                      onClick={() => handleRegenerateBill(row.id)}
-                      title="Regenerate Bill"
-                    >
-                      <RefreshCw size={14} className="mr-1" /> Re-gen
-                    </Button>
-                  )}
-                  {row.bill_status === 'SUBMITTED' && (
+                  {row.current_approver_role === 'TREASURY' && (
                     <Button 
                       variant="ghost" 
                       className="p-2 h-auto text-indigo-600 hover:bg-indigo-50 rounded-xl flex items-center text-[10px] font-bold uppercase tracking-tighter"
                       onClick={() => handleOpenApproveModal(row.id)}
                     >
-                      <CheckCircle size={14} className="mr-1" /> Review
+                      <CheckCircle size={14} className="mr-1" /> Process
                     </Button>
                   )}
                   <Button 
@@ -487,7 +312,7 @@ const PrincipalBillingDashboard = () => {
                 <ReceiptText size={32} />
               </div>
               <p className="text-slate-400 font-bold">No billing records found</p>
-              <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest mt-1">Generate your first bill to get started</p>
+              <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest mt-1">Pending claims will appear here</p>
             </div>
           )}
         </div>
@@ -553,7 +378,7 @@ const PrincipalBillingDashboard = () => {
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Faculty Member</p>
                 <p className="text-sm font-bold text-slate-900">
-                  {chbFacultyList.find(f => f.faculty_credential_id === selectedBill.faculty_credential_id)?.candidate_name || 'N/A'}
+                  {bills.find(b => b.id === selectedBill.id)?.faculty_name || selectedBill.faculty_name || 'N/A'}
                 </p>
               </div>
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
@@ -621,160 +446,11 @@ const PrincipalBillingDashboard = () => {
         )}
       </Modal>
 
-      {/* Individual Generation Modal */}
-      <Modal
-        isOpen={isGenModalOpen}
-        onClose={closeModals}
-        title="Generate Faculty Bill"
-        size="md"
-      >
-        <form onSubmit={handleGenerate} className="space-y-6 p-1">
-          <div className="space-y-4">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center">
-              <Users size={14} className="mr-2 text-indigo-500" /> Target Faculty
-            </label>
-            <div className="relative">
-              <select 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
-                value={genData.faculty_credential_id}
-                onChange={(e) => setGenData({...genData, faculty_credential_id: e.target.value})}
-                required
-              >
-                <option value="">Select a Faculty Member...</option>
-                {chbFacultyList.filter(f => f.faculty_credential_id).map(f => (
-                  <option key={f.faculty_credential_id} value={f.faculty_credential_id}>{f.candidate_name} ({f.course})</option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <ChevronLeft className="-rotate-90" size={14} />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Lecture Date</label>
-            <div className="relative">
-              <select 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
-                value={genData.period_start}
-                onChange={(e) => setGenData({...genData, period_start: e.target.value, period_end: e.target.value})}
-                required
-              >
-                <option value="">{availableDates.length > 0 ? "Select Lecture Date..." : "No verified logs available"}</option>
-                {availableDates.map(date => (
-                  <option key={date} value={date}>{date}</option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <ChevronLeft className="-rotate-90" size={14} />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Academic Session</label>
-            <select 
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
-              value={genData.academic_year}
-              onChange={(e) => setGenData({...genData, academic_year: e.target.value})}
-            >
-              <option value="2026-2027">2026-2027</option>
-              <option value="2025-2026">2025-2026</option>
-            </select>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={closeModals}
-              className="flex-1 rounded-xl font-bold text-slate-500 border-slate-200 hover:bg-slate-50"
-            >
-              CANCEL
-            </Button>
-            <Button 
-              disabled={loading}
-              className="flex-[2] bg-slate-900 hover:bg-black text-white rounded-xl font-bold shadow-lg transition-all active:scale-95"
-            >
-              {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'GENERATE BILL'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Bulk Generation Modal */}
-      <Modal
-        isOpen={isBulkModalOpen}
-        onClose={closeModals}
-        title="Bulk Generation"
-        size="md"
-      >
-        <form onSubmit={handleBulkGenerate} className="space-y-6 p-1">
-          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-start">
-            <Info size={20} className="text-indigo-600 mr-3 mt-0.5" />
-            <p className="text-xs font-bold text-indigo-900 leading-relaxed">
-              This will generate honorarium bills for <span className="font-bold underline">ALL active faculty members</span> in your institution for the selected period.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Period Start</label>
-              <Input 
-                type="date"
-                value={bulkData.period_start}
-                onChange={(e) => setBulkData({...bulkData, period_start: e.target.value})}
-                required
-                className="bg-slate-50 border-slate-200 rounded-xl font-bold"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Period End</label>
-              <Input 
-                type="date"
-                value={bulkData.period_end}
-                onChange={(e) => setBulkData({...bulkData, period_end: e.target.value})}
-                required
-                className="bg-slate-50 border-slate-200 rounded-xl font-bold"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Academic Session</label>
-            <select 
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 appearance-none cursor-pointer"
-              value={bulkData.academic_year}
-              onChange={(e) => setBulkData({...bulkData, academic_year: e.target.value})}
-            >
-              <option value="2026-2027">2026-2027</option>
-              <option value="2025-2026">2025-2026</option>
-            </select>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={closeModals}
-              className="flex-1 rounded-xl font-bold text-slate-500 border-slate-200 hover:bg-slate-50"
-            >
-              CANCEL
-            </Button>
-            <Button 
-              disabled={loading}
-              className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all active:scale-95"
-            >
-              {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'RUN BULK GENERATION'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
       {/* Approval Modal */}
       <Modal
         isOpen={isApproveModalOpen}
         onClose={closeModals}
-        title="Review & Approve Bill"
+        title="Process Bill Disbursement"
         size="md"
       >
         <form onSubmit={handleApprove} className="space-y-6 p-1">
@@ -786,7 +462,7 @@ const PrincipalBillingDashboard = () => {
                 onClick={() => setApproveData({...approveData, action: 'APPROVE'})}
                 className={`flex items-center justify-center p-4 rounded-2xl border-2 transition-all ${approveData.action === 'APPROVE' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-bold' : 'border-slate-100 bg-white text-slate-400 font-bold'}`}
               >
-                <CheckCircle size={20} className="mr-2" /> APPROVE
+                <CheckCircle2 size={20} className="mr-2" /> APPROVE
               </button>
               <button
                 type="button"
@@ -832,4 +508,4 @@ const PrincipalBillingDashboard = () => {
   );
 };
 
-export default PrincipalBillingDashboard;
+export default TreasuryBillingDashboard;

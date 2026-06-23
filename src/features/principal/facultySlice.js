@@ -11,12 +11,33 @@ export const getFaculties = createAsyncThunk(
       if (params.course_id) queryParams.append('course_id', params.course_id);
       if (params.academic_year) queryParams.append('academic_year', params.academic_year);
       if (params.page) queryParams.append('page', params.page);
-      if (params.limit) queryParams.append('limit', params.limit || 10);
+      
+      const requestedLimit = params.limit ? parseInt(params.limit, 10) : 10;
+      const safeLimit = Math.min(requestedLimit, 100);
+      queryParams.append('limit', safeLimit);
 
       const response = await api.get(`/vacancies/faculty?${queryParams.toString()}`);
       return response.data; // { status, data: [], total, total_pages, current_page }
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to fetch faculties');
+    }
+  }
+);
+
+export const getAppointedFaculties = createAsyncThunk(
+  'faculty/getAppointedFaculties',
+  async (params, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.academic_year) queryParams.append('academic_year', params.academic_year);
+      if (params.course_id) queryParams.append('course_id', params.course_id);
+      queryParams.append('status', 'ACCEPTED');
+      queryParams.append('size', '100'); // Max limit allowed by backend
+      
+      const response = await api.get(`/appointments/list?${queryParams.toString()}`);
+      return response.data?.data?.items || [];
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch appointed faculties');
     }
   }
 );
@@ -60,7 +81,8 @@ export const deleteFaculty = createAsyncThunk(
 const facultySlice = createSlice({
   name: 'faculty',
   initialState: {
-    facultyList: [],
+    facultyList: [], // Existing faculties (for vacancy step)
+    chbFacultyList: [], // Appointed CHB faculties (for work logs & billing)
     loading: false,
     error: null,
     totalResults: 0,
@@ -90,6 +112,20 @@ const facultySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.facultyList = [];
+      })
+      // Get Appointed Faculties
+      .addCase(getAppointedFaculties.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAppointedFaculties.fulfilled, (state, action) => {
+        state.loading = false;
+        state.chbFacultyList = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(getAppointedFaculties.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.chbFacultyList = [];
       })
       // Add Faculty
       .addCase(addFaculty.fulfilled, (state, action) => {

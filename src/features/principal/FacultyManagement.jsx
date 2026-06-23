@@ -62,7 +62,7 @@ const FacultyManagement = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     designation: '',
-    employment_type: 'Full-Time',
+    employment_type: 'PERMANENT',
     qualification: '',
     specialization: '',
     date_of_birth: '',
@@ -169,7 +169,7 @@ const FacultyManagement = () => {
     setFormData({
       full_name: faculty.full_name || '',
       designation: faculty.designation || '',
-      employment_type: faculty.employment_type || 'Full-Time',
+      employment_type: faculty.employment_type || 'PERMANENT',
       qualification: faculty.qualification || '',
       specialization: faculty.specialization || '',
       date_of_birth: faculty.date_of_birth || '',
@@ -270,7 +270,7 @@ const FacultyManagement = () => {
       const payload = {
         full_name: formData.full_name || null,
         designation: formData.designation || null,
-        employment_type: formData.employment_type || 'Full-Time',
+        employment_type: formData.employment_type || 'PERMANENT',
         qualification: formData.qualification || null,
         specialization: formData.specialization || null,
         status: formData.status || 'ACTIVE',
@@ -375,23 +375,23 @@ const FacultyManagement = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-blue-500/5 border border-blue-500/10 p-4 rounded-xl">
           <p className="text-xs font-bold text-blue-500 uppercase tracking-wider">Total Faculty</p>
-          <p className="text-2xl font-black text-blue-600 mt-1">{totalResults || faculties.length}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-1">{totalResults || faculties.length}</p>
         </div>
         <div className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-xl">
           <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Effective Strength</p>
-          <p className="text-2xl font-black text-emerald-600 mt-1">
+          <p className="text-2xl font-bold text-emerald-600 mt-1">
             {faculties.filter(f => f.status === 'ACTIVE').length}
           </p>
         </div>
         <div className="bg-purple-500/5 border border-purple-500/10 p-4 rounded-xl">
           <p className="text-xs font-bold text-purple-500 uppercase tracking-wider">Permanent</p>
-          <p className="text-2xl font-black text-purple-600 mt-1">
+          <p className="text-2xl font-bold text-purple-600 mt-1">
             {faculties.filter(f => f.employment_type === 'PERMANENT').length}
           </p>
         </div>
         <div className="bg-amber-500/5 border border-amber-500/10 p-4 rounded-xl">
           <p className="text-xs font-bold text-amber-500 uppercase tracking-wider">Contract/Ad-hoc</p>
-          <p className="text-2xl font-black text-amber-600 mt-1">
+          <p className="text-2xl font-bold text-amber-600 mt-1">
             {faculties.filter(f => f.employment_type !== 'PERMANENT').length}
           </p>
         </div>
@@ -606,10 +606,9 @@ const FacultyManagement = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-accent outline-none transition-all"
                     >
-                      <option value="Full-Time">Full-Time</option>
-                      <option value="Regular">Regular</option>
-                      <option value="Contract">Contract</option>
-                      <option value="Visiting">Visiting</option>
+                      <option value="PERMANENT">Full-Time / Permanent</option>
+                      <option value="CONTRACT">Contract</option>
+                      <option value="VISITING">Visiting</option>
                     </select>
                   </div>
                   <div className="space-y-2">

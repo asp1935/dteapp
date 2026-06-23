@@ -59,7 +59,7 @@ const MarkEntryForm = ({ candidate, advertisementId, institutionId, onCancel, on
             <Award size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900">Score Assessment</h2>
+            <h2 className="text-xl font-bold text-slate-900">Score Assessment</h2>
             <p className="text-xs text-slate-500 font-medium">Evaluating: <span className="text-indigo-600 font-bold">{candidate.candidate_name}</span></p>
           </div>
         </div>
@@ -71,7 +71,7 @@ const MarkEntryForm = ({ candidate, advertisementId, institutionId, onCancel, on
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
               <BookOpen size={14} className="text-indigo-500" />
               Subject Knowledge
             </label>
@@ -88,7 +88,7 @@ const MarkEntryForm = ({ candidate, advertisementId, institutionId, onCancel, on
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
               <Presentation size={14} className="text-emerald-500" />
               Teaching Aptitude
             </label>
@@ -105,7 +105,7 @@ const MarkEntryForm = ({ candidate, advertisementId, institutionId, onCancel, on
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
               <MessageSquare size={14} className="text-amber-500" />
               Communication Skills
             </label>
@@ -122,7 +122,7 @@ const MarkEntryForm = ({ candidate, advertisementId, institutionId, onCancel, on
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
               <Star size={14} className="text-purple-500" />
               Overall Impression
             </label>
@@ -146,7 +146,7 @@ const MarkEntryForm = ({ candidate, advertisementId, institutionId, onCancel, on
           <Button 
             type="submit" 
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700 min-w-[160px] shadow-lg shadow-indigo-100"
+            className="min-w-[160px] shadow-sm"
           >
             {saving ? <Loader2 size={18} className="animate-spin mr-2" /> : <Save size={18} className="mr-2" />}
             Save Scores

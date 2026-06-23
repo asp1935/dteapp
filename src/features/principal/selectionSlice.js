@@ -234,6 +234,17 @@ const selectionSlice = createSlice({
       .addCase(fetchDashboard.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Confirm Selection
+      .addCase(confirmSelection.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(confirmSelection.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(confirmSelection.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   }
 });

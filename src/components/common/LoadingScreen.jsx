@@ -31,7 +31,7 @@ const LoadingScreen = ({ message = 'Loading system...' }) => {
       
       {/* Brand Identity */}
       <div className="absolute bottom-12 flex flex-col items-center opacity-40">
-        <p className="text-xs font-black uppercase tracking-[0.2em]">Department of Technical Education</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]">Department of Technical Education</p>
         <p className="text-[10px] font-medium mt-1 uppercase tracking-widest">Portal Governance System</p>
       </div>
     </div>

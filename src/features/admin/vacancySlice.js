@@ -80,7 +80,7 @@ const vacancySlice = createSlice({
       })
       .addCase(fetchVacancyAssessment.fulfilled, (state, action) => {
         state.loading = false;
-        state.assessment = action.payload.data || action.payload;
+        state.assessment = action.payload?.data !== undefined ? action.payload.data : action.payload;
       })
       .addCase(fetchVacancyAssessment.rejected, (state, action) => {
         state.loading = false;
@@ -92,7 +92,7 @@ const vacancySlice = createSlice({
       })
       .addCase(suggestVacancy.fulfilled, (state, action) => {
         state.suggesting = false;
-        state.assessment = action.payload.data || action.payload;
+        state.assessment = action.payload?.data !== undefined ? action.payload.data : action.payload;
       })
       .addCase(suggestVacancy.rejected, (state, action) => {
         state.suggesting = false;
@@ -104,7 +104,7 @@ const vacancySlice = createSlice({
       })
       .addCase(runAIAnalysis.fulfilled, (state, action) => {
         state.suggesting = false;
-        state.assessment = action.payload.data || action.payload;
+        state.assessment = action.payload?.data !== undefined ? action.payload.data : action.payload;
       })
       .addCase(runAIAnalysis.rejected, (state, action) => {
         state.suggesting = false;
@@ -116,7 +116,7 @@ const vacancySlice = createSlice({
       })
       .addCase(confirmVacancy.fulfilled, (state, action) => {
         state.confirming = false;
-        state.assessment = action.payload.data || action.payload;
+        state.assessment = action.payload?.data !== undefined ? action.payload.data : action.payload;
       })
       .addCase(confirmVacancy.rejected, (state, action) => {
         state.confirming = false;
