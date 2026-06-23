@@ -9,11 +9,7 @@ import { fetchInstitutions } from './institutionSlice';
 import { fetchCourses } from './courseSlice';
 import { 
   generateAdAI, clearAdStatus, fetchAds, fetchRecruitmentContext, 
-<<<<<<< HEAD
   clearRecruitmentContext, saveAd, updateAd, submitAd, approveAd, publishAd, fetchAdById, setPreview 
-=======
-  clearRecruitmentContext, saveAd, submitAd, approveAd, publishAd, deleteAd, fetchAdById
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 } from './advertisementSlice';
 import { cn } from '../../utils/cn';
 import Modal from '../../components/common/Modal';
@@ -333,7 +329,6 @@ const AdGenerationDashboard = () => {
                       </div>
                     </div>
 
-<<<<<<< HEAD
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deadline</label>
@@ -347,13 +342,6 @@ const AdGenerationDashboard = () => {
                           <option>Walk-in</option><option>Online</option><option>Email</option>
                         </select>
                       </div>
-=======
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Deadline</label>
-                      <input type="date" min={minDeadline} value={deadline} onChange={(e) => setDeadline(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
                     </div>
 
                     <button onClick={handleGenerate} disabled={aiLoading || !deadline}

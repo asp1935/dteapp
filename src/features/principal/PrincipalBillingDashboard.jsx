@@ -643,7 +643,6 @@ const PrincipalBillingDashboard = () => {
                 required
               >
                 <option value="">Select a Faculty Member...</option>
-<<<<<<< HEAD
                 {chbFacultyList.filter(f => f.faculty_credential_id).map(f => (
                   <option key={f.faculty_credential_id} value={f.faculty_credential_id}>{f.candidate_name} ({f.course})</option>
                 ))}
@@ -665,10 +664,6 @@ const PrincipalBillingDashboard = () => {
                 <option value="">{availableDates.length > 0 ? "Select Lecture Date..." : "No verified logs available"}</option>
                 {availableDates.map(date => (
                   <option key={date} value={date}>{date}</option>
-=======
-                {facultyList.map(f => (
-                  <option key={f.id} value={f.id}>{f.full_name} ({f.designation})</option>
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
                 ))}
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">

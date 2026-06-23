@@ -6,7 +6,6 @@ import {
   ExternalLink, 
   Trash2, 
   Loader2,
-<<<<<<< HEAD
   CheckCircle,
   XCircle,
   Info,
@@ -15,9 +14,6 @@ import {
   Building2,
   Calendar,
   GraduationCap
-=======
-  X
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 } from 'lucide-react';
 import { Button } from '../../components/common/UIComponents';
 import applicationService from '../../services/applicationService';
@@ -33,16 +29,9 @@ const MyApplications = () => {
   const totalPages = pagination?.total_pages || 1;
   const [page, setPage] = useState(1);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-<<<<<<< HEAD
   const [selectedApp, setSelectedApp] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
-=======
-  const [viewOpen, setViewOpen] = useState(false);
-  const [selectedApp, setSelectedApp] = useState(null);
-  const [documents, setDocuments] = useState([]);
-  const [docLoading, setDocLoading] = useState(false);
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 
   useEffect(() => {
     dispatch(getMyApplications({ skip: (page - 1) * 10, limit: 10 }));
@@ -71,7 +60,6 @@ const MyApplications = () => {
     }
   };
 
-<<<<<<< HEAD
   const handleViewApp = async (app) => {
     setSelectedApp(app);
     setDocsLoading(true);
@@ -83,21 +71,6 @@ const MyApplications = () => {
       toast.error('Failed to fetch documents');
     } finally {
       setDocsLoading(false);
-=======
-  const handleViewDetails = async (app) => {
-    setSelectedApp(app);
-    setViewOpen(true);
-    setDocLoading(true);
-    try {
-      const response = await applicationService.listDocuments(app.application_id);
-      setDocuments(response?.data || []);
-    } catch (error) {
-      setDocuments([]);
-      const detail = error.response?.data?.detail;
-      toast.error(detail?.message || 'Failed to load application details');
-    } finally {
-      setDocLoading(false);
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
     }
   };
 
@@ -153,7 +126,6 @@ const MyApplications = () => {
                     <h4 className="text-xl font-bold text-slate-900 mb-1">{app.advertisement_name || app.course_name}</h4>
                     <p className="text-sm text-slate-500 font-medium">{app.institution_name} • AY {app.academic_year}</p>
                   </div>
-<<<<<<< HEAD
                 </div>
                 <div className="flex items-center space-x-6 mt-6 md:mt-0">
                   <span className={cn(
@@ -178,48 +150,6 @@ const MyApplications = () => {
                         disabled={isWithdrawing}
                       >
                         <Trash2 size={18} />
-=======
-                </td>
-              </tr>
-            ) : (
-              myApplications.map((app) => (
-                <tr key={app.application_id} className="hover:bg-muted/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-[10px] font-bold bg-muted px-1.5 py-0.5 rounded text-secondary tracking-tight">
-                          {app.application_number}
-                        </span>
-                      </div>
-                      <p className="font-bold text-foreground leading-tight">{app.advertisement_name || app.course_name}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-secondary">
-                    <div className="space-y-0.5">
-                      <p className="font-medium text-xs text-foreground/80">{app.institution_name}</p>
-                      <p className="text-[10px] flex items-center">
-                        <Clock size={10} className="mr-1" /> AY {app.academic_year}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={cn(
-                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border",
-                      getStatusStyle(app.status)
-                    )}>
-                      {app.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 text-[10px] font-bold border-border hover:border-accent"
-                        onClick={() => handleViewDetails(app)}
-                      >
-                        <ExternalLink size={12} className="mr-1" /> View Detail
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
                       </Button>
                     )}
                   </div>

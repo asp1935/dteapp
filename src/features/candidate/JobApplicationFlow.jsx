@@ -70,7 +70,6 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose, onSu
 
   if (success) {
     return (
-<<<<<<< HEAD
       <div className="bg-background w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-border flex flex-col animate-in fade-in zoom-in duration-300">
         <div className="p-12 text-center space-y-6">
           <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -84,34 +83,6 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose, onSu
             <Button variant="accent" className="px-12" onClick={onClose}>Done</Button>
           </div>
         </div>
-=======
-      <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl border border-slate-100 p-16 text-center space-y-8 animate-in fade-in zoom-in duration-300">
-        <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-2 shadow-inner">
-          <CheckCircle size={48} />
-        </div>
-        <div className="space-y-3">
-          <h3 className="text-3xl font-black text-slate-900 tracking-tight">Application Submitted!</h3>
-          <p className="text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
-            Your application for <strong className="text-slate-900">{safeTitle}</strong> has been successfully received.
-          </p>
-        </div>
-        
-        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100/50">
-          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Next Step</p>
-          <p className="text-sm font-semibold text-slate-600 mt-1">You can track your status in the "My Applications" section.</p>
-        </div>
-
-        <Button
-          variant="accent"
-          className="w-full h-16 rounded-2xl text-lg font-black shadow-xl shadow-indigo-100"
-          onClick={() => {
-            if (onSuccess) onSuccess();
-            onClose();
-          }}
-        >
-          Done
-        </Button>
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
       </div>
     );
   }

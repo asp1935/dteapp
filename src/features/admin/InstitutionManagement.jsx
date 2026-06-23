@@ -13,12 +13,8 @@ import { ROLES } from '../../constants/roles';
 const InstitutionManagement = () => {
   const dispatch = useDispatch();
   const { institutions, loading } = useSelector((state) => state.institutions);
-<<<<<<< HEAD
   const role = useSelector((state) => state.auth.role);
   
-=======
-
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -165,7 +161,6 @@ const InstitutionManagement = () => {
             className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border focus:bg-background focus:border-accent rounded-lg text-sm transition-all outline-none"
           />
         </div>
-<<<<<<< HEAD
         {role === ROLES.RO && (
           <Button 
             variant="accent" 
@@ -176,16 +171,6 @@ const InstitutionManagement = () => {
             <span>Add Institution</span>
           </Button>
         )}
-=======
-        <Button
-          variant="accent"
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center space-x-2 w-full sm:w-auto"
-        >
-          <Plus size={20} />
-          <span>Add Institution</span>
-        </Button>
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
       </div>
 
       {/* Form Modal */}
@@ -818,7 +803,6 @@ const InstitutionManagement = () => {
                 >
                   <BarChart3 size={16} />
                 </Button>
-<<<<<<< HEAD
                 {[ROLES.ADMIN, ROLES.RO].includes(role) && (
                   <>
                     <Button 
@@ -843,24 +827,6 @@ const InstitutionManagement = () => {
                     </button>
                   </>
                 )}
-=======
-                <Button
-                  variant="ghost"
-                  className="p-2 h-auto text-blue-500 hover:bg-blue-500/10"
-                  onClick={() => handleEdit(row)}
-                  title="Edit Institution"
-                >
-                  <Edit size={16} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="p-2 h-auto text-red-500 hover:bg-red-500/10"
-                  onClick={() => handleDelete(row.id)}
-                  title="Delete Institution"
-                >
-                  <Trash2 size={16} />
-                </Button>
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
               </div>
             )}
           />

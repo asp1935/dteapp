@@ -96,7 +96,6 @@ const CandidateDashboard = () => {
         </div>
       ) : (
         
-<<<<<<< HEAD
         <div className="max-w-6xl w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Dashboard Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -123,108 +122,9 @@ const CandidateDashboard = () => {
               <div>
                 <p className="text-4xl font-black text-slate-900">{appointments.length}</p>
                 <p className="text-sm text-slate-500 font-medium mt-1">Offers received</p>
-=======
-        <div className="grid lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="lg:col-span-2 space-y-8">
-          {/* Active Ads */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold">Latest Advertisements</h3>
-              <button 
-                onClick={() => window.location.href = '/candidate/ads'}
-                className="text-xs font-bold text-accent hover:underline flex items-center"
-              >
-                View All Jobs <ArrowRight size={14} className="ml-1" />
-              </button>
-            </div>
-            
-            <div className="grid gap-4">
-              {loading && (
-                <div className="flex flex-col items-center justify-center py-12 bg-background border border-border border-dashed rounded-xl">
-                  <Loader2 className="animate-spin text-accent mb-2" />
-                  <p className="text-xs text-secondary font-medium">Fetching latest opportunities...</p>
-                </div>
-              )}
-              
-              {!loading && allAds.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 bg-background border border-border border-dashed rounded-xl">
-                  <Briefcase className="text-muted mb-2" size={32} />
-                  <p className="text-xs text-secondary font-medium">No new advertisements to apply right now.</p>
-                </div>
-              )}
-
-              {!loading && allAds.slice(0, 5).map((ad) => {
-                const appStatus = appliedAdStatusMap[String(ad.id)];
-                const isApplied = appStatus && appStatus !== 'WITHDRAWN';
-                
-                return (
-                  <div key={ad.id} className="p-5 bg-background border border-border rounded-xl hover:border-accent transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-foreground group-hover:text-accent transition-colors">
-                        Lecturer in {ad.course_name}
-                      </h4>
-                      <div className="flex items-center space-x-4 text-xs text-secondary">
-                        <span className="flex items-center font-medium"><MapPin size={12} className="mr-1" /> {ad.institution_name}</span>
-                        <span className="flex items-center"><Clock size={12} className="mr-1" /> Closes: {new Date(ad.application_end_date).toLocaleDateString()}</span>
-                        <span className="flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase tracking-wider">{ad.vacancy_count} Openings</span>
-                      </div>
-                    </div>
-                    {isApplied ? (
-                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                        Applied
-                      </span>
-                    ) : (
-                      <Button variant="accent" size="sm" onClick={() => {
-                        setSelectedAd(ad);
-                        setShowApplyFlow(true);
-                      }}>Apply Now</Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* My Appointments */}
-          {appointments.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold flex items-center">
-                <Award className="mr-2 text-indigo-600" size={20} /> 
-                Appointment Offers
-              </h3>
-              <div className="grid gap-4">
-                {appointments.map((app) => (
-                  <div key={app.id} className="p-6 bg-white border border-indigo-100 rounded-[2rem] shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
-                        <FileText size={24} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-black text-indigo-600 uppercase tracking-widest">{app.appointment_number}</p>
-                        <h4 className="font-bold text-slate-900">Offer from {app.institution_name}</h4>
-                        <p className="text-xs text-slate-500 font-medium">Position: {app.course_name} • Joining: {new Date(app.joining_date).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span className={cn(
-                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
-                        app.status === 'ISSUED' ? "bg-amber-100 text-amber-600" :
-                        app.status === 'ACCEPTED' ? "bg-emerald-100 text-emerald-600" : 
-                        app.status === 'DECLINED' ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-400"
-                      )}>
-                        {app.status === 'ISSUED' ? 'PENDING ACTION' : app.status}
-                      </span>
-                      <Button variant="accent" size="sm" className="rounded-xl shadow-lg shadow-indigo-50" onClick={() => handleViewAppointment(app.id)}>
-                        View & Respond
-                      </Button>
-                    </div>
-                  </div>
-                ))}
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
               </div>
             </div>
 
-<<<<<<< HEAD
             <div className="bg-white border border-amber-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-slate-700">Applications</h3>
@@ -236,76 +136,6 @@ const CandidateDashboard = () => {
                 <p className="text-4xl font-black text-slate-900">{myApplications.length}</p>
                 <p className="text-sm text-slate-500 font-medium mt-1">Total applications sent</p>
               </div>
-=======
-          {/* My Applications */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold">Your Applications</h3>
-            <div className="bg-background rounded-xl border border-border overflow-hidden shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 border-b border-border">
-                  <tr>
-                    <th className="px-6 py-3 font-semibold">Post</th>
-                    <th className="px-6 py-3 font-semibold">Status</th>
-                    <th className="px-6 py-3 font-semibold text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {myApplications.length === 0 && (
-                    <tr>
-                      <td colSpan="3" className="px-6 py-12 text-center text-secondary text-xs italic">
-                        No applications submitted yet.
-                      </td>
-                    </tr>
-                  )}
-                  {myApplications.map((app) => (
-                    <tr key={app.application_id}>
-                      <td className="px-6 py-4">
-                        <p className="font-medium">{app.advertisement_name}</p>
-                        <p className="text-xs text-secondary">{app.institution_name}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={cn(
-                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                          app.status === 'SUBMITTED' ? "bg-emerald-100 text-emerald-800" : 
-                          app.status === 'WITHDRAWN' ? "bg-slate-100 text-slate-600" : "bg-blue-100 text-blue-800"
-                        )}>
-                          {app.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-accent hover:underline font-medium">View Detail</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-primary text-white rounded-2xl p-6 relative overflow-hidden">
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold mb-2">
-                {profileComplete ? 'Profile Complete' : 'Complete Your Profile'}
-              </h3>
-              <p className="text-white/70 text-sm mb-4">
-                {profileComplete
-                  ? 'Your profile is complete and ready for applications.'
-                  : 'Complete profiles have a 40% higher chance of being shortlisted.'}
-              </p>
-              <div className="w-full bg-white/20 h-2 rounded-full mb-6">
-                <div className="bg-accent h-full rounded-full transition-all duration-500" style={{ width: `${profileProgress}%` }}></div>
-              </div>
-              <Button
-                variant="accent"
-                className="w-full bg-white text-primary hover:bg-white/90"
-                onClick={() => setActiveView('profile')}
-              >
-                {profileComplete ? 'View Profile' : 'Edit Profile'}
-              </Button>
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
             </div>
 
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between md:col-span-3 relative overflow-hidden group">

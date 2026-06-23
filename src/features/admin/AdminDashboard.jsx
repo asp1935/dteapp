@@ -1,19 +1,6 @@
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
 import { Users, Building2, FileText, Briefcase } from 'lucide-react';
 import api from '../../services/api';
-=======
-import { useDispatch, useSelector } from 'react-redux';
-import { Users, Building2, FileText, Search, GraduationCap, Briefcase } from 'lucide-react';
-import { Table } from '../../components/common/Table';
-import { Button, Input } from '../../components/common/UIComponents';
-import InstitutionManagement from './InstitutionManagement';
-import CourseManagement from './CourseManagement';
-import { fetchCourses } from './courseSlice';
-import NormsIntakeManagement from './NormsIntakeManagement';
-import AIValidationDashboard from './AIValidationDashboard';
-import { fetchBillingRates } from './billingSlice';
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
 
 const AdminDashboard = () => {
   const [liveStats, setLiveStats] = useState({
@@ -65,8 +52,7 @@ const AdminDashboard = () => {
           </div>
         ))}
       </div>
-<<<<<<< HEAD
-=======
+
 
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
@@ -131,7 +117,7 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
->>>>>>> f965a7779698e7959403db83782d5c9815a657c5
+
     </div>
   );
 };
