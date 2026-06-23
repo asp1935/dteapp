@@ -293,10 +293,8 @@ const PrincipalWorkLogs = () => {
                         </td>
                       </tr>
                     )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </React.Fragment>
+                ))}
           </tbody>
         </table>
         {filteredLogs.length === 0 && (
@@ -307,6 +305,8 @@ const PrincipalWorkLogs = () => {
              <p className="text-slate-400 font-bold">No work logs found for the selected period.</p>
           </div>
         )}
+      </div>
+      )}
       </div>
     </div>
   );

@@ -38,9 +38,12 @@ import PrincipalWorkLogs from './features/principal/PrincipalWorkLogs';
 import PrincipalAppointmentManagement from './features/principal/PrincipalAppointmentManagement';
 import ApplicationManagement from './features/admin/ApplicationManagement';
 import MyApplications from './features/candidate/MyApplications';
+import MISReportsDashboard from './features/admin/MISReportsDashboard';
+import AcademicCalendar from './features/admin/AcademicCalendar';
 import CandidateAdsPage from './features/candidate/CandidateAdsPage';
 import CandidateOffers from './features/candidate/CandidateOffers';
 import ManageTimetable from './features/principal/ManageTimetable';
+import TimetableManagement from './features/principal/TimetableManagement';
 
 function App() {
   const dispatch = useDispatch();
@@ -158,7 +161,7 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.TREASURY]}>
               <div className="p-6">
-                <TreasurerBillingDashboard />
+                <TreasuryBillingDashboard />
               </div>
             </ProtectedRoute>
           } 

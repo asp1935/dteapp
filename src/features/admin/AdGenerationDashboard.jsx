@@ -152,14 +152,7 @@ const AdGenerationDashboard = () => {
       .catch((err) => alert(err.message || err));
   };
 
-  const handleView = async (id) => {
-    const action = await dispatch(fetchAdById(id));
-    if (fetchAdById.fulfilled.match(action)) {
-      const adData = action.payload.data || action.payload;
-      dispatch(setPreview({ english: adData.content_en, marathi: adData.content_mr }));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm('Are you sure you want to delete this advertisement?');
