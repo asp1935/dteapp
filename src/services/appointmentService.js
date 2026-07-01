@@ -28,5 +28,9 @@ export const appointmentService = {
   respondToLetter: async (id, data) => {
     const response = await api.post(`/appointments/${id}/respond`, data);
     return response.data;
+  },
+  deleteLetter: async (id) => {
+    const response = await api.delete(`/appointments/${id}`);
+    return response.data;
   }
 };

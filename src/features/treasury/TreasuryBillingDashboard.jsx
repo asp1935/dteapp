@@ -64,21 +64,7 @@ const TreasuryBillingDashboard = () => {
     dispatch(fetchBillingSummary({}));
   }, [dispatch, page, limit]);
 
-  useEffect(() => {
-    if (success) {
-      toast.success('Billing action successful!');
-      dispatch(fetchBills({ page: 1, limit }));
-      dispatch(fetchBillingSummary({}));
-      closeModals();
-      dispatch(resetBillingStatus());
-    }
-    if (error) {
-      toast.error(error);
-      dispatch(resetBillingStatus());
-    }
-  }, [success, error, dispatch, limit]);
-
-  const closeModals = () => {
+  const closeModals = React.useCallback(() => {
     setIsApproveModalOpen(false);
     setIsDetailsModalOpen(false);
     setSelectedBillId(null);
@@ -86,7 +72,22 @@ const TreasuryBillingDashboard = () => {
       action: 'APPROVE',
       remarks: ''
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    if (success) {
+      toast.success('Billing action successful!');
+      dispatch(fetchBills({ page: 1, limit }));
+      dispatch(fetchBillingSummary({}));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      closeModals();
+      dispatch(resetBillingStatus());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(resetBillingStatus());
+    }
+  }, [success, error, dispatch, limit, closeModals]);
 
   const handleOpenApproveModal = (billId) => {
     setSelectedBillId(billId);

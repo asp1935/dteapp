@@ -56,6 +56,7 @@ const TreasurerBillingDashboard = () => {
   useEffect(() => {
     if (success) {
       toast.success('Disbursement processed successfully');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDetailsModalOpen(false);
       setRemarks('');
       dispatch(resetBillingStatus());

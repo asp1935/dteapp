@@ -444,7 +444,7 @@ const VacancyManagement = () => {
                     handleConfirm();
                     setShowConfirmModal(false);
                   }}
-                  className="flex-1 h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-bold"
+                  className="flex-1 h-14 rounded-2xl bg-white hover:bg-gray-50 text-black font-bold shadow-sm"
                 >
                   Confirm & Finalize
                 </Button>

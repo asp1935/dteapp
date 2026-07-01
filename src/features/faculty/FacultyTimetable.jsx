@@ -6,7 +6,7 @@ import { cn } from '../../utils/cn';
 
 const FacultyTimetable = () => {
   const dispatch = useDispatch();
-  const { timetable, logs, loading } = useSelector((state) => state.attendance);
+  const { timetableByDay, logs, loading } = useSelector((state) => state.attendance);
   const { user } = useSelector((state) => state.auth);
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -40,7 +40,7 @@ const FacultyTimetable = () => {
   // Helper to check if a slot on a specific date is logged
   const getLogForSlot = (date, slotId) => {
     const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-    return logs.find(log => log.log_date === dateStr && log.timetable_slot_id === slotId);
+    return logs.find(log => log.lecture_date === dateStr && log.timetable_slot_id === slotId);
   };
 
   const isToday = (date) => {
@@ -76,11 +76,11 @@ const FacultyTimetable = () => {
         </div>
       </div>
 
-      {loading && Object.keys(timetable || {}).length === 0 ? (
+      {loading && Object.keys(timetableByDay || {}).length === 0 ? (
         <div className="flex items-center justify-center py-32 bg-white rounded-3xl border border-slate-200">
           <Loader2 className="animate-spin text-indigo-500" size={48} />
         </div>
-      ) : Object.keys(timetable || {}).length === 0 ? (
+      ) : Object.keys(timetableByDay || {}).length === 0 ? (
         <div className="text-center py-32 bg-white rounded-3xl border border-slate-200 shadow-sm">
           <BookOpen size={64} className="mx-auto text-slate-300 mb-6" />
           <p className="text-slate-500 font-bold text-xl">No timetable assigned yet.</p>
@@ -108,7 +108,11 @@ const FacultyTimetable = () => {
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const date = i + 1;
               const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-              const slots = timetable[dateStr] || [];
+              
+              const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
+              const dayOfWeek = dayNames[cellDate.getDay()];
+              const slots = timetableByDay[dayOfWeek] || [];
+              
               const today = isToday(date);
               const past = isPast(date);
 

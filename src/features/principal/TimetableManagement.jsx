@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Button, Input, Select } from '../../components/common/UIComponents';
 import { fetchTimetable, createTimetable, updateTimetableSlot } from '../faculty/attendanceSlice';
-import { getFaculties } from './facultySlice';
+import { getAppointedFaculties } from './facultySlice';
 import { fetchCourses } from '../admin/courseSlice';
 import toast from 'react-hot-toast';
 import { cn } from '../../utils/cn';
@@ -32,7 +32,7 @@ const LECTURE_TYPES = [
 const TimetableManagement = () => {
   const dispatch = useDispatch();
   const { timetable, loading } = useSelector((state) => state.attendance);
-  const { facultyList } = useSelector((state) => state.faculty);
+  const { chbFacultyList = [] } = useSelector((state) => state.faculty);
   const { courses } = useSelector((state) => state.courses);
   const { user } = useSelector((state) => state.auth);
 
@@ -47,11 +47,8 @@ const TimetableManagement = () => {
       if (courses.length === 0) {
         dispatch(fetchCourses({ institutionId: user.institution_id }));
       }
-      dispatch(getFaculties({ 
-        page: 1, 
-        limit: 100, 
+      dispatch(getAppointedFaculties({ 
         course_id: selectedCourse || undefined,
-        institution_id: user.institution_id,
         academic_year: selectedYear
       }));
     }
@@ -228,9 +225,13 @@ const TimetableManagement = () => {
                 {user?.role === 'FACULTY' ? (
                   <option value={user.id}>{user.full_name}</option>
                 ) : (
-                  facultyList.map(f => (
-                    <option key={f.id} value={f.credential_id || f.id}>{f.full_name} ({f.designation})</option>
-                  ))
+                  chbFacultyList
+                    .filter(f => f.credentials_issued)
+                    .map(f => (
+                      <option key={f.id} value={f.faculty_credential_id}>
+                        {f.candidate_name} ({f.course})
+                      </option>
+                    ))
                 )}
               </select>
               {user?.role === 'PRINCIPAL' && (

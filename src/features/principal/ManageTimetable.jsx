@@ -20,7 +20,7 @@ const ManageTimetable = () => {
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSlot, setNewSlot] = useState({
-    calendar_date: new Date().toISOString().split('T')[0],
+    day_of_week: 'MONDAY',
     slot_number: 1,
     start_time: '10:00',
     end_time: '11:00',
@@ -55,7 +55,21 @@ const ManageTimetable = () => {
     try {
       setLoadingTimetable(true);
       const res = await attendanceService.getTimetable(faculty.faculty_credential_id, academicYear);
-      setTimetable(res?.data || {});
+      const rawData = res?.data || [];
+      if (Array.isArray(rawData)) {
+        const grouped = {};
+        rawData.forEach(slot => {
+          const day = slot.day_of_week;
+          if (day) {
+            const dayStr = day.toUpperCase();
+            if (!grouped[dayStr]) grouped[dayStr] = [];
+            grouped[dayStr].push(slot);
+          }
+        });
+        setTimetable(grouped);
+      } else {
+        setTimetable(rawData);
+      }
     } catch (err) {
       console.error(err);
       setTimetable({});
@@ -213,17 +227,15 @@ const ManageTimetable = () => {
                   </div>
                 ) : (
                   <div className="space-y-8">
-                    {Object.keys(timetable)
-                      .sort((a, b) => new Date(a) - new Date(b))
-                      .map(dateStr => (
-                      timetable[dateStr] && timetable[dateStr].length > 0 && (
-                        <div key={dateStr}>
+                    {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'].map(day => (
+                      timetable[day] && timetable[day].length > 0 && (
+                        <div key={day}>
                           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-indigo-600"></span> 
-                            {new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                            {day}
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {timetable[dateStr].map(slot => renderSlot(slot))}
+                            {timetable[day].map(slot => renderSlot(slot))}
                           </div>
                         </div>
                       )
@@ -258,13 +270,16 @@ const ManageTimetable = () => {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Date</label>
-                  <input 
-                    type="date"
-                    value={newSlot.calendar_date}
-                    onChange={e => setNewSlot({...newSlot, calendar_date: e.target.value})}
+                  <label className="text-xs font-bold text-slate-700 uppercase">Day</label>
+                  <select 
+                    value={newSlot.day_of_week}
+                    onChange={e => setNewSlot({...newSlot, day_of_week: e.target.value})}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
+                  >
+                    {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'].map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 uppercase">Slot #</label>

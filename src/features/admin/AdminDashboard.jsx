@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Users, Building2, FileText, Briefcase } from 'lucide-react';
 import api from '../../services/api';
+import InstitutionManagement from './InstitutionManagement';
+import CourseManagement from './CourseManagement';
+import NormsIntakeManagement from './NormsIntakeManagement';
+import AIValidationDashboard from './AIValidationDashboard';
+import { fetchBillingRates } from './billingSlice';
+import { Table } from '../../components/common/Table';
+import { Input, Button } from '../../components/common/UIComponents';
 
 const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState('institutes');
   const [liveStats, setLiveStats] = useState({
     advertisements: 0,
     vacancies: 0,

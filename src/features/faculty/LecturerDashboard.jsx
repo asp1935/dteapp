@@ -28,7 +28,7 @@ import { cn } from '../../utils/cn';
 const LecturerDashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { logs, summary, timetable, loading, submitting } = useSelector((state) => state.attendance);
+  const { logs, summary, timetable, timetableByDay, loading, submitting } = useSelector((state) => state.attendance);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,9 +38,9 @@ const LecturerDashboard = () => {
     lecture_type: 'THEORY',
     topic_covered: '',
     hours: 1,
-    attendance_count: '',
-    latitude: null,
-    longitude: null
+    attendance_count: 0,
+    latitude: 0,
+    longitude: 0
   });
 
   const [isCountingFaces, setIsCountingFaces] = useState(false);
@@ -287,12 +287,18 @@ const LecturerDashboard = () => {
                           <p className="text-sm font-medium text-slate-600 line-clamp-1">{log.topic_covered}</p>
                         </td>
                         <td className="px-8 py-5 text-center">
-                          <span className="text-sm font-bold text-slate-900">{log.hours}</span>
+                          <span className="text-sm font-bold text-slate-900">
+                            {log.start_time && log.end_time ? (() => {
+                              const [sh, sm] = log.start_time.split(':').map(Number);
+                              const [eh, em] = log.end_time.split(':').map(Number);
+                              return Math.round(((eh + em/60) - (sh + sm/60)) * 10) / 10;
+                            })() : '-'}
+                          </span>
                         </td>
                         <td className="px-8 py-5">
                           <span className={cn(
                             "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                            statusColors[log.status] || 'bg-slate-100 text-slate-600'
+                            statusColors[log.log_status || log.status] || 'bg-slate-100 text-slate-600'
                           )}>
                             {log.log_status || log.status}
                           </span>
@@ -427,8 +433,8 @@ const LecturerDashboard = () => {
                   <input 
                     type="date"
                     required
-                    value={formData.log_date}
-                    onChange={(e) => setFormData({...formData, log_date: e.target.value})}
+                    value={formData.lecture_date}
+                    onChange={(e) => setFormData({...formData, lecture_date: e.target.value})}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
                   />
                 </div>
@@ -456,7 +462,7 @@ const LecturerDashboard = () => {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
                   >
                   <option value="">Select Slot...</option>
-                  {timetable.filter(s => s.day_of_week === new Date(formData.lecture_date).toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()).map(slot => (
+                  {timetable.filter(s => s.slot_date === formData.lecture_date).map(slot => (
                     <option key={slot.id} value={slot.id}>{slot.start_time} - {slot.subject_name || 'Class'}</option>
                   ))}
                   </select>
@@ -564,7 +570,7 @@ const LecturerDashboard = () => {
                 <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 rounded-xl text-sm font-bold border-slate-200">
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={submitting || formData.latitude === null} className="flex-1 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" variant="primary" disabled={submitting || formData.latitude === 0} className="flex-1 rounded-xl text-sm font-bold bg-black hover:bg-gray-900 text-white">
                   {submitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Save Log Entry'}
                 </Button>
               </div>
@@ -597,7 +603,7 @@ const LecturerDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'].map(day => {
-                    const slots = timetable[day] || [];
+                    const slots = timetableByDay[day] || [];
                     if (slots.length === 0) return null;
                     return (
                       <div key={day} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">

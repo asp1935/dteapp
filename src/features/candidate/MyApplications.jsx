@@ -32,6 +32,7 @@ const MyApplications = () => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
 
   useEffect(() => {
     dispatch(getMyApplications({ skip: (page - 1) * 10, limit: 10 }));
@@ -340,7 +341,7 @@ const MyApplications = () => {
 
             <div>
               <h4 className="font-bold mb-2">Uploaded Documents</h4>
-              {docLoading ? (
+              {docsLoading ? (
                 <div className="text-sm text-secondary flex items-center">
                   <Loader2 size={16} className="animate-spin mr-2" /> Loading documents...
                 </div>

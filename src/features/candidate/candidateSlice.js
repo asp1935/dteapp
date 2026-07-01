@@ -68,7 +68,7 @@ const candidateSlice = createSlice({
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = { ...state.profile, ...action.payload };
+        state.profile = action.payload.data;
         state.success = true;
       })
       .addCase(updateProfile.rejected, (state, action) => {
@@ -91,8 +91,11 @@ const candidateSlice = createSlice({
       .addCase(updateExperience.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateExperience.fulfilled, (state) => {
+      .addCase(updateExperience.fulfilled, (state, action) => {
         state.loading = false;
+        if (state.profile) {
+          state.profile.experiences = action.payload.data;
+        }
         state.success = true;
       })
       .addCase(updateExperience.rejected, (state, action) => {
@@ -103,8 +106,11 @@ const candidateSlice = createSlice({
       .addCase(updateQualifications.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateQualifications.fulfilled, (state) => {
+      .addCase(updateQualifications.fulfilled, (state, action) => {
         state.loading = false;
+        if (state.profile) {
+          state.profile.qualifications = action.payload.data;
+        }
         state.success = true;
       })
       .addCase(updateQualifications.rejected, (state, action) => {

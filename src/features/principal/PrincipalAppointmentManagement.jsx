@@ -13,7 +13,8 @@ import {
   Building2,
   Calendar,
   AlertCircle,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { Button, Input } from '../../components/common/UIComponents';
 import { appointmentService } from '../../services/appointmentService';
@@ -92,12 +93,28 @@ const PrincipalAppointmentManagement = () => {
   };
 
   const handleSubmitToCandidate = async (id) => {
+    if (!window.confirm('Are you sure you want to issue this appointment letter to the candidate? This action cannot be undone.')) {
+      return;
+    }
     try {
       await appointmentService.submitLetter(id);
-      toast.success('Appointment letter sent to candidate');
+      toast.success('Appointment letter issued to candidate successfully!');
       fetchAppointments();
     } catch (error) {
-      toast.error('Failed to send letter');
+      toast.error('Failed to issue appointment letter');
+    }
+  };
+
+  const handleDeleteLetter = async (id) => {
+    if (!window.confirm('Are you sure you want to permanently delete this appointment letter? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await appointmentService.deleteLetter(id);
+      toast.success('Appointment letter deleted successfully!');
+      fetchAppointments();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete appointment letter');
     }
   };
 
@@ -233,6 +250,16 @@ const PrincipalAppointmentManagement = () => {
                         >
                           <Eye size={16} className="text-slate-600" />
                         </Button>
+                        {app.status === 'DRAFT' && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-9 w-9 p-0 rounded-xl hover:bg-red-50"
+                            onClick={() => handleDeleteLetter(app.id)}
+                          >
+                            <Trash2 size={16} className="text-red-500" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -275,7 +302,7 @@ const PrincipalAppointmentManagement = () => {
                   <div className="flex items-center justify-between px-2">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">English Version</span>
                   </div>
-                  <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none">
+                  <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none whitespace-pre-wrap leading-relaxed">
                     <div dangerouslySetInnerHTML={{ __html: selectedApp.content_en }} />
                   </div>
                 </div>
@@ -285,7 +312,7 @@ const PrincipalAppointmentManagement = () => {
                   <div className="flex items-center justify-between px-2">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Marathi Version</span>
                   </div>
-                  <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none">
+                  <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none whitespace-pre-wrap leading-relaxed">
                     <div dangerouslySetInnerHTML={{ __html: selectedApp.content_mr }} />
                   </div>
                 </div>

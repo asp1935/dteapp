@@ -157,7 +157,8 @@ export const fetchMonthlySummary = createAsyncThunk(
 const attendanceSlice = createSlice({
   name: 'attendance',
   initialState: {
-    timetable: [],
+    timetable: [],  // Flat array for forms/filters
+    timetableByDay: {},  // Day-indexed object for calendar view
     logs: [],
     calendar: [],
     summary: null,
@@ -168,6 +169,7 @@ const attendanceSlice = createSlice({
   reducers: {
     clearAttendanceState: (state) => {
       state.timetable = [];
+      state.timetableByDay = {};
       state.logs = [];
       state.calendar = [];
       state.summary = null;
@@ -182,10 +184,28 @@ const attendanceSlice = createSlice({
       .addCase(fetchTimetable.fulfilled, (state, action) => {
         state.loading = false;
         const data = action.payload.data || action.payload;
-        // Backend returns dict grouped by day, flatten it for UI components that expect array
-        state.timetable = (typeof data === 'object' && !Array.isArray(data)) 
-          ? Object.values(data).flat() 
-          : (data || []);
+        
+        if (Array.isArray(data)) {
+          // Store flat array for forms/filters
+          state.timetable = data;
+          
+          // Also create day-indexed object for calendar view
+          const timetableByDay = {};
+          data.forEach(slot => {
+            const day = slot.day_of_week;
+            if (day) {
+              const dayStr = day.toUpperCase();
+              if (!timetableByDay[dayStr]) {
+                timetableByDay[dayStr] = [];
+              }
+              timetableByDay[dayStr].push(slot);
+            }
+          });
+          state.timetableByDay = timetableByDay;
+        } else {
+          state.timetable = [];
+          state.timetableByDay = data || {};
+        }
       })
       .addCase(fetchTimetable.rejected, (state, action) => {
         state.loading = false;
@@ -218,14 +238,20 @@ const attendanceSlice = createSlice({
 
       // --- Global Matchers ---
       .addMatcher(
-        (action) => action.type.endsWith('/pending'),
+        (action) => action.type.startsWith('attendance/') && action.type.endsWith('/pending'),
         (state) => {
           state.loading = true;
           state.error = null;
         }
       )
       .addMatcher(
-        (action) => action.type.endsWith('/rejected'),
+        (action) => action.type.startsWith('attendance/') && action.type.endsWith('/fulfilled'),
+        (state) => {
+          state.loading = false;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.startsWith('attendance/') && action.type.endsWith('/rejected'),
         (state, action) => {
           state.loading = false;
           state.error = action.payload;

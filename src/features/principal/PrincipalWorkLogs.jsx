@@ -9,7 +9,9 @@ import {
   Filter,
   AlertTriangle,
   Loader2,
-  MapPin
+  MapPin,
+  Activity,
+  History
 } from 'lucide-react';
 import { 
   fetchLogs, 
@@ -53,7 +55,7 @@ const PrincipalWorkLogs = () => {
 
   useEffect(() => {
     dispatch(fetchLogs({ month: filterMonth, log_status: filterStatus !== 'ALL' ? filterStatus : undefined }));
-    dispatch(fetchAnomalies({ month: filterMonth, is_acknowledged: false }));
+    // dispatch(fetchAnomalies({ month: filterMonth, is_acknowledged: false }));
     if (!dashboardData) {
       dispatch(fetchDashboardData());
     } else if (dashboardData.stats?.institution_id && chbFacultyList.length === 0) {

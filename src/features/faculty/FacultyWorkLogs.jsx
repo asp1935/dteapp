@@ -78,14 +78,11 @@ const FacultyWorkLogs = () => {
     } else {
       // Find the slot to get slot_number
       let slot_number = 1;
-      for (const date in timetable) {
-        const slot = timetable[date].find(s => s.id === dataToSubmit.timetable_slot_id);
-        if (slot) {
-          slot_number = slot.slot_number;
-          dataToSubmit.subject_name = slot.subject_name;
-          dataToSubmit.class_name = slot.class_name;
-          break;
-        }
+      const slot = (timetable || []).find(s => s.id === dataToSubmit.timetable_slot_id);
+      if (slot) {
+        slot_number = slot.slot_number;
+        dataToSubmit.subject_name = slot.subject_name;
+        dataToSubmit.class_name = slot.class_name;
       }
       dataToSubmit.slot_number = slot_number;
     }
@@ -136,7 +133,7 @@ const FacultyWorkLogs = () => {
   };
 
   const handleBulkSubmit = () => {
-    const draftLogs = logs.filter(l => l.status === 'DRAFT').map(l => l.id);
+    const draftLogs = logs.filter(l => l.log_status === 'DRAFT').map(l => l.id);
     if (draftLogs.length > 0) {
       dispatch(bulkSubmit(draftLogs));
     }
@@ -217,7 +214,7 @@ const FacultyWorkLogs = () => {
             <Button 
               variant="primary" 
               onClick={handleBulkSubmit}
-              disabled={!logs.some(l => l.status === 'DRAFT')}
+              disabled={!logs.some(l => l.log_status === 'DRAFT')}
               className="text-[10px] font-bold uppercase tracking-widest px-6"
             >
               Submit All Drafts
@@ -257,7 +254,7 @@ const FacultyWorkLogs = () => {
                 paginatedLogs.map((log) => (
                   <tr key={log.id} className="group hover:bg-slate-50/50 transition-colors">
                     <td className="px-8 py-5">
-                      <p className="text-sm font-bold text-slate-900">{new Date(log.log_date).toLocaleDateString()}</p>
+                      <p className="text-sm font-bold text-slate-900">{new Date(log.lecture_date).toLocaleDateString()}</p>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{log.lecture_type}</p>
                     </td>
                     <td className="px-8 py-5 max-w-xs">
@@ -268,7 +265,13 @@ const FacultyWorkLogs = () => {
                     </td>
                     <td className="px-8 py-5 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-sm font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">{log.hours}</span>
+                        <span className="text-sm font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">
+                          {log.start_time && log.end_time ? (() => {
+                            const [sh, sm] = log.start_time.split(':').map(Number);
+                            const [eh, em] = log.end_time.split(':').map(Number);
+                            return Math.round(((eh + em/60) - (sh + sm/60)) * 10) / 10;
+                          })() : '-'}
+                        </span>
                         {(log.ai_attendance_count || log.manual_attendance_count) && (
                           <div className="flex gap-2 text-[9px] font-bold tracking-widest uppercase">
                             {log.ai_attendance_count && <span className="text-indigo-600">AI: {log.ai_attendance_count}</span>}
@@ -280,9 +283,9 @@ const FacultyWorkLogs = () => {
                     <td className="px-8 py-5">
                       <span className={cn(
                         "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                        statusColors[log.status] || 'bg-slate-100 text-slate-600'
+                        statusColors[log.log_status] || 'bg-slate-100 text-slate-600'
                       )}>
-                        {log.status}
+                        {log.log_status}
                       </span>
                     </td>
                     <td className="px-8 py-5 text-right">
@@ -331,14 +334,14 @@ const FacultyWorkLogs = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white rounded-[40px] w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+            <div className="p-4 border-b border-slate-50 flex items-center justify-between">
               <h3 className="text-xl font-bold text-slate-900">Log Teaching Hour</h3>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
                 <X size={20} />
               </button>
             </div>
             
-            <form onSubmit={handleCreateLog} className="p-6 space-y-4">
+            <form onSubmit={handleCreateLog} className="p-5 space-y-3">
               <div className="flex items-center gap-2 mb-2">
                 <input 
                   type="checkbox" 
@@ -385,12 +388,10 @@ const FacultyWorkLogs = () => {
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
                     >
                     <option value="">Select Slot...</option>
-                    {Object.keys(timetable || {}).map(dateStr => (
-                      timetable[dateStr].map(slot => (
-                        <option key={slot.id} value={slot.id}>
-                          {slot.calendar_date} - {slot.start_time.substring(0,5)} ({slot.subject_name || 'Class'})
-                        </option>
-                      ))
+                    {(timetable || []).map(slot => (
+                      <option key={slot.id} value={slot.id}>
+                        {slot.day_of_week || 'Class'} - {slot.start_time?.substring(0,5)} ({slot.subject_name || 'Class'})
+                      </option>
                     ))}
                     </select>
                   </div>
@@ -433,7 +434,7 @@ const FacultyWorkLogs = () => {
                 />
               </div>
 
-              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 space-y-3">
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-3 space-y-2">
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">Student Attendance</h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">Capture an image to automatically count students using AI, or enter manually.</p>
@@ -474,7 +475,7 @@ const FacultyWorkLogs = () => {
                 </div>
               </div>
 
-              <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 space-y-3">
+              <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3 space-y-2">
                 <div className="flex justify-between items-center">
                   <div>
                     <h4 className="text-sm font-bold text-slate-900">Location Tagging</h4>
@@ -498,11 +499,12 @@ const FacultyWorkLogs = () => {
                 )}
               </div>
 
-              <div className="pt-4 flex justify-end gap-3">
+              <div className="pt-2 flex justify-end gap-3">
                 <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                 <Button 
                   variant="primary" 
                   type="submit" 
+                  className="!bg-black !text-white hover:!bg-slate-800"
                   disabled={!formData.latitude || !formData.longitude}
                 >
                   Save as Draft

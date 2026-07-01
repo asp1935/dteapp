@@ -77,8 +77,7 @@ const ROBillingDashboard = () => {
       dispatch(resetBillingStatus());
     }
   }, [success, error, dispatch, limit]);
-
-  const closeModals = () => {
+  function closeModals() {
     setIsApproveModalOpen(false);
     setIsDetailsModalOpen(false);
     setSelectedBillId(null);
@@ -86,7 +85,7 @@ const ROBillingDashboard = () => {
       action: 'APPROVE',
       remarks: ''
     });
-  };
+  }
 
   const handleOpenApproveModal = (billId) => {
     setSelectedBillId(billId);

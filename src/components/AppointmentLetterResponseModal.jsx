@@ -60,7 +60,7 @@ const AppointmentLetterResponseModal = ({ appointment, onClose, onRefresh }) => 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Letter Preview */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white p-10 rounded-[40px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none">
+              <div className="bg-white p-10 rounded-[40px] shadow-sm border border-slate-200 min-h-[600px] prose prose-slate max-w-none whitespace-pre-wrap leading-relaxed">
                 <div dangerouslySetInnerHTML={{ __html: appointment.content_en }} />
                 <hr className="my-10" />
                 <div dangerouslySetInnerHTML={{ __html: appointment.content_mr }} />

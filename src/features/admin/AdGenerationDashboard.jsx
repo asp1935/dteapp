@@ -14,12 +14,6 @@ import {
 import { cn } from '../../utils/cn';
 import Modal from '../../components/common/Modal';
 
-const getMinDeadline = () => {
-  const d = new Date();
-  d.setDate(d.getDate() + 7);
-  return d.toISOString().split('T')[0];
-};
-
 const StatusBadge = ({ status }) => {
   const map = {
     complete: { bg: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2, label: 'Complete' },
@@ -56,7 +50,6 @@ const AdGenerationDashboard = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [viewAd, setViewAd] = useState(null);
   const [viewLang, setViewLang] = useState('EN');
-  const minDeadline = getMinDeadline();
 
   useEffect(() => {
     dispatch(fetchInstitutions({ page: 1, limit: 100 }));
@@ -83,10 +76,6 @@ const AdGenerationDashboard = () => {
 
   const handleGenerate = () => {
     if (!canGenerate || !deadline) return;
-    if (deadline < minDeadline) {
-      alert(`Deadline must be at least ${minDeadline} (7 days from today).`);
-      return;
-    }
     dispatch(generateAdAI({
       institution_id: parseInt(selectedInst),
       course_id: parseInt(selectedCourse),
