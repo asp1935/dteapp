@@ -19,18 +19,19 @@ import { cn } from '../../utils/cn';
 import { useNavigate } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDashboardData, setInstituteLocation } from './principalSlice';
+import { fetchDashboardData, setInstituteLocation, fetchFaceUpdateRequests, reviewFaceUpdateRequest } from './principalSlice';
 import { Loader2 } from 'lucide-react';
 import CandidateProfileModal from '../../components/CandidateProfileModal';
 
 const PrincipalDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { dashboardData, loading } = useSelector((state) => state.principal);
+  const { dashboardData, loading, faceUpdateRequests } = useSelector((state) => state.principal);
   const [selectedCandidateId, setSelectedCandidateId] = useState(null);
 
   React.useEffect(() => {
     dispatch(fetchDashboardData());
+    dispatch(fetchFaceUpdateRequests());
   }, [dispatch]);
 
   const handleSetLocation = () => {
@@ -195,6 +196,69 @@ const PrincipalDashboard = () => {
               data={applications}
 
             />
+          </div>
+        </div>
+
+        {/* Face Update Requests Table */}
+        <div className="lg:col-span-2 space-y-6 mt-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Face Update Requests</h3>
+            </div>
+          </div>
+          
+          <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
+            {(!faceUpdateRequests || faceUpdateRequests.length === 0) ? (
+              <div className="p-8 text-center text-slate-400 font-medium italic">
+                No pending face update requests.
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100">
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faculty ID</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reason</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
+                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {faceUpdateRequests.map(req => (
+                    <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-8 py-5 text-sm font-bold text-slate-900">{req.faculty_credential_id}</td>
+                      <td className="px-8 py-5 text-sm text-slate-600 max-w-xs truncate" title={req.reason}>{req.reason}</td>
+                      <td className="px-8 py-5 text-sm font-medium text-slate-500">{new Date(req.created_at).toLocaleDateString()}</td>
+                      <td className="px-8 py-5 text-right space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const remarks = window.prompt("Reason for rejection:");
+                            if (remarks) dispatch(reviewFaceUpdateRequest({ requestId: req.id, action: 'REJECT', remarks }));
+                          }}
+                          className="h-8 px-4 text-[10px] text-rose-600 border-rose-200 hover:bg-rose-50"
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => {
+                            if (window.confirm("Approve face update request?")) {
+                              dispatch(reviewFaceUpdateRequest({ requestId: req.id, action: 'APPROVE', remarks: 'Approved by Principal' }));
+                            }
+                          }}
+                          className="h-8 px-4 text-[10px] bg-emerald-500 hover:bg-emerald-600 border-none text-white"
+                        >
+                          Approve
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 

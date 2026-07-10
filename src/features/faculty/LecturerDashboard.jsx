@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   Clock, 
@@ -18,17 +18,21 @@ import {
   Loader2,
   X,
   Camera,
-  MapPin
+  MapPin,
+  ShieldCheck,
+  Upload,
+  ScanFace
 } from 'lucide-react';
-import { fetchLogs, fetchMonthlySummary, createLog, fetchTimetable, bulkSubmit } from './attendanceSlice';
+import { fetchLogs, fetchMonthlySummary, createLog, fetchTimetable, bulkSubmit, fetchFaceUpdateStatus, requestFaceUpdate } from './attendanceSlice';
 import attendanceService from '../../services/attendanceService';
 import { Button } from '../../components/common/UIComponents';
 import { cn } from '../../utils/cn';
+import FaceScanner from '../../components/common/FaceScanner';
 
 const LecturerDashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { logs, summary, timetable, timetableByDay, loading, submitting } = useSelector((state) => state.attendance);
+  const { logs, summary, timetable, timetableByDay, loading, submitting, faceUpdateStatus } = useSelector((state) => state.attendance);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,8 +48,26 @@ const LecturerDashboard = () => {
   });
 
   const [isCountingFaces, setIsCountingFaces] = useState(false);
+  const [aiCount, setAiCount] = useState(null);
   const [isPinningLocation, setIsPinningLocation] = useState(false);
   const [isTimetableModalOpen, setIsTimetableModalOpen] = useState(false);
+  const [isFaceLockOpen, setIsFaceLockOpen] = useState(false);
+  const [isFaceUpdateModalOpen, setIsFaceUpdateModalOpen] = useState(false);
+  const [faceUpdateReason, setFaceUpdateReason] = useState('');
+
+  // Face verification states
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState(null); // { face_matched, liveness_score, liveness_passed }
+  const [verifyMode, setVerifyMode] = useState(null); // 'selfie' | 'upload'
+  const [faceLocked, setFaceLocked] = useState(!!user?.face_registered);
+  const uploadInputRef = useRef(null);
+
+  useEffect(() => {
+    if (user) {
+      setFaceLocked(!!user.face_registered);
+    }
+  }, [user]);
 
   const [logPage, setLogPage] = useState(1);
   const logsPerPage = 5;
@@ -58,6 +80,7 @@ const LecturerDashboard = () => {
       dispatch(fetchMonthlySummary({ academicYear, month: currentMonth }));
       dispatch(fetchLogs({ month: currentMonth }));
       dispatch(fetchTimetable({ academicYear }));
+      dispatch(fetchFaceUpdateStatus());
       setFormData(prev => ({ ...prev, faculty_credential_id: '' }));
     }
   }, [dispatch, user]);
@@ -78,8 +101,80 @@ const LecturerDashboard = () => {
     const result = await dispatch(createLog(payload));
     if (createLog.fulfilled.match(result)) {
       setIsModalOpen(false);
+      setVerifyResult(null); // Reset for next log
       dispatch(fetchLogs({ month: currentMonth }));
       dispatch(fetchMonthlySummary({ academicYear, month: currentMonth }));
+    }
+  };
+
+  const handleFaceLock = async (faceDataUrl) => {
+    setIsFaceLockOpen(false);
+    
+    import('../../features/faculty/attendanceSlice').then(async ({ registerFace }) => {
+      const result = await dispatch(registerFace(faceDataUrl));
+      if (registerFace.fulfilled.match(result)) {
+        setFaceLocked(true);
+        dispatch(fetchFaceUpdateStatus());
+        import('react-hot-toast').then(toast => toast.toast.success('Face locked successfully! You can now verify your identity.'));
+      }
+    });
+  };
+
+  const handleRequestFaceUpdate = async (e) => {
+    e.preventDefault();
+    if (!faceUpdateReason.trim()) return;
+    const result = await dispatch(requestFaceUpdate(faceUpdateReason));
+    if (requestFaceUpdate.fulfilled.match(result)) {
+      setIsFaceUpdateModalOpen(false);
+      setFaceUpdateReason('');
+    }
+  };
+
+  // ---- Face Verification Handlers ----
+  const handleVerifySelfie = () => {
+    setVerifyResult(null);
+    setVerifyMode('selfie');
+    setIsVerifyModalOpen(true);
+  };
+
+  const handleVerifyUpload = () => {
+    setVerifyResult(null);
+    setVerifyMode('upload');
+    if (uploadInputRef.current) uploadInputRef.current.click();
+  };
+
+  const handleUploadFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      doVerify(reader.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ''; // reset so the same file can be selected again
+  };
+
+  const handleSelfieVerified = (faceDataUrl) => {
+    setIsVerifyModalOpen(false);
+    doVerify(faceDataUrl);
+  };
+
+  const doVerify = async (faceDataUrl) => {
+    setIsVerifying(true);
+    setVerifyResult(null);
+    try {
+      const res = await attendanceService.verifyFace(faceDataUrl);
+      setVerifyResult(res.data);
+      if (res.data.face_matched) {
+        import('react-hot-toast').then(t => t.toast.success('Face verified! Identity confirmed.'));
+      } else {
+        import('react-hot-toast').then(t => t.toast.error('Face did NOT match your locked profile.'));
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Verification failed';
+      import('react-hot-toast').then(t => t.toast.error(msg));
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -103,8 +198,10 @@ const LecturerDashboard = () => {
     try {
       const response = await attendanceService.countFaces(file);
       if (response.status === 'success') {
-        setFormData(prev => ({ ...prev, attendance_count: response.data.face_count }));
-        import('react-hot-toast').then(toast => toast.toast.success(`AI counted ${response.data.face_count} students`));
+        const count = response.data.face_count;
+        setAiCount(count);
+        setFormData(prev => ({ ...prev, attendance_count: count }));
+        import('react-hot-toast').then(toast => toast.toast.success(`AI counted ${count} students`));
       } else {
         import('react-hot-toast').then(toast => toast.toast.error(response.message || 'Failed to process image'));
       }
@@ -169,7 +266,55 @@ const LecturerDashboard = () => {
               Track your teaching hours and manage your monthly honorarium logs.
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            {/* Hidden file input for upload */}
+            <input ref={uploadInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadFile} />
+
+            {faceLocked && (
+              <div className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 h-14">
+                <CheckCircle2 size={18} className="text-emerald-400" />
+                <span className="text-emerald-400 font-bold text-sm">Face Locked</span>
+              </div>
+            )}
+
+            {!faceLocked ? (
+              <Button 
+                variant="outline" 
+                onClick={() => setIsFaceLockOpen(true)}
+                className="h-14 px-8 rounded-2xl bg-slate-800 text-white hover:bg-slate-700 font-bold border-slate-700 shadow-lg transition-colors"
+              >
+                <Camera size={18} className="mr-2 text-indigo-400" />
+                Lock Face Profile
+              </Button>
+            ) : faceUpdateStatus?.status === 'APPROVED' ? (
+              <Button 
+                variant="outline" 
+                onClick={() => setIsFaceLockOpen(true)}
+                className="h-14 px-8 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold border-emerald-600 shadow-lg transition-colors"
+              >
+                <Camera size={18} className="mr-2 text-white" />
+                Update Face Profile
+              </Button>
+            ) : faceUpdateStatus?.status === 'PENDING' ? (
+              <Button 
+                variant="outline" 
+                disabled
+                className="h-14 px-8 rounded-2xl bg-slate-800/50 text-slate-400 font-bold border-slate-700 cursor-not-allowed transition-colors"
+              >
+                <Clock size={18} className="mr-2 text-slate-400" />
+                Face Update Requested
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => setIsFaceUpdateModalOpen(true)}
+                className="h-14 px-8 rounded-2xl bg-slate-800 text-white hover:bg-slate-700 font-bold border-slate-700 shadow-lg transition-colors"
+              >
+                <AlertCircle size={18} className="mr-2 text-indigo-400" />
+                Request Face Update
+              </Button>
+            )}
+
             <Button 
               variant="primary" 
               onClick={() => setIsModalOpen(true)}
@@ -179,6 +324,8 @@ const LecturerDashboard = () => {
               Log Lecture
             </Button>
           </div>
+
+          {/* Verification result banner (hidden as we verify in modal now) */}
         </div>
       </div>
 
@@ -418,7 +565,7 @@ const LecturerDashboard = () => {
       {/* Add Log Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white rounded-[40px] w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-[40px] w-full max-w-4xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="p-6 border-b border-slate-50 flex items-center justify-between">
               <h3 className="text-xl font-bold text-slate-900">Log Teaching Hour</h3>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
@@ -426,77 +573,83 @@ const LecturerDashboard = () => {
               </button>
             </div>
             
-            <form onSubmit={handleCreateLog} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Log Date</label>
-                  <input 
-                    type="date"
-                    required
-                    value={formData.lecture_date}
-                    onChange={(e) => setFormData({...formData, lecture_date: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Lecture Type</label>
-                  <select 
-                    value={formData.lecture_type}
-                    onChange={(e) => setFormData({...formData, lecture_type: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
-                  >
-                    <option value="THEORY">Theory</option>
-                    <option value="PRACTICAL">Practical</option>
-                    <option value="TUTORIAL">Tutorial</option>
-                  </select>
-                </div>
-              </div>
+            <form onSubmit={handleCreateLog} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column: Basic Details */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Log Date</label>
+                      <input 
+                        type="date"
+                        required
+                        value={formData.lecture_date}
+                        onChange={(e) => setFormData({...formData, lecture_date: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Lecture Type</label>
+                      <select 
+                        value={formData.lecture_type}
+                        onChange={(e) => setFormData({...formData, lecture_type: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
+                      >
+                        <option value="THEORY">Theory</option>
+                        <option value="PRACTICAL">Practical</option>
+                        <option value="TUTORIAL">Tutorial</option>
+                      </select>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Timetable Slot</label>
-                  <select 
-                    required
-                    value={formData.timetable_slot_id}
-                    onChange={(e) => setFormData({...formData, timetable_slot_id: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
-                  >
-                  <option value="">Select Slot...</option>
-                  {timetable.filter(s => s.slot_date === formData.lecture_date).map(slot => (
-                    <option key={slot.id} value={slot.id}>{slot.start_time} - {slot.subject_name || 'Class'}</option>
-                  ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Duration (Hours)</label>
-                  <input 
-                    type="number"
-                    min="0.5"
-                    step="0.5"
-                    required
-                    value={formData.hours}
-                    onChange={(e) => setFormData({...formData, hours: parseFloat(e.target.value)})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
-                  />
-                </div>
-              </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Timetable Slot</label>
+                      <select 
+                        required
+                        value={formData.timetable_slot_id}
+                        onChange={(e) => setFormData({...formData, timetable_slot_id: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
+                      >
+                      <option value="">Select Slot...</option>
+                      {timetable.filter(s => s.slot_date === formData.lecture_date).map(slot => (
+                        <option key={slot.id} value={slot.id}>{slot.start_time} - {slot.subject_name || 'Class'}</option>
+                      ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Duration (Hours)</label>
+                      <input 
+                        type="number"
+                        min="0.5"
+                        step="0.5"
+                        required
+                        value={formData.hours}
+                        onChange={(e) => setFormData({...formData, hours: parseFloat(e.target.value)})}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold"
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Topic Covered</label>
-                <textarea 
-                  required
-                  value={formData.topic_covered}
-                  onChange={(e) => setFormData({...formData, topic_covered: e.target.value})}
-                  placeholder="Describe the topics taught in this session..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium h-16"
-                />
-              </div>
-
-              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 space-y-3">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">Student Attendance</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Capture an image to automatically count students using AI, or enter manually.</p>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Topic Covered</label>
+                    <textarea 
+                      required
+                      value={formData.topic_covered}
+                      onChange={(e) => setFormData({...formData, topic_covered: e.target.value})}
+                      placeholder="Describe the topics taught in this session..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium h-[4.5rem]"
+                    />
+                  </div>
                 </div>
+
+                {/* Right Column: Attendance & Verification */}
+                <div className="space-y-4">
+                  <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 space-y-3">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">Student Attendance</h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Capture an image to automatically count students using AI, or enter manually.</p>
+                    </div>
                 
                 <div className="grid grid-cols-2 gap-4 items-end">
                   <div className="space-y-1">
@@ -513,7 +666,7 @@ const LecturerDashboard = () => {
                       <div className={`w-full bg-white border border-indigo-200 hover:border-indigo-400 rounded-xl px-4 py-2 flex items-center justify-center gap-2 transition-colors ${isCountingFaces ? 'opacity-50' : ''}`}>
                         {isCountingFaces ? <Loader2 size={16} className="text-indigo-500 animate-spin" /> : <Camera size={16} className="text-indigo-500" />}
                         <span className="text-xs font-bold text-indigo-600">
-                          {isCountingFaces ? 'Counting...' : 'Capture Image'}
+                          {isCountingFaces ? 'Counting...' : (aiCount !== null ? `AI Count: ${aiCount}` : 'Capture Image')}
                         </span>
                       </div>
                     </div>
@@ -566,11 +719,55 @@ const LecturerDashboard = () => {
                 </Button>
               </div>
 
-              <div className="pt-4 border-t border-slate-50 flex gap-3">
+              <div className="bg-slate-50/50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Faculty Face Verification</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {faceLocked 
+                      ? "Please verify your identity to submit." 
+                      : "Lock your profile on dashboard first to verify."}
+                  </p>
+                </div>
+                <Button 
+                  type="button"
+                  onClick={handleVerifySelfie}
+                  disabled={!faceLocked || isVerifying || verifyResult?.face_matched}
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all",
+                    verifyResult?.face_matched 
+                      ? "bg-emerald-100 text-emerald-700 border-none opacity-100 cursor-default" 
+                      : "bg-indigo-500 hover:bg-indigo-600 text-white border-none shadow-md shadow-indigo-500/20"
+                  )}
+                >
+                  {isVerifying ? (
+                    <Loader2 className="animate-spin" size={14} />
+                  ) : verifyResult?.face_matched ? (
+                    <>
+                      <CheckCircle2 size={14} className="mr-1.5" />
+                      Verified
+                    </>
+                  ) : (
+                    <>
+                      <ScanFace size={14} className="mr-1.5" />
+                      Verify Face
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {verifyResult && !verifyResult.face_matched && (
+                <div className="text-rose-500 text-xs font-bold text-center mt-2">
+                  ❌ Verification Failed — Face does NOT match your locked profile.
+                </div>
+              )}
+                </div>
+              </div>
+
+              <div className="pt-6 mt-6 border-t border-slate-100 flex gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 rounded-xl text-sm font-bold border-slate-200">
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={submitting || formData.latitude === 0} className="flex-1 rounded-xl text-sm font-bold bg-black hover:bg-gray-900 text-white">
+                <Button type="submit" variant="primary" disabled={submitting || formData.latitude === 0 || !verifyResult?.face_matched} className="flex-1 rounded-xl text-sm font-bold bg-black hover:bg-gray-900 text-white disabled:opacity-50">
                   {submitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Save Log Entry'}
                 </Button>
               </div>
@@ -641,6 +838,77 @@ const LecturerDashboard = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+
+
+      {/* Face Lock Modal */}
+      {isFaceLockOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="w-full max-w-lg">
+            <h2 className="text-2xl font-bold text-white text-center mb-6">Lock Face Credentials</h2>
+            <p className="text-slate-300 text-center text-sm mb-6 max-w-md mx-auto">
+              Please align your face in the frame and blink to verify liveness. This will securely lock your face profile for future self-attendance marking.
+            </p>
+            <FaceScanner 
+              onLivenessVerified={handleFaceLock} 
+              onCancel={() => setIsFaceLockOpen(false)} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Face Verify via Selfie Modal */}
+      {isVerifyModalOpen && verifyMode === 'selfie' && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="w-full max-w-lg">
+            <h2 className="text-2xl font-bold text-white text-center mb-6">Verify Your Identity</h2>
+            <p className="text-slate-300 text-center text-sm mb-6 max-w-md mx-auto">
+              Take a selfie to verify your face against the locked profile.
+            </p>
+            <FaceScanner 
+              onLivenessVerified={handleSelfieVerified} 
+              onCancel={() => setIsVerifyModalOpen(false)} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Request Face Update Modal */}
+      {isFaceUpdateModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-[40px] w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-slate-900">Request Face Profile Update</h3>
+              <button onClick={() => setIsFaceUpdateModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleRequestFaceUpdate} className="p-6 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Reason for Update</label>
+                <textarea 
+                  required
+                  value={faceUpdateReason}
+                  onChange={(e) => setFaceUpdateReason(e.target.value)}
+                  placeholder="E.g., Changed appearance, previous scan is blurry..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium h-24"
+                />
+              </div>
+              <p className="text-xs text-slate-500">Your request will be sent to the Principal for approval. Once approved, you can lock your new face profile.</p>
+
+              <div className="pt-4 border-t border-slate-50 flex gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsFaceUpdateModalOpen(false)} className="flex-1 rounded-xl text-sm font-bold border-slate-200">
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" className="flex-1 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white border-none">
+                  Submit Request
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

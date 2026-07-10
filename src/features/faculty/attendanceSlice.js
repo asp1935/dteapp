@@ -117,6 +117,47 @@ export const verifyLog = createAsyncThunk(
   }
 );
 
+export const registerFace = createAsyncThunk(
+  'attendance/registerFace',
+  async (faceDataUrl, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.registerFace(faceDataUrl);
+      toast.success('Face profile locked successfully');
+      return response;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to register face';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
+    }
+  }
+);
+
+export const requestFaceUpdate = createAsyncThunk(
+  'attendance/requestFaceUpdate',
+  async (reason, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.requestFaceUpdate(reason);
+      toast.success('Face update requested successfully');
+      return response;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to request face update';
+      toast.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      return rejectWithValue(msg);
+    }
+  }
+);
+
+export const fetchFaceUpdateStatus = createAsyncThunk(
+  'attendance/fetchFaceUpdateStatus',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getFaceUpdateStatus();
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to fetch face update status');
+    }
+  }
+);
+
 export const upsertCalendar = createAsyncThunk(
   'attendance/upsertCalendar',
   async ({ institutionId, academicYear, entries }, { rejectWithValue }) => {
@@ -162,6 +203,7 @@ const attendanceSlice = createSlice({
     logs: [],
     calendar: [],
     summary: null,
+    faceUpdateStatus: null,
     loading: false,
     submitting: false,
     error: null,
@@ -173,6 +215,7 @@ const attendanceSlice = createSlice({
       state.logs = [];
       state.calendar = [];
       state.summary = null;
+      state.faceUpdateStatus = null;
       state.error = null;
     }
   },
@@ -219,6 +262,12 @@ const attendanceSlice = createSlice({
       })
       .addCase(fetchMonthlySummary.fulfilled, (state, action) => {
         state.summary = action.payload.data || action.payload;
+      })
+      .addCase(fetchFaceUpdateStatus.fulfilled, (state, action) => {
+        state.faceUpdateStatus = action.payload.data || action.payload;
+      })
+      .addCase(requestFaceUpdate.fulfilled, (state, action) => {
+        state.faceUpdateStatus = action.payload.data || action.payload;
       })
       .addCase(createTimetable.fulfilled, (state) => {
         state.loading = false;

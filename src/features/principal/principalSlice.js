@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import principalService from '../../services/principalService';
+import attendanceService from '../../services/attendanceService';
+import { toast } from 'react-hot-toast';
 
 export const fetchDashboardData = createAsyncThunk(
   'principal/fetchDashboard',
@@ -23,10 +25,37 @@ export const setInstituteLocation = createAsyncThunk(
   }
 );
 
+export const fetchFaceUpdateRequests = createAsyncThunk(
+  'principal/fetchFaceUpdateRequests',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await attendanceService.getFaceUpdateRequests();
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to fetch face update requests');
+    }
+  }
+);
+
+export const reviewFaceUpdateRequest = createAsyncThunk(
+  'principal/reviewFaceUpdateRequest',
+  async ({ requestId, action, remarks }, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.reviewFaceUpdateRequest(requestId, action, remarks);
+      toast.success(`Request ${action.toLowerCase()}d successfully`);
+      return response;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to review request';
+      toast.error(msg);
+      return rejectWithValue(msg);
+    }
+  }
+);
+
 const principalSlice = createSlice({
   name: 'principal',
   initialState: {
     dashboardData: null,
+    faceUpdateRequests: [],
     loading: false,
     error: null,
   },
@@ -54,6 +83,25 @@ const principalSlice = createSlice({
       .addCase(setInstituteLocation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchFaceUpdateRequests.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchFaceUpdateRequests.fulfilled, (state, action) => {
+        state.loading = false;
+        state.faceUpdateRequests = action.payload.data || action.payload;
+      })
+      .addCase(fetchFaceUpdateRequests.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(reviewFaceUpdateRequest.fulfilled, (state, action) => {
+        // Find and update the request in the list
+        const updatedRequest = action.payload.data || action.payload;
+        const index = state.faceUpdateRequests.findIndex(r => r.id === updatedRequest.id);
+        if (index !== -1) {
+          state.faceUpdateRequests[index] = updatedRequest;
+        }
       });
   },
 });

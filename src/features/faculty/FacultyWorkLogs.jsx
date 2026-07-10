@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchLogs, bulkSubmit, createLog, fetchTimetable } from './attendanceSlice';
 import { Button } from '../../components/common/UIComponents';
-import { Loader2, MoreVertical, ClipboardList, Calendar as CalendarIcon, Filter, Plus, X, Camera, MapPin } from 'lucide-react';
+import { Loader2, MoreVertical, ClipboardList, Calendar as CalendarIcon, Filter, Plus, X, Camera, MapPin, ScanFace, CheckCircle2 } from 'lucide-react';
 import attendanceService from '../../services/attendanceService';
 import { cn } from '../../utils/cn';
+import FaceScanner from '../../components/common/FaceScanner';
 
 const FacultyWorkLogs = () => {
   const dispatch = useDispatch();
@@ -35,6 +36,12 @@ const FacultyWorkLogs = () => {
   const [isCountingFaces, setIsCountingFaces] = useState(false);
   const [isTaggingLocation, setIsTaggingLocation] = useState(false);
 
+  // Face verification states
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [faceLocked, setFaceLocked] = useState(!!user?.face_registered);
+
   const handleTagLocation = () => {
     setIsTaggingLocation(true);
     if ("geolocation" in navigator) {
@@ -56,6 +63,35 @@ const FacultyWorkLogs = () => {
     } else {
       setIsTaggingLocation(false);
       import('react-hot-toast').then(toast => toast.toast.error('Geolocation is not supported by your browser'));
+    }
+  };
+
+  const handleVerifySelfie = () => {
+    setVerifyResult(null);
+    setIsVerifyModalOpen(true);
+  };
+
+  const handleSelfieVerified = (faceDataUrl) => {
+    setIsVerifyModalOpen(false);
+    doVerify(faceDataUrl);
+  };
+
+  const doVerify = async (faceDataUrl) => {
+    setIsVerifying(true);
+    setVerifyResult(null);
+    try {
+      const res = await attendanceService.verifyFace(faceDataUrl);
+      setVerifyResult(res.data);
+      if (res.data.face_matched) {
+        import('react-hot-toast').then(t => t.toast.success('Face verified! Identity confirmed.'));
+      } else {
+        import('react-hot-toast').then(t => t.toast.error('Face did NOT match your locked profile.'));
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Verification failed';
+      import('react-hot-toast').then(t => t.toast.error(msg));
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -105,6 +141,7 @@ const FacultyWorkLogs = () => {
     const result = await dispatch(createLog(dataToSubmit));
     if (!result.error) {
       setIsModalOpen(false);
+      setVerifyResult(null); // Reset for next log
       dispatch(fetchLogs({ month: selectedMonth, academicYear: '2026-27' }));
     }
   };
@@ -499,18 +536,77 @@ const FacultyWorkLogs = () => {
                 )}
               </div>
 
+              {/* Faculty Face Verification UI */}
+              <div className="bg-slate-50/50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Faculty Face Verification</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {faceLocked 
+                      ? "Please verify your identity to submit." 
+                      : "Lock your profile on dashboard first to verify."}
+                  </p>
+                </div>
+                <Button 
+                  type="button"
+                  onClick={handleVerifySelfie}
+                  disabled={!faceLocked || isVerifying || verifyResult?.face_matched}
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all",
+                    verifyResult?.face_matched 
+                      ? "bg-emerald-100 text-emerald-700 border-none opacity-100 cursor-default" 
+                      : "bg-indigo-500 hover:bg-indigo-600 text-white border-none shadow-md shadow-indigo-500/20"
+                  )}
+                >
+                  {isVerifying ? (
+                    <Loader2 className="animate-spin" size={14} />
+                  ) : verifyResult?.face_matched ? (
+                    <>
+                      <CheckCircle2 size={14} className="mr-1.5" />
+                      Verified
+                    </>
+                  ) : (
+                    <>
+                      <ScanFace size={14} className="mr-1.5" />
+                      Verify Face
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {verifyResult && !verifyResult.face_matched && (
+                <div className="text-rose-500 text-xs font-bold text-center mt-2">
+                  ❌ Verification Failed — Face does NOT match your locked profile.
+                </div>
+              )}
+
               <div className="pt-2 flex justify-end gap-3">
                 <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                 <Button 
                   variant="primary" 
                   type="submit" 
-                  className="!bg-black !text-white hover:!bg-slate-800"
-                  disabled={!formData.latitude || !formData.longitude}
+                  className="!bg-black !text-white hover:!bg-slate-800 disabled:opacity-50"
+                  disabled={!formData.latitude || !formData.longitude || !verifyResult?.face_matched}
                 >
                   Save as Draft
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Face Verify via Selfie Modal */}
+      {isVerifyModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="w-full max-w-lg">
+            <h2 className="text-2xl font-bold text-white text-center mb-6">Verify Your Identity</h2>
+            <p className="text-slate-300 text-center text-sm mb-6 max-w-md mx-auto">
+              Take a selfie to verify your face against the locked profile.
+            </p>
+            <FaceScanner 
+              onLivenessVerified={handleSelfieVerified} 
+              onCancel={() => setIsVerifyModalOpen(false)} 
+            />
           </div>
         </div>
       )}

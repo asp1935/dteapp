@@ -175,6 +175,7 @@ const PrincipalWorkLogs = () => {
                   <th className="px-6 py-4">Class</th>
                   <th className="px-6 py-4">Type</th>
                   <th className="px-6 py-4 text-center">Distance</th>
+                  <th className="px-6 py-4 text-center">Liveness</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -218,6 +219,24 @@ const PrincipalWorkLogs = () => {
                             </div>
                           );
                         })()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        {log.liveness_score != null ? (
+                          log.face_verified ? (
+                            <div className="flex flex-col items-center">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold bg-emerald-100 text-emerald-700">
+                                <CheckCircle size={12} /> Verified
+                              </span>
+                              <span className="text-[10px] text-gray-500 mt-1 font-medium">Score: {(log.liveness_score * 100).toFixed(0)}%</span>
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold bg-rose-100 text-rose-700">
+                              <XCircle size={12} /> Failed
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-gray-400 text-xs italic">N/A</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[log.log_status] || 'bg-gray-100 text-gray-800'}`}>

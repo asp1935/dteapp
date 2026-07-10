@@ -60,6 +60,36 @@ const attendanceService = {
     return response.data;
   },
 
+  registerFace: async (faceDataUrl) => {
+    const response = await api.post('/attendance/face/register', { face_image_data_url: faceDataUrl });
+    return response.data;
+  },
+
+  verifyFace: async (faceDataUrl) => {
+    const response = await api.post('/attendance/face/verify', { face_image_data_url: faceDataUrl });
+    return response.data;
+  },
+
+  requestFaceUpdate: async (reason) => {
+    const response = await api.post('/attendance/face/update-requests', { reason });
+    return response.data;
+  },
+
+  getFaceUpdateStatus: async () => {
+    const response = await api.get('/attendance/face/update-requests/status');
+    return response.data;
+  },
+
+  getFaceUpdateRequests: async () => {
+    const response = await api.get('/attendance/face/update-requests');
+    return response.data;
+  },
+
+  reviewFaceUpdateRequest: async (requestId, action, remarks) => {
+    const response = await api.post(`/attendance/face/update-requests/${requestId}/review`, { action, remarks });
+    return response.data;
+  },
+
   /**
    * Update an existing log
    */

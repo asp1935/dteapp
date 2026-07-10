@@ -35,8 +35,6 @@ const Sidebar = () => {
       { name: 'Faculty Calculator', icon: Calculator, path: '/admin/ai-assistant' },
       { name: 'User Management', icon: Users, path: '/admin/users' },
       { name: 'Advertisements', icon: FileText, path: '/admin/ads' },
-      { name: 'Applications', icon: ClipboardList, path: '/admin/applications' },
-      { name: 'Academic Calendar', icon: Calendar, path: '/admin/calendar' },
       { name: 'Billing', icon: Briefcase, path: '/admin/billing' },
 
     ],
