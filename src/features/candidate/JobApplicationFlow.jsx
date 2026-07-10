@@ -139,7 +139,7 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose, onSu
             <div className="space-y-2">
               <label className="text-sm font-bold text-secondary uppercase tracking-wider">Cover Letter / Statement of Interest</label>
               <textarea 
-                className="w-full p-4 rounded-xl border border-border bg-muted/20 focus:ring-2 focus:ring-accent outline-none transition-all min-h-[200px] text-sm"
+                className="w-full p-4 rounded-xl border border-border bg-muted/20 focus:ring-1 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all min-h-[200px] text-sm"
                 placeholder="Briefly describe why you are interested in this position and why you are a good fit..."
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
@@ -148,7 +148,7 @@ const JobApplicationFlow = ({ advertisementId, advertisementTitle, onClose, onSu
               <p className="text-[10px] text-secondary">Minimum 50 characters required.</p>
             </div>
             <div className="flex justify-end">
-              <Button variant="accent" className="px-8 py-3 group" disabled={loading || coverLetter.length < 10}>
+              <Button variant="primary" className="px-8 py-3 group bg-slate-900 text-white hover:bg-black" disabled={loading || coverLetter.length < 10}>
                 {loading ? 'Processing...' : (
                   <>
                     Next: Upload Documents <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />

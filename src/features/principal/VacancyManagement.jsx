@@ -113,7 +113,7 @@ const VacancyManagement = () => {
     if (confirmVacancy.fulfilled.match(result)) {
       toast.success('Vacancy confirmed successfully! Ready for Step 3.');
     } else {
-      toast.error('Failed to confirm vacancy');
+      toast.error(result.payload || 'Failed to confirm vacancy');
     }
   };
 
@@ -444,7 +444,7 @@ const VacancyManagement = () => {
                     handleConfirm();
                     setShowConfirmModal(false);
                   }}
-                  className="flex-1 h-14 rounded-2xl bg-white hover:bg-gray-50 text-black font-bold shadow-sm"
+                  className="flex-1 h-14 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold shadow-lg shadow-slate-200"
                 >
                   Confirm & Finalize
                 </Button>

@@ -100,12 +100,13 @@ const AdminBillingDashboard = () => {
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // Fetch data based on active tab
   useEffect(() => {
     if (institutions.length === 0) {
       dispatch(fetchInstitutions({ page: 1, limit: 100 }));
+    } else if (!selectedInstituteId && institutions.length > 0) {
+      setSelectedInstituteId(institutions[0].id.toString());
     }
-  }, [dispatch, institutions.length]);
+  }, [dispatch, institutions, selectedInstituteId]);
 
   useEffect(() => {
     if (activeTab === 'rates' && selectedInstituteId) {
